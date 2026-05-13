@@ -46,6 +46,8 @@ This is a Markdown configuration template, not an application build. Verificatio
 - Repository-authoritative sources beat memory, chat history, and external references.
 - External repositories, prompts, skills, and plugins are reference inputs only; absorb them as local routing, context, verification, and recovery primitives instead of copying them wholesale.
 - Per-turn start timestamps and native closeout confirmation are hard requirements owned by `.github/instructions/must.instructions.md`; do not end a turn on prose alone.
+- Blocking clarification, route selection, execution approval, continuation, and closeout must use native structured UI when available: `ask_user` in Copilot CLI, or `vscode/askQuestions` / `askQuestions` / equivalent structured UI in VS Code. Plain prose questions do not count.
+- When the user has already said to start development, safe non-destructive preparation such as creating an isolated worktree should proceed directly if the runtime permits it. Ask only for destructive, ambiguous, dirty-state, or user-owned-path choices, and ask natively.
 - Substantial tasks start with `Senior Project Expert`, then route to specialists.
 - New features and bug fixes should add tests or minimal reproducible checks when practical.
 - Public APIs, message formats, database schema, auth boundaries, dependencies, and CI/CD require blast-radius assessment first.

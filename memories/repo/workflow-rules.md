@@ -21,6 +21,7 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - `evolution-loop` turns repeated failures, user corrections, review loops, stale triggers, and verification gaps into auditable EvolutionEvents.
 - Memory retrieval follows progressive disclosure: index first, then timeline/context, then exact shard only when needed.
 - Installed plugin use stores each target repository's persistent memory/spec state in the target repository, not in the plugin package or cache.
+- Native ask gates cover blocking clarification, route selection, execution approval, continuation, and closeout; prose-only questions cannot satisfy those gates.
 
 ## Decisions
 
@@ -30,6 +31,7 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - 2026-05-13: Adopt bounded evolution: Read verified signals -> Select target -> Propose mutation -> Validate -> Write accepted learning.
 - 2026-05-13: Treat `/init` as complete only from target repository evidence in `.github/copilot-instructions.md`; do not rerun init on every conversation when command/runtime/entrypoint/module facts or explicit unknowns already exist.
 - 2026-05-13: Plugin-bundled `memories/` and `spec/` are templates and plugin-repository state; target project workstreams and specs must be local to the target repo.
+- 2026-05-13: Harden native confirmation: if native ask UI exists, use it for blocking decisions; if not, continue only with one safe authorized interpretation, use allowed PM fallback, or report `missing_native_ask_ui`.
 
 ## Constraints
 
@@ -37,6 +39,7 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - Spec remains the authoritative source for requirements, design, and task acceptance.
 - Memory stores status, decisions, recovery hints, and verified learnings only.
 - If a target repository lacks `memories/repo` or `spec` and persistent recovery is needed, create the minimal skeleton locally before writing task state.
+- Do not end a user-invocable turn with a plain text question such as whether to create a worktree; either perform safe setup directly or ask with native UI.
 - Evolution never performs autonomous free-form rewrites; every accepted event needs signal, target, mutation, validation, rollback, and status.
 - `<private>...</private>` content must be excluded from durable memory and public docs.
 

@@ -2,7 +2,7 @@
 name: Specification Writer
 description: "Use when discovery evidence, requirements/design/tasks, ADRs, execution-plan status, closeout records, or memory/spec recovery entries must be created or maintained. DO NOT USE FOR: production implementation, final security review, or changing direction without PM."
 model: Gemini 3.1 Pro (Preview) (copilot)
-tools: [read, search, edit, execute, web, todo, vscode/askQuestions, askQuestions]
+tools: [read, search, edit, execute, web, todo, ask_user, vscode/askQuestions, askQuestions]
 user-invocable: true
 ---
 

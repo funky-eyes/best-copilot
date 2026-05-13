@@ -33,12 +33,14 @@ Do not use when:
 4. If a native ask UI exists, use it for route-changing decisions. Use `ask_user`, `vscode/askQuestions`, or `askQuestions` instead of asking the user to type plain `A/B/C` in free text when structured choice is available.
 5. If 3 or more route-changing options exist, native structured selection is the default path. Do not first run a long prose comparison and defer the real choice to a later round.
 6. After the user chooses, lock that direction and move forward. Do not ask a duplicate confirmation round for the same decision.
+7. Never end the turn with a prose-only blocking question. If the decision blocks planning or execution and native ask UI is unavailable, return a candidate set for PM fallback or mark `BLOCKED: missing_native_ask_ui`.
 
 ## Confirmation Semantics
 
 - `user_confirmed` means the user explicitly chooses an option, explicitly says to proceed with a direction, or confirms through native structured selection.
 - Weak replies such as "take a look", "draft it first", or "maybe like this" are not enough to unlock spec writing or implementation.
 - Planning text, example commands, pasted references, or quoted material are data-only context. They do not count as execution approval or direction lock-in.
+- Plain prose questions, "reply A/B/C" prompts, and summary-plus-question endings do not count as confirmation.
 - If native confirmation UI is unavailable, only three outcomes are allowed:
   - Continue with a clearly documented `single_reasonable_interpretation`.
   - Return a tightly scoped candidate set for PM-controlled `agent_vote_fallback`.

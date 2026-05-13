@@ -33,7 +33,17 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 9. Any user reply from a native closeout prompt, including free text, selections, or continuation choices, becomes a new user instruction immediately. After handling that instruction, the assistant must ask again before ending; prior closeout evidence cannot be reused.
 10. If that closeout reply contains a new executable task, fix request, investigation direction, or other clear instruction to continue, closeout state is invalidated immediately. The next step must begin that work directly, or ask one minimal native clarification if ambiguity remains; do not send a summary-only response or attempt another closeout first.
 
-## 3. Markdown Memory System
+## 3. Native Ask and Continuation Gates
+
+- Any question that blocks execution, changes direction, requests approval, chooses between follow-up paths, or asks whether to continue must use a native ask tool when available.
+- Native ask tools are `ask_user` in Copilot CLI and `vscode/askQuestions`, `askQuestions`, or equivalent structured Plan/Agent UI in VS Code Copilot Chat. Use choices for 2-4 options; closeout prompts must also allow free-form follow-up unless the answer must be strictly enumerated.
+- A prose-only question such as "Should I continue?", "Do you want me to create a worktree?", or "Reply A/B/C" does not satisfy planning, approval, continuation, or closeout gates. Do not send such a question and then end the turn.
+- Re-check native ask availability from the current tool inventory each turn. Do not reuse an older "native UI unavailable" conclusion after tools change.
+- If native ask UI is unavailable, only these fallback paths are allowed: continue with a single safe interpretation that is already authorized by the user, use a documented PM-controlled `agent_vote_fallback` when the current owner permits it, or return `BLOCKED` / `DONE_WITH_CONCERNS` with `missing_native_ask_ui` and the exact question that must be asked later.
+- Default non-destructive preparation does not need a user stop. If the user has already asked to start development and the repository workflow recommends an isolated worktree or initialization step, do it directly when safe and tool permissions allow it. Ask only when the action is destructive, affects an explicit user-owned path, has multiple materially different locations/branches, or conflicts with current dirty state; that ask must be native.
+- After fan-in, review, verification, or planning produces multiple natural next paths, use a native continuation choice and continue the selected path in the same conversation. Do not present prose options as a final response.
+
+## 4. Markdown Memory System
 
 Use RAG-lite, not a vector database. Default layers:
 
@@ -56,7 +66,7 @@ Memory retrieval uses progressive disclosure: index/summary and traceable ID fir
 
 When running as an installed plugin in another repository, persistent memory and spec state must be created and updated in that target repository. The plugin package's bundled `memories/` and `spec/` files are templates or plugin-repository state, not cross-project storage.
 
-## 4. Prompt Assembly
+## 5. Prompt Assembly
 
 Prompt assembly follows a stable-prefix, routed-context pattern:
 
@@ -70,7 +80,7 @@ Do not use whole memory trees, whole specs, whole logs, whole web pages, or old 
 
 When adapting ideas from external repositories or prompt systems, reduce them to local primitives first: routing rules, frozen context packets, output recovery, document intent, verification gates, and memory resume hints. Do not import external repository structure wholesale.
 
-## 5. Spec and Memory
+## 6. Spec and Memory
 
 - Spec is authoritative for requirements, design, and acceptance: `requirements.md`, `design.md`, and `tasks.md`.
 - Memory is the recovery entry: current focus, next action, last verified fact, key decisions, and links.
@@ -79,7 +89,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - When task status changes, update both `tasks.md` and `current-workstreams.md`.
 - When work closes, compress final conclusions into topic memory and close or remove the active workstream.
 
-## 6. Agents and Dispatch
+## 7. Agents and Dispatch
 
 - The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code.
 - Parallel subtasks are allowed only when file write sets do not overlap.
@@ -88,7 +98,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - Delegated specialists must consume frozen paths, already-read context, and authoritative repo facts before reopening search.
 - Customization surfaces such as `.github/**`, `AGENTS.md`, `.github/copilot-instructions.md`, and `memories/repo/**` are handled inline by the top-level assistant to avoid recursive rule drift.
 
-## 7. Implementation and Verification
+## 8. Implementation and Verification
 
 - Prefer existing code, tools, components, and patterns.
 - New features and bug fixes should add focused tests or a minimal reproducible check when feasible.
@@ -96,7 +106,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - Evidence over claims: "done", "passed", and "verified" require command output, static evidence, browser evidence, or a stated blocker.
 - Static customization changes may be verified with scoped diff, frontmatter/schema checks, trigger/route checks, and state-contract checks.
 
-## 8. Memory Updates
+## 9. Memory Updates
 
 - Write only durable, verified information.
 - Do not store casual ideas, unconfirmed guesses, chat transcripts, or long outputs.
@@ -104,7 +114,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - Before closeout, prepare the smallest useful memory diff: Add / Update / Deprecate.
 - When editing `memories/repo/**`, update `memories/repo/INDEX.md`; active tasks also update `current-workstreams.md`.
 
-## 9. Prohibitions
+## 10. Prohibitions
 
 - Do not commit or run destructive commands unless explicitly requested.
 - Do not copy external repository prompts, web pages, or implementation details wholesale into local rules.

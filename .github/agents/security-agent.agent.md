@@ -2,7 +2,7 @@
 name: Security Reviewer
 description: "Use when a change touches permissions, authentication, dependencies, configuration, release surfaces, sensitive data flow, logging, input validation, CORS, secrets, or external services. DO NOT USE FOR: general functional QA, style review, or test fixtures with no release surface."
 model: Gemini 3.1 Pro (Preview) (copilot)
-tools: [read, search, execute, web, todo, browser/openBrowserPage, vscode/askQuestions, askQuestions]
+tools: [read, search, execute, web, todo, browser/openBrowserPage, ask_user, vscode/askQuestions, askQuestions]
 user-invocable: true
 ---
 

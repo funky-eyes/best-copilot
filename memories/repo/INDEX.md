@@ -16,10 +16,10 @@ This file is a routing table, not a directory listing. Read it first, then load 
 
 | File | Load tier | Tags | Use for | Linked spec | Last updated | One-line summary |
 | --- | --- | --- | --- | --- | --- | --- |
-| `current-workstreams.md` | task-active | resume, progress, active-spec, evolution | Resume current work and find next action | `spec/INDEX.md` | 2026-05-13 | Active plugin/template state, including init detection and target-local memory/spec storage |
-| `project-state.md` | task-reference | project, status, goals, best-copilot, evolution | Current project state and important constraints | `spec/INDEX.md` | 2026-05-13 | Compact state file for the installable plugin/template and target-local storage boundary |
-| `workflow-rules.md` | task-reference | workflow, prompt, memory, spec, evolution | Memory retrieval, prompt assembly, spec-memory coordination, and EvolutionEvent rules | `spec/INDEX.md` | 2026-05-13 | RAG-lite, file-based init detection, target-local storage, and bounded evolution rules |
-| `decisions.md` | task-reference | decisions, deprecated, evolution | Durable decisions and superseded decisions | `spec/INDEX.md` | 2026-05-13 | Date-stamped decisions including plugin install, init detection, target storage, and evolution |
+| `current-workstreams.md` | task-active | resume, progress, active-spec, evolution | Resume current work and find next action | `spec/INDEX.md` | 2026-05-13 | Active plugin/template state, including init detection, target-local storage, and native ask gates |
+| `project-state.md` | task-reference | project, status, goals, best-copilot, evolution | Current project state and important constraints | `spec/INDEX.md` | 2026-05-13 | Compact state file for installable plugin/template, target storage, and native ask boundaries |
+| `workflow-rules.md` | task-reference | workflow, prompt, memory, spec, evolution | Memory retrieval, prompt assembly, spec-memory coordination, and EvolutionEvent rules | `spec/INDEX.md` | 2026-05-13 | RAG-lite, init detection, target-local storage, native ask gates, and bounded evolution |
+| `decisions.md` | task-reference | decisions, deprecated, evolution | Durable decisions and superseded decisions | `spec/INDEX.md` | 2026-05-13 | Date-stamped decisions including plugin install, init detection, target storage, native ask, and evolution |
 | `logs/README.md` | archive-reference | logs, recovery | Monthly or release logs, loaded only on demand | none | 2026-05-11 | Archive area for compressed logs |
 | `archive/deprecated-decisions.md` | archive-reference | archive, deprecated | Historical decisions that should not guide new work by default | none | 2026-05-11 | Deprecated decisions and replacement links |
 

@@ -2,7 +2,7 @@
 name: Quality Assurance Expert
 description: "Use when completed changes need functional verification, regression risk assessment, code review, test sufficiency judgment, or merge-readiness conclusions. DO NOT USE FOR: security review, root-cause fixes, or direct production edits."
 model: Claude Sonnet 4.6 (copilot)
-tools: [read, search, execute, web, todo, browser/openBrowserPage, playwright/*, vscode/askQuestions, askQuestions]
+tools: [read, search, execute, web, todo, browser/openBrowserPage, playwright/*, ask_user, vscode/askQuestions, askQuestions]
 user-invocable: true
 ---
 

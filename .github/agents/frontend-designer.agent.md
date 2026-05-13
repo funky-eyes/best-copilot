@@ -2,7 +2,7 @@
 name: Frontend Designer
 description: "Use when pages, components, interactions, forms, responsive layouts, browser behavior, visual quality, or frontend performance need implementation or review. DO NOT USE FOR: backend mainline work, server-side permissions, or security review."
 model: Gemini 3.1 Pro (Preview) (copilot)
-tools: [read, search, edit, execute, web, todo, browser/openBrowserPage, playwright/*, vscode/askQuestions, askQuestions]
+tools: [read, search, edit, execute, web, todo, browser/openBrowserPage, playwright/*, ask_user, vscode/askQuestions, askQuestions]
 user-invocable: true
 ---
 
