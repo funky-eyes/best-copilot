@@ -1,3 +1,9 @@
+---
+name: best-copilot-project
+applyTo: "**"
+description: Project facts, build entrypoints, target bootstrap policy, and high-frequency conventions for best-copilot.
+---
+
 # best-copilot Project Instructions
 
 This file keeps project-level facts, build entrypoints, and high-frequency conventions only. General workflow rules, state contracts, memory budgets, and verification gates live in `.github/instructions/must.instructions.md`. Skill discovery starts from `.github/instructions/skills-index.instructions.md`.
@@ -12,24 +18,28 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 
 ## First Repository Initialization
 
-- Before first use in a new repository, prefer Copilot's official `/init` or `copilot init`.
+- Before first use in a new repository, prefer Copilot's official `/init` or `copilot init` as evidence gathering only.
 - The plugin has no install-time or first-message hook that can force initialization before an agent is invoked. Treat initialization as the first-substantial-task gate instead.
-- Judge init state from target repository files, not from chat history. If `.github/copilot-instructions.md` exists, has no unresolved init placeholders, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps, do not rerun init just because a new conversation started.
+- This gate is fail-closed: if `.github/instructions/project.instructions.md` is missing or incomplete, do not proceed to requirements analysis, dependency/framework upgrades, security rewrites, or implementation. Only official init, bounded manual fact capture, and target bootstrap file creation are allowed.
+- Judge init state from target repository files, not from chat history. If `.github/instructions/project.instructions.md` exists, has no unresolved init placeholders, is not the untouched neutral scaffold, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown` gaps, do not rerun init just because a new conversation started.
 - Missing target-local instruction/memory/spec scaffolds are not a reason to rerun official init. If facts are current but scaffolds are absent, run only `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
-- If the active runtime can execute shell commands, run `copilot init` directly before requirements analysis. If only Copilot interactive slash commands are available, ask the user to run `/init`.
-- Initialization output should write or update the target repository's `.github/copilot-instructions.md`.
-- After official init, verify that `.github/copilot-instructions.md` exists on disk. If the command produced output but no file, treat it as `official_init_no_write` and use `repo-init-scan` manual fallback to create the file from bounded repository evidence.
+- If the active runtime can execute shell commands, run `copilot init` directly before requirements analysis when facts are missing, then normalize the useful output into `.github/instructions/project.instructions.md`. If only Copilot interactive slash commands are available, ask the user to run `/init`, then normalize the resulting evidence into `.github/instructions/project.instructions.md`.
+- Initialization output should be verified and normalized into the target repository's `.github/instructions/project.instructions.md`.
+- After official init, verify that `.github/instructions/project.instructions.md` exists on disk. If the command produced output but no project facts file, treat it as `official_init_no_write` and use `repo-init-scan` manual fallback to create the file from bounded repository evidence.
 - Normalize `/init` output into reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, major ownership surfaces, and explicit `unknown` gaps instead of guesses.
 - After repository facts exist, use bootstrap skills to create missing target-local scaffolds: `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- First-use scaffolds must be verified on disk before continuing: `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, `.github/instructions/skills-index.instructions.md`, `memories/README.md`, `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, `memories/repo/project-state.md`, `memories/repo/workflow-rules.md`, `memories/repo/decisions.md`, `memories/repo/logs/README.md`, `memories/repo/archive/deprecated-decisions.md`, `spec/INDEX.md`, `spec/templates/requirements-template.md`, `spec/templates/design-template.md`, and `spec/templates/tasks-template.md`.
+- If required facts or scaffolds cannot be created because tools, permissions, or target paths are unavailable, return `BLOCKED first_use_gate_incomplete` with the missing paths; do not continue the user's substantive task.
 - After initialization, continue the original user request in the same conversation whenever possible.
 - If placeholders remain, use `repo-init-scan` for bounded repository scanning before large tasks.
 
 ## Target Repository State
 
 - Plugin installation contributes agents and skills; it does not provide shared per-project memory storage.
+- Store target project facts under that repository's `.github/instructions/project.instructions.md`.
 - Store target project memory under that repository's `memories/repo/**`.
 - Store target project specs under that repository's `spec/**`.
-- This plugin checkout does not keep active target-project memory/spec files. Installed projects get durable local files from the bootstrap skills, not by copying plugin checkout directories.
+- This plugin checkout does not keep active target-project instruction/memory/spec files. Installed projects get durable local files from `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, not by copying this plugin's `.github/instructions/**`, `memories/**`, or `spec/**`.
 - If a target repository lacks local instructions, memory, or spec scaffolds and persistent recovery is needed, create the minimal skeleton locally in the target repository.
 
 ## Build and Verification

@@ -1,16 +1,17 @@
 ---
 name: target-instructions-bootstrap
-description: "Create the target repository's local AI instruction scaffold after repo init. Use from repo-init-scan when `.github/instructions` or `AGENTS.md` is missing, or when a target repo needs reusable Copilot/Codex instruction entrypoints. Do not use to overwrite existing project-specific rules."
+description: "Create the target repository's local AI instruction scaffold during first-use bootstrap. Use from repo-init-scan when `.github/instructions` or `AGENTS.md` is missing, including the neutral project facts scaffold. Do not use to overwrite existing project-specific rules."
 ---
 
 # Target Instructions Bootstrap
 
-Use this skill after repository facts have been initialized. It creates local instruction entrypoints in the target repository so future Copilot and Codex sessions have durable, repo-local rules.
+Use this skill during `repo-init-scan` when target-local instruction entrypoints are missing. It may create a neutral `.github/instructions/project.instructions.md` scaffold, but that scaffold is not enough to pass initialization until `repo-init-scan` replaces the neutral markers with bounded repository facts or bounded-scan `unknown` gaps.
 
 ## Boundary
 
 - Write into the target repository, never into the installed plugin package or plugin cache.
 - Create missing files only. If a file exists, preserve it and append only a clearly compatible missing section.
+- Do not copy this plugin repository's instruction files or active workflow state into the target repository. Generate only the neutral target-local scaffold below.
 - Do not overwrite project-specific rules, language policy, build commands, or existing `AGENTS.md`.
 - Keep generated files short. They are routing and safety scaffolds, not a full manual.
 
@@ -18,9 +19,61 @@ Use this skill after repository facts have been initialized. It creates local in
 
 Create these files when absent:
 
+- `.github/instructions/project.instructions.md`
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `AGENTS.md` when the runtime includes Codex or the user wants Codex compatibility.
+
+## `.github/instructions/project.instructions.md`
+
+```markdown
+---
+name: target-project-facts
+description: Repository facts, build and test commands, entrypoints, and module boundaries for this repository.
+applyTo: "**"
+---
+
+# Target Repository Facts
+
+## Project Facts
+
+- Project name: unknown
+- Purpose: unknown
+- Primary languages/frameworks: unknown
+- Package/build system: unknown
+
+## Build and Test Commands
+
+| Purpose | Command | Notes |
+| --- | --- | --- |
+| Install dependencies | unknown | Not yet verified. |
+| Run tests | unknown | Not yet verified. |
+| Run lint/checks | unknown | Not yet verified. |
+| Start dev/runtime | unknown | Not yet verified. |
+
+## Runtime and Entry Points
+
+- Application entrypoints: unknown
+- Test entrypoints: unknown
+- Local runtime requirements: unknown
+
+## Module Boundaries
+
+- Source modules: unknown
+- Public API surfaces: unknown
+- Data/schema ownership: unknown
+- UI ownership: unknown
+- Security/auth ownership: unknown
+
+## Known Unknowns
+
+- unknown
+
+## Verification Notes
+
+- Init source: manual scaffold
+- Last verified: unknown
+```
 
 ## `.github/instructions/must.instructions.md`
 
@@ -39,9 +92,9 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 ## Repository Truth
 
-- Read `.github/copilot-instructions.md` before non-trivial work.
-- Treat `.github/copilot-instructions.md` as initialized only when it contains concrete build/test/check/dev command facts or explicit `unknown`, plus runtime/framework, entrypoint, and module-boundary facts.
-- If facts are missing, run the repository init flow before real requirements analysis.
+- Read `.github/instructions/project.instructions.md` before non-trivial work.
+- Treat `.github/instructions/project.instructions.md` as initialized only when it is not the untouched neutral scaffold, contains concrete build/test/check/dev command facts or bounded-scan `unknown`, plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
+- If facts are missing, run the repository init flow before real requirements analysis. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
 - Do not guess project stack, module ownership, security boundaries, or build commands.
 
 ## Memory And Spec
@@ -49,6 +102,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Persistent memory belongs in this target repository under `memories/repo/**`.
 - Specs belong in this target repository under `spec/**`.
 - Memory/spec templates come from bootstrap skills and are not active state for this project until created in the target repository.
+- On first substantial plugin use, if `.github/instructions/**`, `memories/repo/**`, or `spec/**` scaffolds are missing, create them through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify the paths on disk before substantive work. If they cannot be created, stop with `BLOCKED first_use_gate_incomplete` and list the missing paths.
 - MEDIUM/LARGE active work should link both ways: spec points to memory, and `memories/repo/current-workstreams.md` points to spec.
 - Memory stores recovery state, decisions, and verified facts. Spec stores requirements, design, tasks, and acceptance checks.
 
@@ -80,7 +134,7 @@ Read only the selected skill, not the whole skill tree.
 
 ## Initialization
 
-- `repo-init-scan`: first substantial task, missing scaffolds, missing or placeholder `.github/copilot-instructions.md`, or incomplete `/init` output.
+- `repo-init-scan`: first substantial task, missing scaffolds, missing or placeholder `.github/instructions/project.instructions.md`, or incomplete `/init` output.
 - `target-instructions-bootstrap`: create missing `.github/instructions/**` and optional `AGENTS.md`.
 - `target-memory-bootstrap`: create missing `memories/repo/**` skeleton.
 - `target-spec-bootstrap`: create missing `spec/**` skeleton and spec templates.
@@ -115,7 +169,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 
 ## Required Entries
 
-1. `.github/copilot-instructions.md`: repository facts, build/test commands, and high-frequency conventions.
+1. `.github/instructions/project.instructions.md`: repository facts, build/test commands, and high-frequency conventions.
 2. `.github/instructions/must.instructions.md`: core local AI rules.
 3. `.github/instructions/skills-index.instructions.md`: lightweight skill routing index.
 4. `memories/repo/INDEX.md` and `memories/repo/current-workstreams.md`: task memory routing and progress recovery when present.
@@ -123,7 +177,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 
 ## Runtime Rules
 
-- Before non-trivial work, read the relevant parts of `.github/copilot-instructions.md` and `.github/instructions/must.instructions.md`.
+- Before non-trivial work, read the relevant parts of `.github/instructions/project.instructions.md` and `.github/instructions/must.instructions.md`.
 - When choosing a skill, read `.github/instructions/skills-index.instructions.md` first, then open only the selected skill.
 - When resuming multi-step work, read `memories/repo/INDEX.md`, then `current-workstreams.md`, then only linked spec or memory shards.
 - Do not treat plugin package state as active project state.
@@ -135,3 +189,4 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm generated files exist in the target repository.
 - Confirm existing files were not overwritten.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
+- If this skill was invoked because `.github/instructions/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

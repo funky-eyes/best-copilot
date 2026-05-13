@@ -47,7 +47,7 @@ Check the installation:
 /skills list
 ```
 
-When installed inside a target repository, the plugin contributes its agents and skills. On first use, the Senior Project Expert can initialize the target repository's local instructions, memory, and spec scaffolds so later sessions recover project state from that repository.
+When installed inside a target repository, the plugin contributes its agents and skills. On first substantial use, the Senior Project Expert must initialize the target repository's local facts, instructions, memory, and spec scaffolds before substantive planning or implementation so later sessions recover project state from that repository.
 
 ## First Use
 
@@ -63,7 +63,7 @@ or run:
 copilot init
 ```
 
-After initialization, start substantial work with the **Senior Project Expert**. It will use the repository facts, create any missing local workflow scaffolds, plan the work, route specialists when needed, and keep verification explicit.
+After initialization, start substantial work with the **Senior Project Expert**. It will normalize repository facts into `.github/instructions/project.instructions.md`, create any missing local workflow scaffolds, verify those files on disk, plan the work, route specialists when needed, and keep verification explicit. If required facts or scaffolds cannot be created, the workflow should stop as `BLOCKED` instead of continuing into implementation from guesses.
 
 ## Language Policy
 

@@ -11,7 +11,7 @@ Use this skill to create durable, target-local memory routing files. The generat
 
 - Write into the target repository, never into the installed plugin package or plugin cache.
 - Create missing files only. Do not overwrite existing target memory.
-- Do not copy this plugin repository's current work, decisions, or examples as active target memory.
+- Do not copy this plugin repository's current work, decisions, examples, `memories/**`, or `spec/**` as active target memory.
 - Memory is for recovery state, verified decisions, and compact facts. It is not for long logs, secrets, or raw chat transcripts.
 
 ## Files
@@ -231,3 +231,4 @@ Historical decisions live here only after they have been replaced or should no l
 - Confirm all missing files were created in the target repository.
 - Confirm existing target memory files were preserved.
 - Confirm placeholders are neutral (`unknown` or `None yet`) and do not describe the plugin repository as the target project.
+- If this skill was invoked because `memories/repo/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_memory_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

@@ -11,6 +11,7 @@ Use this skill to create the target repository's spec routing structure. Specs a
 
 - Write into the target repository, never into the installed plugin package or plugin cache.
 - Create missing files only. Do not overwrite active specs or project-specific templates.
+- Do not copy this plugin repository's active specs, memory, or workflow examples into the target repository. Generate only neutral target-local templates.
 - Use specs for MEDIUM/LARGE requirements, design, tasks, acceptance checks, and ADRs.
 - Link active specs to `memories/repo/current-workstreams.md` when persistent recovery is needed.
 
@@ -136,3 +137,4 @@ Create these paths when absent:
 - Confirm `spec/INDEX.md` and missing templates exist in the target repository.
 - Confirm existing active specs were preserved.
 - Confirm new task specs, when created later, are linked from both `spec/INDEX.md` and `memories/repo/current-workstreams.md`.
+- If this skill was invoked because `spec/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_spec_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

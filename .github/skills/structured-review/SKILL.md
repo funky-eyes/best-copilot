@@ -31,7 +31,7 @@ Choose one primary scenario, then load only the relevant reference files. A cust
 | Scenario | Use when | Reference |
 |---|---|---|
 | post-implementation code review | reviewing an implemented code diff, PR, patch, or changed files | `references/code-review.md` |
-| customization file review | reviewing `.github/agents/`, `.github/skills/`, `.github/instructions/`, `copilot-instructions.md`, plugin/agent/skill files, or workflow instructions | `references/customization-review.md` |
+| customization file review | reviewing `.github/agents/`, `.github/skills/`, `.github/instructions/`, `project.instructions.md`, plugin/agent/skill files, or workflow instructions | `references/customization-review.md` |
 | targeted re-review | checking whether previous findings were fixed | `references/re-review.md` |
 | review handoff / feedback intake | preparing a bounded review packet, triaging reviewer feedback, or converting feedback into fix scope | `references/review-handoff-and-feedback.md` |
 | medium/large design review | reviewing a new feature/design before implementation, especially multi-module work, shared abstractions, external APIs, frontend flows, or `files_involved > 8` | `references/design-review.md` |
