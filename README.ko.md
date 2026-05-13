@@ -34,7 +34,7 @@ copilot plugin install best-copilot@best-copilot
 /skills list
 ```
 
-대상 저장소에 설치되면 plugin은 자체 agents와 skills를 제공합니다. 저장소별 사실은 여전히 대상 저장소의 로컬 파일에서 가져옵니다. Codex 템플릿으로 사용할 때는 Codex가 `AGENTS.md`를 읽고 `.codex/instructions`, `.codex/prompts`, `.codex/skills` 심볼릭 링크를 따라 `.github`로 돌아갑니다.
+대상 저장소에 설치되면 plugin은 자체 agents와 skills를 제공합니다. 첫 사용 시 Senior Project Expert가 대상 저장소 안에 instructions, memory, spec 기반 구조를 만들 수 있으므로 이후 세션은 그 저장소의 로컬 상태에서 이어갈 수 있습니다.
 
 ## 첫 사용
 
@@ -50,13 +50,7 @@ copilot plugin install best-copilot@best-copilot
 copilot init
 ```
 
-`/init`은 Copilot CLI의 공식 초기화 흐름입니다. 저장소를 스캔하고 `.github/copilot-instructions.md`를 작성하거나 갱신합니다. `repo-init-scan` skill은 이를 첫 사용 게이트로 취급합니다. 저장소 정보가 아직 placeholder라면 먼저 초기화한 뒤 실제 작업을 시작합니다.
-
-플러그인 설치 자체에는 보장된 첫 실행 hook이 없습니다. 대신 팀은 이를 첫 번째 실질 작업의 게이트로 강제합니다. 현재 runtime에서 shell 명령을 실행할 수 있으면 Senior Project Expert는 요구사항 분석 전에 `copilot init`을 직접 실행해야 합니다. Copilot 대화형 slash command만 사용할 수 있으면 사용자에게 `/init` 실행을 요청해야 합니다. 초기화가 끝나면 가능한 한 같은 대화에서 원래 요청을 계속 처리해야 합니다.
-
-대상 저장소에 `.github/copilot-instructions.md`가 이미 있고, unresolved init placeholder가 없으며, build/test/check/dev 명령 정보와 runtime/framework, entrypoint, module boundary 정보 또는 명시적인 `unknown` gap이 기록되어 있다면 `/init`이 이미 완료된 것으로 간주합니다. 새 대화가 시작되었다는 이유만으로 다시 실행하지 않습니다.
-
-이 지속 상태는 대상 저장소에 저장됩니다. 프로젝트 memory는 `memories/repo/**`, spec은 `spec/**`에 둡니다. plugin package에 포함된 `memories/`와 `spec/`은 템플릿 및 plugin 저장소 자체 상태이며, plugin을 설치한 모든 프로젝트의 공유 저장소가 아닙니다.
+초기화 후 큰 작업이나 여러 모듈에 걸친 작업은 **Senior Project Expert**로 시작하세요. 이 역할은 저장소 정보를 바탕으로 요구사항을 이해하고, 누락된 로컬 workflow 기반 구조를 보완하고, 작업을 계획하고, 필요한 specialist로 라우팅하며, 검증 증거를 명확히 유지합니다.
 
 ## 언어 정책
 
@@ -137,7 +131,7 @@ copilot init
 2. **Select**: 가장 작은 개선 대상(agent, skill, instruction, prompt, memory, README, spec template)을 선택합니다.
 3. **Propose**: 증거, 범위, 검증, rollback을 포함한 Evolution Proposal을 만듭니다.
 4. **Validate**: frontmatter/schema, trigger eval, static check, review, command evidence로 검증합니다.
-5. **Write**: 승인된 학습만 `.github/**`, `memories/repo/**`, `spec/**`에 기록합니다.
+5. **Write**: 승인된 학습만 관련 `.github/**` 사용자 지정 항목이나 bootstrap skills가 만든 대상 저장소의 memory/spec 파일에 기록합니다.
 
 승인된 개선은 `EvolutionEvent`: `signal -> target -> mutation -> validation -> rollback -> status` 형식으로 기록합니다.
 

@@ -15,7 +15,8 @@
     "codex",
     "workflow",
     "spec",
-    "memory"
+    "memory",
+    "bootstrap"
   ],
   "category": "agent-team",
   "tags": [
@@ -27,7 +28,8 @@
     "code-review",
     "evolution",
     "self-improving-agents",
-    "memory"
+    "memory",
+    "repo-bootstrap"
   ],
   "agents": ".github/agents/",
   "skills": ".github/skills/"

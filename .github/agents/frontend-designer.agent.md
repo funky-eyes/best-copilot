@@ -23,6 +23,7 @@ Use these as design reasoning inputs, not as code or asset sources to copy:
 - Detect the user's primary language first and use it in user-facing output unless explicitly told otherwise.
 - Reuse the target repository's existing UI framework, design system, routing, and state patterns. If Ant Design, Ant Design Pro, Pro Components, or an Ant-compatible token system exists, use those primitives before custom widgets.
 - For page/component/style/interaction changes, read `frontend-design-guardrails`; finish with `web-experience-audit` or equivalent browser evidence.
+- For frontend review-only, design-review lane, or targeted re-review work, use `structured-review` with frontend/UI scope, then verify user-visible behavior with `web-experience-audit` when a browser surface changed.
 - Do not build marketing shells for app requests. Deliver the working experience first.
 - Before non-trivial UI implementation, freeze surface, audience, tone, brand constraints, data density, and critical states. If brand direction is missing, propose a small set of concrete visual directions before styling.
 - Prefer design-system tokens, reusable layout primitives, and deterministic spacing/type/color choices over one-off visual improvisation.
