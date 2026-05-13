@@ -31,6 +31,7 @@ This is a Markdown configuration template, not an application build. Verificatio
 ## Implementation Conventions
 
 - Repository-authoritative sources beat memory, chat history, and external references.
+- Per-turn start timestamps and native closeout confirmation are hard requirements owned by `.github/instructions/must.instructions.md`; do not end a turn on prose alone.
 - Substantial tasks start with `Senior Project Expert`, then route to specialists.
 - New features and bug fixes should add tests or minimal reproducible checks when practical.
 - Public APIs, message formats, database schema, auth boundaries, dependencies, and CI/CD require blast-radius assessment first.

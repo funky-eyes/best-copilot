@@ -22,10 +22,15 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 ## 2. Request Flow
 
 1. Parse literal request, real intent, and success criteria.
-2. Read explicit user paths first; if evidence is insufficient, read known owner files, indexes, and necessary shards.
-3. Before editing, freeze a minimal packet: `goal`, `scope`, `constraints`, `expected_outcome`, `non_goals`, `files_involved`, `changed_files`, `search_hints`, `reference_files`, `acceptance_checks`, and `verification_budget`.
-4. Search at most three rounds; stop after two rounds with no new signal.
-5. Before completion, provide real verification or clearly state why verification is blocked.
+2. Before the first substantial action in a turn, the top-level assistant or any direct user-invocable agent must record a per-request start timestamp. If that timestamp was missed, any final message may only state that the task duration cannot be computed reliably; never backfill a whole-turn duration window as if it were exact.
+3. Read explicit user paths first; if evidence is insufficient, read known owner files, indexes, and necessary shards.
+4. Before editing, freeze a minimal packet: `goal`, `scope`, `constraints`, `expected_outcome`, `non_goals`, `files_involved`, `changed_files`, `search_hints`, `reference_files`, `acceptance_checks`, and `verification_budget`.
+5. Search at most three rounds; stop after two rounds with no new signal.
+6. Before completion, provide real verification or clearly state why verification is blocked.
+7. If preparing to end the current turn, and the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, the top-level assistant or any direct user-invocable agent must first use a native ask tool (`ask_user`, `vscode/askQuestions`, or `askQuestions`). A prose-only summary never counts as closeout authorization.
+8. If a previous turn lacked a native ask tool and only a prose status update was possible, then any later turn where a native ask tool is available again must use that native closeout flow before ending. Earlier prose does not become retroactive authorization.
+9. Any user reply from a native closeout prompt, including free text, selections, or continuation choices, becomes a new user instruction immediately. After handling that instruction, the assistant must ask again before ending; prior closeout evidence cannot be reused.
+10. If that closeout reply contains a new executable task, fix request, investigation direction, or other clear instruction to continue, closeout state is invalidated immediately. The next step must begin that work directly, or ask one minimal native clarification if ambiguity remains; do not send a summary-only response or attempt another closeout first.
 
 ## 3. Markdown Memory System
 
