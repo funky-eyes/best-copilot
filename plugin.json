@@ -1,0 +1,29 @@
+{
+  "name": "best-copilot",
+  "description": "A senior-agent team plugin for GitHub Copilot CLI, with planning, architecture, implementation, QA, security, fix, memory, and spec workflows that also bridge cleanly to Codex.",
+  "version": "0.1.0",
+  "author": {
+    "name": "best-copilot maintainers"
+  },
+  "keywords": [
+    "copilot",
+    "agents",
+    "skills",
+    "codex",
+    "workflow",
+    "spec",
+    "memory"
+  ],
+  "category": "agent-team",
+  "tags": [
+    "custom-agents",
+    "agent-skills",
+    "software-engineering",
+    "code-review",
+    "evolution",
+    "self-improving-agents",
+    "memory"
+  ],
+  "agents": ".github/agents/",
+  "skills": ".github/skills/"
+}
