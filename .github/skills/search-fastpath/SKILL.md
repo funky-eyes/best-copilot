@@ -12,7 +12,7 @@ Find the right files quickly without turning every task into an unbounded reposi
 ## Search Order
 
 1. User-provided paths, current files, attachments, changed files.
-2. Repo indexes: `README*`, `.github/copilot-instructions.md`, and target-local `spec/INDEX.md` / `memories/repo/INDEX.md` when present.
+2. Repo indexes: `README*`, `.github/instructions/project.instructions.md`, and target-local `spec/INDEX.md` / `memories/repo/INDEX.md` when present.
 3. File-name discovery with `rg --files` or `find`.
 4. Scoped content search with `rg` in the smallest likely directory.
 5. External sources only when repo evidence cannot answer the question and current instructions allow web use.

@@ -13,17 +13,20 @@ External repositories, skill libraries, and prompt systems are reference inputs 
 
 ## Init And Fact Capture
 
+This section is a fail-closed gate. If required repository facts or first-use scaffolds are missing, the only allowed work is official init, bounded manual fact capture, and target bootstrap file creation. Do not continue to substantive requirements analysis, package inspection for implementation, dependency upgrades, framework migrations, security rewrites, or code changes until the gate passes.
+
 1. If the repository is new, under-documented, or still full of `/init` placeholders, prefer the official initializer before substantive analysis.
-2. Judge init state from target repository files: `.github/copilot-instructions.md` must exist, be free of unresolved init placeholders, and record build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps.
+2. Judge init state from target repository files: `.github/instructions/project.instructions.md` must exist, be free of unresolved init placeholders, not be the untouched neutral scaffold, and record build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown` gaps.
 3. When shell execution is available, run `copilot init` directly. When only Copilot interactive slash commands are available, ask the user to run `/init`.
-4. Immediately after official init, verify the target `.github/copilot-instructions.md` exists and contains the required fact categories. Treat command output without the file as `official_init_no_write`, not success.
-5. If official init does not write the file or leaves it incomplete, create or repair `.github/copilot-instructions.md` from bounded repo evidence before requirements analysis.
+4. Immediately after official init, normalize useful output or artifacts into `.github/instructions/project.instructions.md`, then verify the target file exists and contains the required fact categories. Treat command output without the project facts file as `official_init_no_write`, not success.
+5. If official init does not provide enough usable facts or leaves the project facts file incomplete, create or repair `.github/instructions/project.instructions.md` from bounded repo evidence before requirements analysis.
 6. Do not rerun init on every conversation once the target repository has sufficient facts.
 7. Initialization is not a closeout point: after init, continue the original task in the same conversation whenever possible.
 8. Normalize discovered facts into short reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, and major ownership surfaces.
-9. After repository facts exist, create missing target-local scaffolds through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap` when those surfaces are absent or the current work needs them. Missing scaffolds alone do not justify rerunning official init.
+9. After repository facts exist, create missing target-local scaffolds through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap` when those surfaces are absent or the current work needs them. Missing scaffolds alone do not justify rerunning official init, but they do block substantive task work until created or explicitly blocked.
 10. Store persistent instructions/memory/spec state in the target repository, not in the installed plugin package or plugin cache.
 11. Mark unknowns as `unknown`; do not guess missing repository facts.
+12. Before leaving init, verify `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, `.github/instructions/skills-index.instructions.md`, `memories/README.md`, `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, `memories/repo/project-state.md`, `memories/repo/workflow-rules.md`, `memories/repo/decisions.md`, `memories/repo/logs/README.md`, `memories/repo/archive/deprecated-decisions.md`, `spec/INDEX.md`, `spec/templates/requirements-template.md`, `spec/templates/design-template.md`, and `spec/templates/tasks-template.md` on disk. If verification fails, return `BLOCKED first_use_gate_incomplete` with missing paths.
 
 ## Default Flow
 

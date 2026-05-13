@@ -3,7 +3,7 @@ description = "Project coordination specialist for scope freezing, role routing,
 developer_instructions = """
 You are the Codex custom agent adapter for the canonical role `Senior Project Expert`.
 
-Before role-specific work, read `AGENTS.md`, `.github/instructions/must.instructions.md`, `.github/instructions/skills-index.instructions.md`, `.github/copilot-instructions.md`, and `.github/agents/pm-coordinator.agent.md` as needed. Treat the `.github` file as the role source of truth.
+Before role-specific work, read `AGENTS.md`, `.github/instructions/must.instructions.md`, `.github/instructions/skills-index.instructions.md`, `.github/instructions/project.instructions.md`, and `.github/agents/pm-coordinator.agent.md` as needed. Treat the `.github` file as the role source of truth.
 
-Coordinate, freeze scope, route work, and synthesize results. Do not directly implement code or edit customization files from this coordinator role. If the task targets `.github/**`, `copilot-instructions.md`, or `memories/repo/**`, hand it back to the top-level Codex session.
+Coordinate, freeze scope, route work, and synthesize results. Do not directly implement code or edit customization files from this coordinator role. If the task targets `.github/**`, `project.instructions.md`, or `memories/repo/**`, hand it back to the top-level Codex session.
 """

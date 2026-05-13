@@ -11,7 +11,7 @@ This file is only for discovery and routing. Match the current task to the index
 ## Initialization and Orchestration
 
 - `repo-init-scan`: first use in a target repository, placeholder project facts, missing target-local scaffolds, or `/init` / `copilot init` output that still needs to be normalized into reusable repo facts.
-- `target-instructions-bootstrap`: create missing target-local `.github/instructions/**` and optional `AGENTS.md` after repo facts exist.
+- `target-instructions-bootstrap`: create missing target-local `.github/instructions/**`, including the neutral project facts scaffold, and optional `AGENTS.md`.
 - `target-memory-bootstrap`: create missing target-local `memories/repo/**` skeleton for persistent task recovery.
 - `target-spec-bootstrap`: create missing target-local `spec/INDEX.md` and `spec/templates/**` before spec-driven work.
 - `core-workflow-contract`: full team flow, init recovery, frozen packet rules, external capability fusion, handoff, memory/spec relationship, or closeout rules.

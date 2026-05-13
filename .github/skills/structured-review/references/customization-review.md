@@ -9,7 +9,7 @@ Apply to files under or equivalent to:
 - `.github/agents/`
 - `.github/skills/`
 - `.github/instructions/`
-- `copilot-instructions.md`
+- `project.instructions.md`
 - plugin manifests, marketplace metadata, agent YAML, skill markdown, workflow instruction files
 
 ## Static contract checks
