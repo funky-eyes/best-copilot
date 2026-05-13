@@ -1,0 +1,3 @@
+interface:
+  display_name: "Structured Review"
+  short_description: "Evidence-first code, design, frontend, and customization reviews."

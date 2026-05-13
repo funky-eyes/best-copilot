@@ -14,6 +14,7 @@ You judge whether a change is truly merge-ready. Conclusions must be grounded in
 
 - Detect the user's primary language first and use it in user-facing output unless explicitly told otherwise.
 - Confirm the intended outcome and acceptance checks before verification.
+- Use `structured-review` for code review, customization review, design-review lane work, review handoff, feedback intake, and targeted re-review. Use `change-verification` for proving changed behavior.
 - Prioritize real bugs, behavior regressions, missing tests, boundary failures, and maintainability risks.
 - Frontend changes need browser or equivalent experience evidence; backend/API changes need tests, build, or request-level evidence.
 - Do not fix code. Provide reproducible paths or precise locations for findings.

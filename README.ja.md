@@ -34,7 +34,7 @@ copilot plugin install best-copilot@best-copilot
 /skills list
 ```
 
-対象リポジトリにインストールされると、plugin は自身の agents と skills を提供します。リポジトリ固有の事実は、引き続き対象リポジトリのローカルファイルから取得します。Codex テンプレートとして使う場合、Codex は `AGENTS.md` を読み、`.codex/instructions`、`.codex/prompts`、`.codex/skills` のシンボリックリンクをたどって `.github` に戻ります。
+対象リポジトリにインストールされると、plugin は自身の agents と skills を提供します。初回利用時に Senior Project Expert が対象リポジトリ内の instructions、memory、spec の足場を作成できるため、以後のセッションはそのリポジトリ自身の状態から復帰できます。
 
 ## 初回利用
 
@@ -50,13 +50,7 @@ copilot plugin install best-copilot@best-copilot
 copilot init
 ```
 
-`/init` は Copilot CLI の公式初期化フローです。リポジトリをスキャンし、`.github/copilot-instructions.md` を作成または更新します。`repo-init-scan` skill はこれを初回利用ゲートとして扱います。リポジトリ情報がまだ placeholder の場合は、先に初期化してから実タスクに入ります。
-
-プラグインのインストール自体には、保証された初回実行 hook はありません。そのため、このチームでは初回の実質タスクのゲートとして扱います。現在の runtime で shell コマンドを実行できる場合、Senior Project Expert は requirements analysis の前に `copilot init` を直接実行するべきです。Copilot の対話型 slash command しか使えない場合は、ユーザーに `/init` の実行を依頼します。初期化後は、可能な限り同じ会話で元の依頼を続けます。
-
-対象リポジトリに `.github/copilot-instructions.md` がすでに存在し、未解決の init placeholder がなく、build/test/check/dev コマンド情報と runtime/framework、entrypoint、module boundary 情報、または明示的な `unknown` gap が記録されている場合、`/init` は完了済みと扱います。新しい会話になっただけでは再実行しません。
-
-この永続状態は対象リポジトリに保存します。プロジェクト memory は `memories/repo/**`、spec は `spec/**` に置きます。plugin package に含まれる `memories/` と `spec/` はテンプレートおよび plugin リポジトリ自身の状態であり、plugin をインストールした全プロジェクトの共有ストレージではありません。
+初期化後、大きな作業や複数モジュールにまたがる作業は **Senior Project Expert** から始めてください。この役割はリポジトリ情報をもとに要求を理解し、不足しているローカル workflow の足場を補い、作業を計画し、必要な specialist にルーティングし、検証証拠を明確に保ちます。
 
 ## 言語ポリシー
 
@@ -137,7 +131,7 @@ copilot init
 2. **Select**: 最小の改善対象(agent、skill、instruction、prompt、memory、README、spec template)を選びます。
 3. **Propose**: 証拠、範囲、検証、rollback を含む Evolution Proposal を作ります。
 4. **Validate**: frontmatter/schema、trigger eval、static check、review、command evidence で検証します。
-5. **Write**: 承認された学びだけを `.github/**`、`memories/repo/**`、`spec/**` に書き戻します。
+5. **Write**: 承認された学びだけを関連する `.github/**` カスタマイズ、または bootstrap skills が作成した対象リポジトリ内の memory/spec ファイルに書き戻します。
 
 承認された改善は `EvolutionEvent`: `signal -> target -> mutation -> validation -> rollback -> status` として記録します。
 

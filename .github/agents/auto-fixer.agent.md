@@ -14,6 +14,7 @@ You own root-cause fixes. Explain why it broke, make the smallest safe fix, and 
 
 - Detect the user's primary language first and use it in user-facing output unless explicitly told otherwise.
 - Read failure evidence and relevant code first. Use `systematic-debugging` when cause is unknown; use `root-cause-investigation` when scope is narrow.
+- For fixes that originate from review feedback, consume the `structured-review` feedback-intake or targeted re-review scope before patching.
 - Before patching, state the broken behavior, expected behavior, boundary handling, and falsification condition.
 - Fix only the confirmed root cause. Do not refactor neighboring code opportunistically.
 - Run the smallest useful regression check. If verification cannot run, state the blocker and best fallback evidence.

@@ -2,9 +2,22 @@
 
 English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-`best-copilot` is an installable, reusable, and continuously improvable AI agent team template. It is designed first as a GitHub Copilot CLI plugin, keeps `.github/**` as the canonical Copilot customization source, and lets Codex reuse the same team contract through `AGENTS.md` and `.codex/**`.
+`best-copilot` is an installable Copilot CLI agent team for serious engineering work: repository onboarding, scoped planning, spec-driven implementation, structured review, verification, and bounded workflow improvement.
 
-The core idea is simple: substantial engineering work should start with the **Senior Project Expert**, then move through architecture, specification, implementation, frontend, QA, security, fix, and evolution stages as needed.
+It keeps `.github/**` as the canonical Copilot customization source, exposes agents and skills through `plugin.json`, and lets Codex reuse the same contract through `AGENTS.md` plus the `.codex` bridges.
+
+The main promise is practical: large tasks should not jump from a user request straight to a patch. They should start with the **Senior Project Expert**, learn the target repository, freeze scope, pass design review, execute from an approved plan, cross-review implementation, verify with evidence, and only then close.
+
+## Highlights
+
+- **Installable agent team**: ship the full team as a Copilot CLI plugin instead of copying one-off instructions between repositories.
+- **Senior PM orchestration**: large or risky work starts with one coordinator that owns intent, scope, planning, dispatch, fan-in, and closeout.
+- **First-use repository bootstrap**: new target repositories run `/init` or `copilot init`, then get local instruction, memory, and spec scaffolds from `target-*-bootstrap` skills.
+- **Spec-first delivery**: MEDIUM/LARGE work uses requirements, design, tasks, readiness review, and an execution-confirmed plan before implementation.
+- **Unified review system**: `structured-review` is the single review entry for code, customization, design review, feedback intake, review handoff, and targeted re-review.
+- **Fresh-context execution**: approved plans can run through `subagent-driven-development` or checkpointed `executing-plans` so tasks do not bleed context into each other.
+- **Evidence-first verification**: completion claims need command output, static checks, browser evidence, or an explicit blocker.
+- **Bounded evolution**: repeated failures and review loops become auditable, reversible workflow improvements rather than ad hoc prompt drift.
 
 ## Installation
 
@@ -34,7 +47,7 @@ Check the installation:
 /skills list
 ```
 
-When installed inside a target repository, the plugin contributes its agents and skills, while repository-specific facts still come from that target repository. Codex template use reads `AGENTS.md` and follows `.codex/instructions`, `.codex/prompts`, and `.codex/skills` symlinks back to `.github`.
+When installed inside a target repository, the plugin contributes its agents and skills. On first use, the Senior Project Expert can initialize the target repository's local instructions, memory, and spec scaffolds so later sessions recover project state from that repository.
 
 ## First Use
 
@@ -50,22 +63,7 @@ or run:
 copilot init
 ```
 
-`/init` is Copilot CLI's official initialization flow. It scans the repository and writes or updates `.github/copilot-instructions.md`. The `repo-init-scan` skill treats this as a first-use gate: if repository facts are still placeholders, initialize first and only then start real work.
-
-Plugin installation itself does not provide a guaranteed first-run hook. The team enforces this at the first substantial task instead: if the active runtime can execute shell commands, the Senior Project Expert should run `copilot init` before requirements analysis; if only Copilot interactive slash commands are available, it should ask the user to run `/init`. After initialization, it should continue the original request in the same conversation whenever possible.
-
-If `.github/copilot-instructions.md` already exists in the target repository, has no unresolved init placeholders, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps, the team treats `/init` as already done and should not rerun it on every conversation.
-
-That first-use step is what makes the workflow portable. Instead of pretending every repository has the same runtime, commands, boundaries, and risk profile, `best-copilot` learns the local project first and then runs the same delivery contract on top of real repo facts.
-
-Recommended first facts:
-
-- `.github/copilot-instructions.md`: project type, build/test/dev commands, entrypoints, test framework, and security/API/UI/schema owners.
-- `memories/repo/project-state.md`: current project state and durable constraints.
-- `memories/repo/current-workstreams.md`: current focus, next resume action, and last verified fact.
-- `spec/INDEX.md`: active spec routing.
-
-These files are stored in the target repository. The plugin package's bundled `memories/` and `spec/` directories are templates and plugin-repository state, not shared storage for every project that installs the plugin.
+After initialization, start substantial work with the **Senior Project Expert**. It will use the repository facts, create any missing local workflow scaffolds, plan the work, route specialists when needed, and keep verification explicit.
 
 ## Language Policy
 
@@ -75,22 +73,15 @@ Responses should use the detected primary language unless the user explicitly as
 
 ## Team Entry
 
-Large tasks should start with the **Senior Project Expert**. This role does not write production code directly. It owns coordination:
-
-On a serious request, the Senior Project Expert behaves like the delivery lead for the whole engagement, not like a thin router. It runs the actual workflow the repository is built around: lock direction through brainstorming when the request is ambiguous, turn that direction into a spec kit, push that spec through multi-party review, then drive implementation through spec-driven and test-driven execution before code goes through cross-review, QA, security, and frontend verification.
-
-For example:
-
-- If the user says "optimize this callback flow", the Senior Project Expert does not immediately dispatch implementation. It first uses brainstorming to lock whether the real goal is latency, correctness, retry safety, API cleanup, or release-risk reduction, then turns that direction into requirements, design, and tasks. That avoids spending two rounds optimizing the wrong thing.
-- If a change touches API contracts, background jobs, and UI at the same time, it does not let one long chat thread muddle everything together. It freezes scope, turns the work into a spec kit, gets Technical Architect, Developer, and QA to challenge the plan, then routes mainline work to the Technical Architect, isolated slices to the Developer, and UI to the Frontend Designer. New behavior or bug fixes then move through spec-driven, test-driven implementation before those owned changes cross-review each other and finally go through QA and security sign-off.
-
-The result is a workflow that is harder to derail: less blind guessing at the start, less duplicated repo rediscovery in the middle, and fewer late surprises in review because direction, spec, implementation discipline, review order, and verification are explicit from the beginning.
+Large tasks should start with the **Senior Project Expert**. This role is not a thin router and does not write production code directly. It behaves like the delivery lead for the engagement:
 
 - Understand the user's intent and success criteria.
-- Decide whether `/init`, spec, planning, design review, or parallel work is needed.
+- Decide whether `/init`, bootstrapping, spec, planning, design review, or parallel work is needed.
 - Freeze scope, non-goals, acceptance checks, and verification budget.
-- Route work to the right specialist and synthesize fan-out/fan-in results.
-- Close the task by updating spec, memory, verification evidence, and the next resume point.
+- Route work to the right specialist with frozen packets.
+- Require spec/design readiness before implementation when the risk is non-trivial.
+- Ensure implementation is reviewed by someone other than the author.
+- Close the task only with verification evidence, residual risk, and a next resume point.
 
 Small tasks can be handled directly by the default assistant or a specialist. If a task crosses modules, changes public contracts, touches permissions/dependencies/release surfaces, or asks for deep analysis, use the Senior Project Expert first.
 
@@ -124,6 +115,49 @@ The roles are not just renamed copies of one generic agent. Each agent declares 
 
 The routing policy is part of the product: orchestration and architecture use higher-depth planning models, implementation and specification use broad-context execution models, and QA/fix roles use concise review/debug models to keep findings actionable.
 
+## Workflow
+
+A big request moves through explicit gates. The exact path adapts to task size and risk, but the high-signal flow looks like this:
+
+```mermaid
+flowchart TD
+    A[User request] --> B{Target repo facts ready?}
+    B -- No --> C[Run /init or copilot init]
+    C --> D[repo-init-scan normalizes facts]
+    D --> E[Bootstrap target instructions, memory, spec]
+    B -- Yes --> F[Senior Project Expert freezes intent and scope]
+    E --> F
+    F --> G{Ambiguous or route-changing?}
+    G -- Yes --> H[brainstorming locks direction]
+    G -- No --> I[writing-plans or inline scope]
+    H --> I
+    I --> J{MEDIUM/LARGE or high risk?}
+    J -- Yes --> K[Spec Bundle and spec-review-gauntlet]
+    K --> L[Multi-lane design review]
+    L --> M{Findings adjudicated?}
+    M -- Spec blocker --> K
+    M -- Ready --> N[Execution-confirmed plan]
+    J -- No --> P[Implementation by owning specialist]
+    N --> O[subagent-driven-development or executing-plans]
+    O --> P[Implementation by owning specialist]
+    P --> Q[Stage 1 spec compliance review]
+    Q --> R[Stage 2 code quality and release risk review]
+    R --> S[structured-review / QA / security / frontend verification]
+    S --> T{Failure or review finding?}
+    T -- Yes --> U[Root Cause Fixer and targeted re-review]
+    U --> Q
+    T -- No --> V[Closeout with evidence and resume point]
+    V --> W[evolution-loop for repeated workflow signals]
+```
+
+The important properties are:
+
+- **Init before guessing**: repository facts come from the target repository, not chat memory.
+- **Bootstraps are local to the target repo**: instructions, `memories/repo/**`, and `spec/**` are created in the target repository, not in the plugin package.
+- **Review is unified**: `structured-review` handles code review, customization review, design review, feedback intake, review handoff, and targeted re-review.
+- **Implementation does not self-certify**: authors do not sign off on their own files.
+- **Verification is explicit**: every closeout states what was checked, what passed, and what remains risky.
+
 ## Large Task Flow
 
 A big request does not jump from prompt to patch. It moves through visible checkpoints designed to catch bad assumptions early, force independent review before release risk escapes, and separate implementation from peer review and verification.
@@ -132,14 +166,16 @@ A big request does not jump from prompt to patch. It moves through visible check
 2. **Discover**: The Senior Project Expert reads minimal context and freezes target, scope, risks, and acceptance checks.
 3. **Brainstorm**: If the request is ambiguous or route-changing, `brainstorming` locks the direction first so implementation does not start on the wrong semantic branch.
 4. **Spec Kit**: The Specification Writer turns the locked direction into the repository's spec kit: `requirements.md`, `design.md`, and `tasks.md`.
-5. **Design Review**: Technical Architect, Developer, and Quality Assurance review the spec kit before code starts. Security Reviewer and Frontend Designer join when their surface is affected, so risky assumptions are challenged before implementation hardens them.
-6. **SDD/TDD Implementation**: Technical Architect owns the mainline; Developer handles non-overlapping slices; Frontend Designer handles UI. Implementation follows the spec kit, and new behavior or bug fixes use test-driven development when practical instead of writing code first and justifying it later.
-7. **Cross Review**: Technical Architect reviews Developer-owned changes, Developer reviews Technical Architect-owned changes, and no implementer signs off on code they authored themselves.
-8. **Verify**: QA runs minimal sufficient verification; frontend work gets browser evidence; failures enter the fix loop instead of being waved through.
-9. **Secure**: Security reviews release-surface, dependency, auth, and sensitive-data risks when present.
-10. **Fix Loop**: Root Cause Fixer handles confirmed failures and sends them back to review or verification.
-11. **Close**: Senior Project Expert summarizes changes, evidence, risks, and the next resume point.
-12. **Evolve**: Repeated failures, stale triggers, review loops, or reusable lessons become auditable EvolutionEvents.
+5. **Design Review**: `spec-review-gauntlet` and `structured-review` challenge the spec kit before code starts. Technical Architect, Developer, and Quality Assurance review by default; Security Reviewer and Frontend Designer join when their surface is affected.
+6. **Execution Plan**: `writing-plans` produces task boundaries, dependencies, acceptance checks, verification budget, and a current plan revision.
+7. **SDD/TDD Implementation**: `subagent-driven-development` or `executing-plans` runs approved tasks through checkpointed implementation. Technical Architect owns the mainline; Developer handles non-overlapping slices; Frontend Designer handles UI. New behavior or bug fixes use test-driven development when practical.
+8. **Two-Stage Review**: each task passes Stage 1 spec-compliance review before Stage 2 code-quality/release-risk review.
+9. **Cross Review**: Technical Architect reviews Developer-owned changes, Developer reviews Technical Architect-owned changes, and no implementer signs off on code they authored themselves.
+10. **Verify**: QA runs minimal sufficient verification; frontend work gets browser evidence; failures enter the fix loop instead of being waved through.
+11. **Secure**: Security reviews release-surface, dependency, auth, and sensitive-data risks when present.
+12. **Fix Loop**: Root Cause Fixer handles confirmed failures and sends them back to review or verification.
+13. **Close**: Senior Project Expert summarizes changes, evidence, risks, and the next resume point.
+14. **Evolve**: Repeated failures, stale triggers, review loops, or reusable lessons become auditable EvolutionEvents.
 
 ## Self-Evolution
 
@@ -148,10 +184,10 @@ A big request does not jump from prompt to patch. It moves through visible check
 Evolution loop:
 
 1. **Read**: task results, failed commands, review findings, user corrections, memory, and spec drift.
-2. **Select**: the smallest improvement target: agent, skill, instruction, prompt, memory, README, or spec template.
+2. **Select**: the smallest improvement target: agent, skill, instruction, memory, README, or spec template.
 3. **Propose**: an Evolution Proposal with evidence, scope, validation, and rollback.
 4. **Validate**: frontmatter/schema checks, trigger evals, static checks, review, or command evidence.
-5. **Write**: only accepted learning goes back to `.github/**`, `memories/repo/**`, or `spec/**`.
+5. **Write**: only accepted learning goes back to the relevant `.github/**` customization or to target-local memory/spec files created by the bootstrap skills.
 
 Accepted improvements are recorded as `EvolutionEvent`: `signal -> target -> mutation -> validation -> rollback -> status`.
 
@@ -164,21 +200,12 @@ Accepted improvements are recorded as `EvolutionEvent`: `signal -> target -> mut
 ├── .github/
 │   ├── agents/
 │   ├── instructions/
-│   ├── prompts/
 │   └── skills/
 ├── .codex/
 │   ├── agents/
 │   ├── config.toml
 │   ├── instructions -> ../.github/instructions
-│   ├── prompts -> ../.github/prompts
 │   └── skills -> ../.github/skills
-├── memories/
-│   ├── global.md
-│   ├── user-profile.md
-│   └── repo/
-└── spec/
-    ├── INDEX.md
-    └── templates/
 ```
 
 ## Strengths
@@ -211,7 +238,7 @@ Accepted improvements are recorded as `EvolutionEvent`: `signal -> target -> mut
 - [claude-mem](https://github.com/thedotmack/claude-mem): lightweight memory and cross-session recovery ideas.
 - [fetch-skill](https://github.com/aresbit/fetch-skill/): source-aware fetching, output modes, and fallback fetch ladders.
 - [spec-kit](https://github.com/github/spec-kit): spec-kit structure, requirements/design/tasks framing, and specification-first delivery discipline.
-- [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator): skill frontmatter, progressive disclosure, eval prompts, and trigger optimization.
+- [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator): skill frontmatter, progressive disclosure, eval scenarios, and trigger optimization.
 - [Anthropic code-simplifier](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier): behavior-preserving simplification of recently changed code.
 - [Anthropic code-review](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review): multi-perspective review and confidence filtering.
 - [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills): Read -> Execute -> Reflect -> Write learning loops.
