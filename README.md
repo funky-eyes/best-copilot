@@ -40,6 +40,8 @@ copilot plugin marketplace add /absolute/path/to/best-copilot
 copilot plugin install best-copilot@best-copilot
 ```
 
+Copilot CLI reads installed plugins from its plugin cache. After changing agents, skills, or instructions in a local checkout, reinstall or update the plugin before testing a new CLI session; otherwise the session may still use the previously installed copy.
+
 Check the installation:
 
 ```text

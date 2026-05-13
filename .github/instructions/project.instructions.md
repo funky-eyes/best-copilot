@@ -54,6 +54,8 @@ This is a Markdown configuration template, not an application build. Verificatio
 | Check YAML frontmatter | `ruby -ryaml -e 'Dir[".github/{agents,skills}/**/*.{md,agent.md}"].each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'` |
 | Residual scan | `rg --hidden -n "legacy-template-name|project-specific-name|internal-host" .` |
 
+For local plugin development, reinstall or update the plugin after changing agents, skills, or instructions. Copilot CLI reads installed plugin components from its plugin cache, so an unreinstalled local checkout can make tests appear to ignore recent edits.
+
 ## Implementation Conventions
 
 - Repository-authoritative sources beat memory, chat history, and external references.

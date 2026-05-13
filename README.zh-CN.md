@@ -27,6 +27,8 @@ copilot plugin marketplace add /absolute/path/to/best-copilot
 copilot plugin install best-copilot@best-copilot
 ```
 
+Copilot CLI 会从已安装插件缓存中读取插件内容。本地 checkout 里的 agents、skills 或 instructions 改动后，测试新的 CLI 会话前请重新安装或更新插件；否则会话可能仍在使用上一次安装的副本。
+
 安装后检查：
 
 ```text
