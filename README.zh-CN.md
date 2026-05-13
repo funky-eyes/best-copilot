@@ -34,6 +34,8 @@ copilot plugin install best-copilot@best-copilot
 /skills list
 ```
 
+安装到目标仓库后，Copilot 会读取 `.github/agents`、`.github/skills`、`.github/instructions` 和 `.github/copilot-instructions.md`。Codex 会读取 `AGENTS.md`，并通过 `.codex/instructions`、`.codex/prompts`、`.codex/skills` 这些符号链接回到 `.github`。
+
 ## 第一次使用
 
 新仓库第一次执行有意义任务前，先让 Copilot 学习仓库：
@@ -60,6 +62,16 @@ copilot init
 
 大型任务先找 **Senior Project Expert**。它不直接写生产代码，负责：
 
+面对一个真正的大需求，Senior Project Expert 不是简单“分派一下 agent”，而是像项目总控一样把模糊请求压成一条可审计、可复盘、可验证的交付链。它跑的不是随手分工，而是这套仓库真正依赖的 workflow：先在有歧义时做 brainstorming 锁方向，再把方向落成 Spec Kit，然后拉多方会审，之后按 spec-driven、test-driven 的方式推进实现，代码出来后还要经过架构师/开发工程师互评，再进入 QA、安全和前端验证。
+
+它带来的价值不只是流程更完整，而是同时把质量和效率往上拉：质量更高，是因为高风险假设会在写代码前就被 challenge；效率更高，是因为团队不会在错误方向上连续白干两三轮。
+
+比如用户说“把这个回调链路优化一下”，它不会立刻把任务丢给实现 agent 开改，而是先用 brainstorming 锁清楚这句话到底是在说性能、正确性、重试安全、接口收敛，还是发布风险，然后把锁定后的方向落成 requirements、design、tasks。这个动作看起来多了一步，但实际是在避免后面两三轮都在错误目标上返工。
+
+再比如一个需求同时碰 API 契约、后台任务和前端交互，它也不会让所有内容混在一条长对话里一起失控，而是先冻结范围和非目标，落成 Spec Kit，先让 Technical Architect、Developer、QA 对方案做会审，涉及安全或前端体验时再把 Security Reviewer 或 Frontend Designer 拉进来。设计过关后，主线交给 Technical Architect，独立切片交给 Developer，页面和交互交给 Frontend Designer；新增行为或 bugfix 在可行时先写失败测试，再按 spec 推进实现；代码写完以后，再强制架构师与开发工程师互相审查各自负责的代码，最后才进 QA / 安全 / 前端验证。这样做的好处是：问题会更早暴露，责任边界更清楚，review 不会退化成“作者自己说没问题”。
+
+最终效果不是“agent 更多了”，而是整条链路更难跑偏：开始阶段少盲猜，中间阶段少重复搜仓库，实施阶段少脱离 spec 硬写代码，收尾阶段少在 QA 或发布前才爆出大坑。
+
 - 理解用户意图和成功标准。
 - 判断是否需要 `/init`、spec、计划、设计审查或并行拆分。
 - 冻结范围、非目标、验收标准和验证预算。
@@ -72,8 +84,8 @@ copilot init
 | --- | --- | --- |
 | Senior Project Expert | 意图、范围、编排、并行派发、fan-in、收口、演进信号 | 直接写生产代码 |
 | Specification Writer | 证据、requirements/design/tasks、ADR、进度记录、memory/spec 恢复 | 生产实现 |
-| Technical Architect | 后端/全栈设计与主线实现、API/数据/服务边界 | 前端细节、小切片 |
-| Developer | 已冻结实现切片、聚焦测试、最小验证 | 架构变更或扩范围 |
+| Technical Architect | 后端/全栈设计与主线实现、API/数据/服务边界、审查 Developer 负责代码的架构适配性 | 前端细节、小切片 |
+| Developer | 已冻结实现切片、实现可行性审查、审查 Technical Architect 负责代码的落地复杂度 | 架构变更或扩范围 |
 | Frontend Designer | 页面、组件、交互、响应式、浏览器行为、视觉验证 | 后端主线 |
 | Quality Assurance Expert | 功能验证、回归风险、代码审查、可合并性 | 安全专项和修复 |
 | Security Reviewer | 权限、敏感数据流、依赖风险、发布面安全 | 普通功能 QA |
@@ -86,9 +98,9 @@ copilot init
 | Agent | 模型 | 推理特性 |
 | --- | --- | --- |
 | Senior Project Expert | GPT-5.4 | 长程编排、范围控制、fan-out/fan-in 判断和收口决策 |
-| Technical Architect | GPT-5.4 | 深度后端/全栈推理、公开契约设计、数据/API 边界分析和主线实现策略 |
+| Technical Architect | GPT-5.4 | 深度后端/全栈推理、公开契约设计、数据/API 边界分析、主线实现策略，以及对 Developer 负责代码的审查 |
 | Specification Writer | Gemini 3.1 Pro (Preview) | 大上下文综合、结构化 requirements/design/tasks、ADR 和恢复记录 |
-| Developer | Gemini 3.1 Pro (Preview) | 冻结切片的聚焦实现、快速代码上下文对齐、测试和有界验证 |
+| Developer | Gemini 3.1 Pro (Preview) | 冻结切片的聚焦实现、对主线代码的实现可行性审查、快速代码上下文对齐、测试和有界验证 |
 | Frontend Designer | Gemini 3.1 Pro (Preview) | UI/状态/上下文综合、Ant Design 式企业级模式、主动设计系统推理、响应式行为、交互质量和浏览器证据规划 |
 | Quality Assurance Expert | Claude Sonnet 4.6 | 低噪声审查、回归推理、测试充分性判断和可合并性结论 |
 | Security Reviewer | Gemini 3.1 Pro (Preview) | 发布面分析、权限边界、敏感数据流、依赖和配置审查 |
@@ -98,16 +110,20 @@ copilot init
 
 ## 大型任务流程
 
+大需求不会从 prompt 直接跳到代码提交。它会经过一条有检查点的流程，目的是尽早打掉坏假设，把设计评审和独立审查前置，把实现、互评、验证拆开处理。
+
 1. **Init**：缺仓库事实时运行 `/init` 或 `copilot init`。
 2. **Discover**：冻结目标、范围、风险和验收标准。
-3. **Plan**：更新 spec，并用 `writing-plans` 拆成可执行切片。
-4. **Design Review**：按影响面进行架构、QA、安全、前端审查。
-5. **Implement**：主线交给 Technical Architect，独立切片交给 Developer，前端交给 Frontend Designer。
-6. **Verify**：QA 做最小充分验证；前端补浏览器证据。
-7. **Secure**：存在发布面、依赖、权限或敏感数据流时做安全审查。
-8. **Fix Loop**：确认失败后由 Root Cause Fixer 最小修复并复测。
-9. **Close**：总结改动、证据、风险和恢复入口。
-10. **Evolve**：重复失败、老化触发词、review 回环或可复用经验变成 EvolutionEvent。
+3. **Brainstorm**：如果需求存在歧义或路线会影响实现方向，先用 `brainstorming` 锁定方向，避免在错误语义分支上开工。
+4. **Spec Kit**：由 Specification Writer 把已锁定方向落成仓库里的 Spec Kit，也就是 `requirements.md`、`design.md`、`tasks.md`。
+5. **Design Review**：先由 Technical Architect、Developer、QA 共同审 Spec Kit；涉及安全或前端体验时，再加入 Security Reviewer 或 Frontend Designer，让高风险假设在实现前就被挑战。
+6. **SDD/TDD Implementation**：主线交给 Technical Architect，独立切片交给 Developer，前端交给 Frontend Designer。实现以 Spec Kit 为锚点推进；新增行为或 bugfix 在可行时先写失败测试，而不是先写代码再回头补理由。
+7. **Cross Review**：Technical Architect 审 Developer 负责的代码，Developer 审 Technical Architect 负责的代码，任何实现者都不能给自己写的代码放行。
+8. **Verify**：QA 做最小充分验证；前端补浏览器证据；没过就进入 fix loop，而不是口头说“应该没问题”。
+9. **Secure**：存在发布面、依赖、权限或敏感数据流时做安全审查。
+10. **Fix Loop**：确认失败后由 Root Cause Fixer 最小修复并复测。
+11. **Close**：总结改动、证据、风险和恢复入口。
+12. **Evolve**：重复失败、老化触发词、review 回环或可复用经验变成 EvolutionEvent。
 
 ## 自进化能力
 
@@ -123,6 +139,9 @@ copilot init
 
 ## 项目优点
 
+- 先评审再实现：大需求先经过设计审查，而不是代码写完了再补理由。
+- Spec Kit + TDD 驱动实现：方向先落成 requirements/design/tasks，新行为或 bugfix 在可行时先写测试，再推进实现。
+- 架构师与开发互评：主线 owner 和切片 owner 互相审查，避免实现者自己给自己放行。
 - Copilot-first，可通过 `copilot plugin marketplace add` 加入 marketplace 后，再用 `copilot plugin install best-copilot@best-copilot` 安装。
 - Codex-compatible，通过 `.codex` adapter 复用 `.github` 真源。
 - 先 `/init` 再执行，减少新仓库盲猜。
@@ -144,6 +163,7 @@ copilot init
 - [Open Design](https://github.com/nexu-io/open-design)
 - [claude-mem](https://github.com/thedotmack/claude-mem)
 - [fetch-skill](https://github.com/aresbit/fetch-skill/)
+- [spec-kit](https://github.com/github/spec-kit)
 - [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator)
 - [Anthropic code-simplifier](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier)
 - [Anthropic code-review](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review)

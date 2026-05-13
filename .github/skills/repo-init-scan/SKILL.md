@@ -19,17 +19,21 @@ Use this skill to make the agent team learn the target repository before doing r
 1. Prefer the official Copilot initializer:
    - In Copilot CLI interactive mode, ask the user to run `/init`.
    - From a shell, ask the user to run `copilot init`.
-2. If `/init` is unavailable in the current runtime, do a bounded manual scan:
+2. If `/init` is unavailable in the current runtime, or its output still leaves key facts unresolved, do a bounded manual scan:
    - Read `README*`, package/build files, CI files, app entrypoints, test directories, and existing `.github/copilot-instructions.md`.
    - Search only for build/test/dev entrypoints and major module boundaries.
    - If the repository has nested major modules, record candidates for hierarchical `AGENTS.md` or scoped instruction files, but do not create them unless requested.
-3. Update repository facts only with evidence from current files or commands:
+3. Normalize repository facts only with evidence from current files or commands:
    - `.github/copilot-instructions.md`: build/test/dev commands, framework, entrypoints, security/API/UI/schema owners.
    - `memories/repo/project-state.md`: compact current state and constraints.
    - `memories/repo/current-workstreams.md`: current focus and next resume action.
    - `memories/repo/INDEX.md`: routing rows for changed memory files.
 4. Keep instructions short. Do not paste long command output, logs, dependency trees, private hosts, tokens, or PII.
-5. Verify:
+5. Normalize for reuse:
+   - Keep the facts generic enough to survive future tasks in the same repository.
+   - Mark unresolved facts explicitly as `unknown` instead of guessing.
+   - Record only the smallest set of repo facts needed for later routing and verification.
+6. Verify:
    - No `<fill:` placeholders remain for facts that were discoverable.
    - Any unknown facts are explicitly marked `unknown`, not guessed.
    - At least one real build/test/check command is documented, or the reason is recorded.
