@@ -9,6 +9,9 @@
     "copilot",
     "agents",
     "skills",
+    "frontend",
+    "design-system",
+    "ui-ux",
     "codex",
     "workflow",
     "spec",
@@ -18,6 +21,8 @@
   "tags": [
     "custom-agents",
     "agent-skills",
+    "frontend-design",
+    "design-systems",
     "software-engineering",
     "code-review",
     "evolution",

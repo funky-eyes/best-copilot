@@ -16,8 +16,8 @@ tags: [project, state, constraints, best-copilot]
 ## Current State
 
 - Current focus: publish-ready generalization of the self-evolving agent team, plugin manifest, first-use init workflow, README, and default skill set.
-- Key acceptance signals: `plugin.json` exists; English README explains install/team/evolution flow and links localized README files; `.github` remains canonical and English-only; `.codex` remains a thin bridge; default skills are concise and generic.
-- Current risk: README install examples still need the final GitHub owner/repo before public publishing.
+- Key acceptance signals: `.github/plugin/marketplace.json` exists; root `plugin.json` exists; English README explains marketplace install/team/evolution flow and links localized README files; Frontend Designer documents model-specific design reasoning; `.github` remains canonical and English-only; `.codex` remains a thin bridge; default skills are concise and generic.
+- Current risk: marketplace install should be smoke-tested with a current Copilot CLI after publishing/pushing the latest repository state.
 
 ## Constraints
 
@@ -28,7 +28,7 @@ tags: [project, state, constraints, best-copilot]
 
 ## Open Questions
 
-- What final GitHub owner/repository should replace README install-command placeholders before publication?
+- Does current Copilot CLI accept the marketplace plugin source path `.` for a root-level plugin directory in `funky-eyes/best-copilot`?
 
 ## Useful Output Format
 

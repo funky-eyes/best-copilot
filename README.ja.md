@@ -8,22 +8,23 @@
 
 ## インストール
 
-GitHub リポジトリからインストール:
+このリポジトリを Copilot CLI プラグイン marketplace として登録します。
 
 ```bash
-copilot plugin install funky-eyes/best-copilot
+copilot plugin marketplace add funky-eyes/best-copilot
 ```
 
-リポジトリのサブディレクトリからインストール:
+登録済み marketplace からプラグインをインストールします。
 
 ```bash
-copilot plugin install funky-eyes/best-copilot:path/to/best-copilot
+copilot plugin install best-copilot@best-copilot
 ```
 
-利用中の Copilot CLI がローカルプラグインソースをサポートしている場合は、ローカルディレクトリからもインストールできます。サポートしていない場合は GitHub リポジトリまたは Git URL を使ってください。
+Copilot CLI では、リポジトリ、URL、ローカルパスからの直接インストールは非推奨です。通常のインストールには上記の marketplace フローを使ってください。ローカル開発時も、ローカル checkout を marketplace として登録します。
 
 ```bash
-copilot plugin install /absolute/path/to/best-copilot
+copilot plugin marketplace add /absolute/path/to/best-copilot
+copilot plugin install best-copilot@best-copilot
 ```
 
 インストール確認:
@@ -78,6 +79,23 @@ copilot init
 | Security Reviewer | 権限、機密データフロー、依存関係リスク、release-surface セキュリティ | 通常の機能 QA |
 | Root Cause Fixer | 失敗分析、最小パッチ、回帰検証 | 根拠のないリファクタリング |
 
+## モデル戦略
+
+これらの役割は、同じ汎用 agent に別名を付けただけではありません。各 agent は `.github/agents/*.agent.md` の frontmatter で明示的なモデルを宣言し、モデル選択は役割に必要な推論特性に合わせています。
+
+| Agent | モデル | 推論特性 |
+| --- | --- | --- |
+| Senior Project Expert | GPT-5.4 | 長期的な調整、範囲制御、fan-out/fan-in 判断、closeout 判断 |
+| Technical Architect | GPT-5.4 | 深いバックエンド/フルスタック推論、公開契約設計、データ/API 境界分析、主実装戦略 |
+| Specification Writer | Gemini 3.1 Pro (Preview) | 広いコンテキスト統合、構造化 requirements/design/tasks、ADR、recovery records |
+| Developer | Gemini 3.1 Pro (Preview) | 固定済み slice の集中実装、コード文脈への素早い整合、テスト、有界な検証 |
+| Frontend Designer | Gemini 3.1 Pro (Preview) | UI/状態/文脈の統合、Ant Design 型のエンタープライズパターン、能動的なデザインシステム推論、レスポンシブ挙動、インタラクション品質、ブラウザ証拠計画 |
+| Quality Assurance Expert | Claude Sonnet 4.6 | 低ノイズなレビュー、回帰推論、テスト十分性判断、merge-readiness 判断 |
+| Security Reviewer | Gemini 3.1 Pro (Preview) | release surface 分析、権限境界、機密データフロー、依存関係と設定レビュー |
+| Root Cause Fixer | Claude Sonnet 4.6 | 失敗の切り分け、仮説の絞り込み、最小パッチ選択、回帰証明 |
+
+ルーティング方針も製品の一部です。オーケストレーションとアーキテクチャには深い計画向けのモデルを使い、実装と仕様には広いコンテキスト実行向けのモデルを使い、QA/修正には簡潔なレビュー/デバッグ向けモデルを使うことで、結論を具体的で実行可能に保ちます。
+
 ## 大きなタスクの流れ
 
 1. **Init**: リポジトリ情報が不足している場合は `/init` または `copilot init` を実行します。
@@ -105,7 +123,7 @@ copilot init
 
 ## 強み
 
-- Copilot-first で、`copilot plugin install` によりインストールできます。
+- Copilot-first で、`copilot plugin marketplace add` で marketplace を追加し、`copilot plugin install best-copilot@best-copilot` でインストールできます。
 - Codex-compatible: `.codex` adapter が同じ `.github` 真実源を再利用します。
 - `/init` 後に実行するため、新しいリポジトリでの推測を減らします。
 - 大きな作業は Senior PM が段階的に調整します。
@@ -123,6 +141,7 @@ copilot init
 - [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [Open Design](https://github.com/nexu-io/open-design)
 - [claude-mem](https://github.com/thedotmack/claude-mem)
 - [fetch-skill](https://github.com/aresbit/fetch-skill/)
 - [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator)
