@@ -13,9 +13,14 @@ External repositories, skill libraries, and prompt systems are reference inputs 
 
 ## Init And Fact Capture
 
-1. If the repository is new, under-documented, or still full of `/init` placeholders, prefer the official initializer first.
-2. Normalize discovered facts into short reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, and major ownership surfaces.
-3. Mark unknowns as `unknown`; do not guess missing repository facts.
+1. If the repository is new, under-documented, or still full of `/init` placeholders, prefer the official initializer before substantive analysis.
+2. Judge init state from target repository files: `.github/copilot-instructions.md` must exist, be free of unresolved init placeholders, and record build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps.
+3. When shell execution is available, run `copilot init` directly. When only Copilot interactive slash commands are available, ask the user to run `/init`.
+4. Do not rerun init on every conversation once the target repository has sufficient facts.
+5. Initialization is not a closeout point: after init, continue the original task in the same conversation whenever possible.
+6. Normalize discovered facts into short reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, and major ownership surfaces.
+7. Store persistent memory/spec state in the target repository, not in the installed plugin package or plugin cache.
+8. Mark unknowns as `unknown`; do not guess missing repository facts.
 
 ## Default Flow
 

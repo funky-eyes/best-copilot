@@ -20,6 +20,7 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - `current-workstreams.md` stores current focus, next resume action, last verified evidence, and links to spec/memory.
 - `evolution-loop` turns repeated failures, user corrections, review loops, stale triggers, and verification gaps into auditable EvolutionEvents.
 - Memory retrieval follows progressive disclosure: index first, then timeline/context, then exact shard only when needed.
+- Installed plugin use stores each target repository's persistent memory/spec state in the target repository, not in the plugin package or cache.
 
 ## Decisions
 
@@ -27,12 +28,15 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - 2026-05-11: Prompt assembly order is stable prefix -> routing index -> current state -> relevant shards -> current user input.
 - 2026-05-11: Long logs, raw webpages, full old specs, and full old memory files are cache=false style inputs and are loaded only on demand.
 - 2026-05-13: Adopt bounded evolution: Read verified signals -> Select target -> Propose mutation -> Validate -> Write accepted learning.
+- 2026-05-13: Treat `/init` as complete only from target repository evidence in `.github/copilot-instructions.md`; do not rerun init on every conversation when command/runtime/entrypoint/module facts or explicit unknowns already exist.
+- 2026-05-13: Plugin-bundled `memories/` and `spec/` are templates and plugin-repository state; target project workstreams and specs must be local to the target repo.
 
 ## Constraints
 
 - Memory never overrides current repo files or user instructions.
 - Spec remains the authoritative source for requirements, design, and task acceptance.
 - Memory stores status, decisions, recovery hints, and verified learnings only.
+- If a target repository lacks `memories/repo` or `spec` and persistent recovery is needed, create the minimal skeleton locally before writing task state.
 - Evolution never performs autonomous free-form rewrites; every accepted event needs signal, target, mutation, validation, rollback, and status.
 - `<private>...</private>` content must be excluded from durable memory and public docs.
 

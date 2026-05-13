@@ -24,7 +24,7 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 
 1. Parse literal request, real intent, and success criteria.
 2. Before the first substantial action in a turn, the top-level assistant or any direct user-invocable agent must record a per-request start timestamp. If that timestamp was missed, any final message may only state that the task duration cannot be computed reliably; never backfill a whole-turn duration window as if it were exact.
-3. Read explicit user paths and any `/init` or `copilot init` artifacts first; if repository facts are still incomplete, read known owner files, indexes, and necessary shards before broad exploration.
+3. Read explicit user paths and any `/init` or `copilot init` artifacts first; if repository facts are still incomplete, read known owner files, indexes, and necessary shards before broad exploration. Treat `/init` as already done only when the target repository has `.github/copilot-instructions.md` with no unresolved init placeholders and with build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps.
 4. Before editing, freeze a minimal packet: `goal`, `scope`, `constraints`, `expected_outcome`, `non_goals`, `files_involved`, `changed_files`, `search_hints`, `reference_files`, `acceptance_checks`, and `verification_budget`. Add `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, and `source_provenance_refs` when they materially constrain the task.
 5. Search at most three rounds; stop after two rounds with no new signal.
 6. Before completion, provide real verification or clearly state why verification is blocked.
@@ -54,6 +54,8 @@ Use RAG-lite, not a vector database. Default layers:
 `memories/repo/current-workstreams.md` is the recovery entry and should include `topic`, `linked_spec`, `linked_memory`, `current_focus`, `next_resume_action`, `last_verified`, and `status`.
 Memory retrieval uses progressive disclosure: index/summary and traceable ID first, exact shards only when needed. Content inside `<private>...</private>` must not be written into durable memory by default.
 
+When running as an installed plugin in another repository, persistent memory and spec state must be created and updated in that target repository. The plugin package's bundled `memories/` and `spec/` files are templates or plugin-repository state, not cross-project storage.
+
 ## 4. Prompt Assembly
 
 Prompt assembly follows a stable-prefix, routed-context pattern:
@@ -72,6 +74,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 
 - Spec is authoritative for requirements, design, and acceptance: `requirements.md`, `design.md`, and `tasks.md`.
 - Memory is the recovery entry: current focus, next action, last verified fact, key decisions, and links.
+- If `memories/repo` or `spec` is missing in the target repository and persistent recovery is needed, create a minimal local skeleton before writing task state.
 - MEDIUM/LARGE active work must link both ways: spec points to memory and `current-workstreams.md` points to spec.
 - When task status changes, update both `tasks.md` and `current-workstreams.md`.
 - When work closes, compress final conclusions into topic memory and close or remove the active workstream.

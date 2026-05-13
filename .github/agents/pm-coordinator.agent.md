@@ -49,11 +49,15 @@ Before any planning or dispatch, identify the primary language of the user's req
 
 ## First-Use Gate
 
-In a new or under-documented repository, check whether `.github/copilot-instructions.md` still has placeholders or lacks build, test, entrypoint, framework, or module-boundary facts.
+Before real requirements analysis in a new or under-documented repository, check whether `.github/copilot-instructions.md` exists, still has placeholders, or lacks build, test, entrypoint, framework, or module-boundary facts.
 
-- If not initialized: ask for Copilot's official `/init` or `copilot init`, then use `repo-init-scan` for minimal fact capture.
-- If initialized: read only the repo facts, spec, and memory shards relevant to the current task.
+- Treat the repository as initialized only when `.github/copilot-instructions.md` exists in the target repository, has no unresolved init placeholders, records build/test/check/dev command facts or explicit `unknown`, and records runtime/framework, entrypoint, and module-boundary facts or explicit `unknown`.
+- If not initialized and shell execution is available: run Copilot's official `copilot init`, then use `repo-init-scan` for minimal fact capture.
+- If not initialized and only Copilot interactive slash commands are available: ask the user to run `/init`, then use `repo-init-scan` for minimal fact capture.
+- If initialized: do not rerun `/init` just because this is a new conversation; read only the repo facts, spec, and memory shards relevant to the current task.
 - When `/init` or manual scanning yields facts, normalize them into reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, major ownership surfaces, and explicit `unknown` gaps.
+- Persistent memory and spec state belongs in the target repository (`memories/repo/**` and `spec/**`), never in the installed plugin package or plugin cache.
+- Do not end the conversation after init. Continue into the user's original analysis or planning request in the same turn whenever tool/runtime constraints allow it.
 
 ## Stages
 

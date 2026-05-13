@@ -34,7 +34,7 @@ copilot plugin install best-copilot@best-copilot
 /skills list
 ```
 
-安装到目标仓库后，Copilot 会读取 `.github/agents`、`.github/skills`、`.github/instructions` 和 `.github/copilot-instructions.md`。Codex 会读取 `AGENTS.md`，并通过 `.codex/instructions`、`.codex/prompts`、`.codex/skills` 这些符号链接回到 `.github`。
+安装到目标仓库后，plugin 提供自己的 agents 和 skills；目标仓库自己的项目事实仍来自目标仓库本地文件。作为 Codex 模板使用时，Codex 会读取 `AGENTS.md`，并通过 `.codex/instructions`、`.codex/prompts`、`.codex/skills` 这些符号链接回到 `.github`。
 
 ## 第一次使用
 
@@ -51,6 +51,12 @@ copilot init
 ```
 
 `/init` 是 Copilot CLI 官方初始化流程，会扫描仓库并写入或更新 `.github/copilot-instructions.md`。`repo-init-scan` skill 会把它作为首次使用门禁：仓库事实仍是占位符时，先初始化，再进入真实任务。
+
+插件安装本身没有可靠的首次运行 hook，不能保证在任何 agent 被调用前自动执行初始化。因此这里按“第一次实质任务门禁”处理：如果当前 runtime 能执行 shell 命令，Senior Project Expert 应该先直接运行 `copilot init` 再做需求分析；如果只能使用 Copilot 交互式 slash command，则要求用户运行 `/init`。初始化完成后，应在同一轮对话里继续处理用户原始需求。
+
+如果目标仓库已经存在 `.github/copilot-instructions.md`，没有未解决的 init 占位符，并且记录了 build/test/check/dev 命令事实，以及 runtime/framework、entrypoint、module boundary 事实或显式 `unknown`，则视为已经执行过 `/init`，不应该因为换了一轮对话就重复执行。
+
+这些持久状态应存储在目标仓库本地：项目记忆写入 `memories/repo/**`，规格写入 `spec/**`。插件包里自带的 `memories/` 和 `spec/` 只是模板和插件仓库自身状态，不是所有安装项目共享的存储位置。
 
 ## 语言策略
 
