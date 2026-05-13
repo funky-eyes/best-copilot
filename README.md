@@ -11,13 +11,13 @@ The core idea is simple: substantial engineering work should start with the **Se
 Install from a GitHub repository:
 
 ```bash
-copilot plugin install <owner>/best-copilot
+copilot plugin install funky-eyes/best-copilot
 ```
 
 Install from a subdirectory:
 
 ```bash
-copilot plugin install <owner>/<repo>:path/to/best-copilot
+copilot plugin install funky-eyes/best-copilot:path/to/best-copilot
 ```
 
 Install from a local directory if your Copilot CLI version supports local plugin sources; otherwise use a GitHub repository or Git URL:
@@ -169,7 +169,3 @@ Accepted improvements are recorded as `EvolutionEvent`: `signal -> target -> mut
 - [Anthropic code-review](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review): multi-perspective review and confidence filtering.
 - [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills): Read -> Execute -> Reflect -> Write learning loops.
 - [Evolver](https://github.com/EvoMap/evolver): protocolized evolution, Genes/Capsules/Events, strategy presets, and auditable evolution records.
-
-## Before Publishing
-
-Replace `<owner>` and `<repo>` in README installation examples with the final GitHub repository. `plugin.json` does not depend on repository-specific URLs.

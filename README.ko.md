@@ -11,13 +11,13 @@
 GitHub 저장소에서 설치:
 
 ```bash
-copilot plugin install <owner>/best-copilot
+copilot plugin install funky-eyes/best-copilot
 ```
 
 저장소 하위 디렉터리에서 설치:
 
 ```bash
-copilot plugin install <owner>/<repo>:path/to/best-copilot
+copilot plugin install funky-eyes/best-copilot:path/to/best-copilot
 ```
 
 현재 Copilot CLI 버전이 로컬 플러그인 소스를 지원하면 로컬 디렉터리에서도 설치할 수 있습니다. 지원하지 않으면 GitHub 저장소나 Git URL을 사용하세요.

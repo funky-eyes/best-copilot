@@ -11,13 +11,13 @@
 GitHub リポジトリからインストール:
 
 ```bash
-copilot plugin install <owner>/best-copilot
+copilot plugin install funky-eyes/best-copilot
 ```
 
 リポジトリのサブディレクトリからインストール:
 
 ```bash
-copilot plugin install <owner>/<repo>:path/to/best-copilot
+copilot plugin install funky-eyes/best-copilot:path/to/best-copilot
 ```
 
 利用中の Copilot CLI がローカルプラグインソースをサポートしている場合は、ローカルディレクトリからもインストールできます。サポートしていない場合は GitHub リポジトリまたは Git URL を使ってください。

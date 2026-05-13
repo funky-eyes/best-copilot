@@ -11,13 +11,13 @@
 从 GitHub 仓库安装：
 
 ```bash
-copilot plugin install <owner>/best-copilot
+copilot plugin install funky-eyes/best-copilot
 ```
 
 从仓库子目录安装：
 
 ```bash
-copilot plugin install <owner>/<repo>:path/to/best-copilot
+copilot plugin install funky-eyes/best-copilot:path/to/best-copilot
 ```
 
 如果当前 Copilot CLI 支持本地插件源，也可以从本地目录安装；否则使用 GitHub 仓库或 Git URL：
