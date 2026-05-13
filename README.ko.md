@@ -27,6 +27,8 @@ copilot plugin marketplace add /absolute/path/to/best-copilot
 copilot plugin install best-copilot@best-copilot
 ```
 
+Copilot CLI는 설치된 플러그인 캐시에서 플러그인 내용을 읽습니다. 로컬 checkout의 agents, skills, instructions를 변경한 뒤에는 새 CLI 세션을 테스트하기 전에 플러그인을 다시 설치하거나 업데이트하세요. 그렇지 않으면 이전에 설치된 복사본을 계속 사용할 수 있습니다.
+
 설치 확인:
 
 ```text

@@ -27,6 +27,8 @@ copilot plugin marketplace add /absolute/path/to/best-copilot
 copilot plugin install best-copilot@best-copilot
 ```
 
+Copilot CLI はインストール済みプラグインのキャッシュからプラグイン内容を読み込みます。ローカル checkout の agents、skills、instructions を変更した後は、新しい CLI セッションでテストする前にプラグインを再インストールまたは更新してください。そうしないと、以前インストールしたコピーが使われ続けることがあります。
+
 インストール確認:
 
 ```text
