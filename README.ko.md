@@ -34,6 +34,8 @@ copilot plugin install best-copilot@best-copilot
 /skills list
 ```
 
+대상 저장소에 설치되면 Copilot은 `.github/agents`, `.github/skills`, `.github/instructions`, `.github/copilot-instructions.md`를 읽습니다. Codex는 `AGENTS.md`를 읽고 `.codex/instructions`, `.codex/prompts`, `.codex/skills` 심볼릭 링크를 따라 `.github`로 돌아갑니다.
+
 ## 첫 사용
 
 새 저장소에서 의미 있는 작업을 시작하기 전에 Copilot이 저장소를 학습하도록 합니다.
@@ -60,6 +62,14 @@ copilot init
 
 큰 작업은 **Senior Project Expert**로 시작합니다. 이 역할은 직접 프로덕션 코드를 작성하지 않고 조율을 담당합니다.
 
+진짜 큰 요구가 들어오면 Senior Project Expert는 단순히 agent를 나누는 역할이 아니라, 전체 전달을 총괄하는 리드처럼 움직입니다. 이 역할은 현재 저장소가 기대하는 실제 workflow를 실행합니다. 요청이 애매하면 brainstorming으로 방향을 먼저 잠그고, 그 방향을 Spec Kit으로 만들고, 여러 역할의 design review를 거친 뒤, spec-driven · test-driven 방식으로 구현을 밀고, 코드가 나온 다음에는 아키텍트/개발자 교차 리뷰와 QA · 보안 · 프론트엔드 검증까지 연결합니다.
+
+예를 들어 사용자가 "이 콜백 흐름을 좀 최적화해줘"라고 말하면 곧바로 구현 agent에게 던지지 않습니다. 먼저 brainstorming으로 이 요청이 지연 시간인지, 정확성인지, 재시도 안전성인지, API 정리인지, 배포 위험 완화인지부터 잠그고, 그 결과를 requirements · design · tasks로 내립니다. 이 한 단계가 나중에 두세 라운드를 잘못된 목표에 쓰는 낭비를 막아줍니다.
+
+또 다른 예로 하나의 변경이 API 계약, 백그라운드 작업, UI를 함께 건드리면, 모든 내용을 한 대화에 섞어 밀어 넣지 않습니다. 범위와 non-goals를 고정하고 Spec Kit으로 내린 뒤, 먼저 Technical Architect · Developer · QA가 계획을 흔들어 보고, 보안이나 프론트엔드 경험이 걸리면 Security Reviewer 또는 Frontend Designer를 추가합니다. 그 다음 메인라인은 Technical Architect가, 독립 slice는 Developer가, UI는 Frontend Designer가 맡고, 새 동작이나 bugfix는 가능하면 실패 테스트부터 작성한 뒤 구현으로 들어갑니다. 마지막으로 각자 소유한 코드를 서로 교차 검토한 뒤 QA / 보안 / 프론트엔드 검증으로 넘어갑니다.
+
+결과적으로 이 흐름은 더 많은 agent를 나열하는 것이 목적이 아니라, 시작 단계의 헛추측을 줄이고, 중간 단계의 재탐색과 재작업을 줄이며, 마지막 단계에서 QA나 배포 직전에 큰 문제가 터지는 일을 줄이기 위한 구조입니다.
+
 - 사용자의 의도와 성공 기준을 이해합니다.
 - `/init`, spec, 계획, design review, 병렬 작업이 필요한지 판단합니다.
 - 범위, non-goals, acceptance checks, verification budget을 고정합니다.
@@ -72,8 +82,8 @@ copilot init
 | --- | --- | --- |
 | Senior Project Expert | 의도, 범위, 오케스트레이션, 병렬 dispatch, fan-in, closeout, evolution signals | 직접 프로덕션 구현 |
 | Specification Writer | 증거, requirements/design/tasks, ADR, 진행 기록, memory/spec recovery | 프로덕션 구현 |
-| Technical Architect | 백엔드/풀스택 설계와 메인 구현, API/데이터/서비스 경계 | 프론트엔드 세부 polish, 작은 병렬 slice |
-| Developer | 고정된 구현 slice, 집중 테스트, 최소 검증 | 아키텍처 변경 또는 범위 확장 |
+| Technical Architect | 백엔드/풀스택 설계와 메인 구현, API/데이터/서비스 경계, Developer 소유 코드의 아키텍처 적합성 리뷰 | 프론트엔드 세부 polish, 작은 병렬 slice |
+| Developer | 고정된 구현 slice, 구현 가능성 리뷰, Technical Architect 소유 코드의 복잡도 리뷰 | 아키텍처 변경 또는 범위 확장 |
 | Frontend Designer | 페이지, 컴포넌트, 상호작용, 반응형, 브라우저 동작, 시각 검증 | 백엔드 메인라인 |
 | Quality Assurance Expert | 기능 검증, 회귀 위험, 코드 리뷰, merge readiness | 보안 리뷰와 수정 |
 | Security Reviewer | 권한, 민감 데이터 흐름, 의존성 위험, release-surface 보안 | 일반 기능 QA |
@@ -86,9 +96,9 @@ copilot init
 | Agent | 모델 | 추론 특성 |
 | --- | --- | --- |
 | Senior Project Expert | GPT-5.4 | 장기 오케스트레이션, 범위 제어, fan-out/fan-in 판단, closeout 판단 |
-| Technical Architect | GPT-5.4 | 깊은 백엔드/풀스택 추론, 공개 계약 설계, 데이터/API 경계 분석, 메인 구현 전략 |
+| Technical Architect | GPT-5.4 | 깊은 백엔드/풀스택 추론, 공개 계약 설계, 데이터/API 경계 분석, 메인 구현 전략, 그리고 Developer 소유 코드 리뷰 |
 | Specification Writer | Gemini 3.1 Pro (Preview) | 넓은 컨텍스트 종합, 구조화된 requirements/design/tasks, ADR, recovery records |
-| Developer | Gemini 3.1 Pro (Preview) | 고정된 slice의 집중 구현, 빠른 코드 컨텍스트 정렬, 테스트, 제한된 검증 |
+| Developer | Gemini 3.1 Pro (Preview) | 고정된 slice의 집중 구현, 메인라인 코드의 구현 가능성 리뷰, 빠른 코드 컨텍스트 정렬, 테스트, 제한된 검증 |
 | Frontend Designer | Gemini 3.1 Pro (Preview) | UI/상태/컨텍스트 종합, Ant Design식 엔터프라이즈 패턴, 능동적인 디자인 시스템 추론, 반응형 동작, 상호작용 품질, 브라우저 증거 계획 |
 | Quality Assurance Expert | Claude Sonnet 4.6 | 저소음 리뷰, 회귀 추론, 테스트 충분성 판단, merge-readiness 판단 |
 | Security Reviewer | Gemini 3.1 Pro (Preview) | release surface 분석, 권한 경계, 민감 데이터 흐름, 의존성과 설정 리뷰 |
@@ -98,16 +108,20 @@ copilot init
 
 ## 큰 작업 흐름
 
+큰 요청은 프롬프트에서 바로 패치로 뛰지 않습니다. 잘못된 가정을 초기에 드러내고, 설계 검토와 독립 리뷰를 구현 전에 끌어오고, 구현과 상호 검토와 검증을 분리하기 위한 체크포인트를 거칩니다.
+
 1. **Init**: 저장소 정보가 없으면 `/init` 또는 `copilot init`을 실행합니다.
 2. **Discover**: 목표, 범위, 위험, acceptance checks를 고정합니다.
-3. **Plan**: spec을 갱신하고 `writing-plans`로 실행 가능한 slice를 만듭니다.
-4. **Design Review**: 영향 면에 따라 아키텍처, QA, 보안, 프론트엔드 리뷰를 수행합니다.
-5. **Implement**: Technical Architect가 메인라인을 맡고, Developer가 독립 slice를 맡고, Frontend Designer가 UI를 맡습니다.
-6. **Verify**: QA가 최소 충분 검증을 수행하고, 프론트엔드는 브라우저 증거를 제공합니다.
-7. **Secure**: release surface, dependency, permission, sensitive data flow가 있으면 보안 리뷰를 수행합니다.
-8. **Fix Loop**: 확인된 실패는 Root Cause Fixer가 최소 수정하고 재검증합니다.
-9. **Close**: 변경, 증거, 위험, 재개 지점을 요약합니다.
-10. **Evolve**: 반복 실패, 오래된 trigger, review loop, 재사용 가능한 학습을 EvolutionEvent로 기록합니다.
+3. **Brainstorm**: 요청이 애매하거나 경로가 구현 방향을 바꾼다면 먼저 `brainstorming`으로 방향을 잠가 잘못된 의미 분기에서 구현이 시작되지 않게 합니다.
+4. **Spec Kit**: Specification Writer가 잠긴 방향을 저장소의 Spec Kit, 즉 `requirements.md`, `design.md`, `tasks.md`로 내립니다.
+5. **Design Review**: 먼저 Technical Architect, Developer, QA가 Spec Kit을 함께 리뷰합니다. 보안이나 프론트엔드 경험이 걸리면 Security Reviewer 또는 Frontend Designer를 추가해 위험한 가정을 구현 전에 깨뜨립니다.
+6. **SDD/TDD Implementation**: Technical Architect가 메인라인을 맡고, Developer가 독립 slice를 맡고, Frontend Designer가 UI를 맡습니다. 구현은 Spec Kit을 기준으로 진행하며, 새 동작이나 bugfix는 가능하면 실패 테스트부터 작성합니다.
+7. **Cross Review**: Technical Architect는 Developer 소유 코드를, Developer는 Technical Architect 소유 코드를 리뷰하고, 어떤 구현자도 자신이 작성한 코드를 스스로 통과시키지 않습니다.
+8. **Verify**: QA가 최소 충분 검증을 수행하고, 프론트엔드는 브라우저 증거를 제공합니다. 실패하면 그냥 넘어가지 않고 fix loop로 들어갑니다.
+9. **Secure**: release surface, dependency, permission, sensitive data flow가 있으면 보안 리뷰를 수행합니다.
+10. **Fix Loop**: 확인된 실패는 Root Cause Fixer가 최소 수정하고 재검증합니다.
+11. **Close**: 변경, 증거, 위험, 재개 지점을 요약합니다.
+12. **Evolve**: 반복 실패, 오래된 trigger, review loop, 재사용 가능한 학습을 EvolutionEvent로 기록합니다.
 
 ## 자기 진화
 
@@ -123,6 +137,12 @@ copilot init
 
 ## 강점
 
+- 더 높은 품질 기본값: 큰 작업은 구현 전에 설계와 리스크를 먼저 흔들고, 이후 교차 리뷰와 증거 기반 검증으로 다시 확인합니다.
+- Spec Kit + TDD 기반 구현: 방향을 requirements/design/tasks로 내리고, 새 동작이나 bugfix는 가능하면 테스트를 실행 게이트로 삼아 구현합니다.
+- 아키텍트/개발자 상호 리뷰: 메인라인 owner와 slice owner가 서로의 코드를 리뷰해 자기 확인 루프를 끊습니다.
+- 더 높은 처리량과 더 적은 재작업: `/init`, frozen packet, 명시적 ownership 덕분에 같은 저장소를 반복 재탐색하거나 잘못된 방향으로 두세 라운드를 낭비하는 일이 줄어듭니다.
+- 저장소 간 이식성: 이 workflow는 먼저 각 저장소의 명령, 엔트리포인트, 모듈 경계, unknown을 학습한 뒤 실행되므로 서로 다른 코드베이스에도 억지로 같은 가정을 덮어쓰지 않습니다.
+- 더 나은 실패 처리: 실패는 낙관적인 요약 뒤에 묻히지 않고, fix loop나 verification 단계로 명확한 ownership과 evidence를 가지고 되돌아갑니다.
 - Copilot-first이며 `copilot plugin marketplace add`로 marketplace를 추가한 뒤 `copilot plugin install best-copilot@best-copilot`로 설치할 수 있습니다.
 - Codex-compatible: `.codex` adapter가 같은 `.github` 진실 공급원을 재사용합니다.
 - `/init` 후 실행하여 새 저장소에서 추측을 줄입니다.
@@ -144,6 +164,7 @@ copilot init
 - [Open Design](https://github.com/nexu-io/open-design)
 - [claude-mem](https://github.com/thedotmack/claude-mem)
 - [fetch-skill](https://github.com/aresbit/fetch-skill/)
+- [spec-kit](https://github.com/github/spec-kit)
 - [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator)
 - [Anthropic code-simplifier](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier)
 - [Anthropic code-review](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review)

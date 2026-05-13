@@ -9,11 +9,19 @@ description: "Detailed team workflow contract for planning, handoff, verificatio
 
 System/developer/user instructions > current repo files > spec > command evidence > repo memory > external references.
 
+External repositories, skill libraries, and prompt systems are reference inputs only. Reuse their ideas by translating them into this repository's local primitives, not by copying their owner rules wholesale.
+
+## Init And Fact Capture
+
+1. If the repository is new, under-documented, or still full of `/init` placeholders, prefer the official initializer first.
+2. Normalize discovered facts into short reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, and major ownership surfaces.
+3. Mark unknowns as `unknown`; do not guess missing repository facts.
+
 ## Default Flow
 
 1. Init if repo facts are missing.
 2. Parse intent and success criteria.
-3. Freeze scope and non-goals.
+3. Freeze scope and non-goals, including explicit user paths, already-read context, authoritative repo facts, and forbidden approaches when they matter.
 4. Plan if task is MEDIUM/LARGE.
 5. Review design when blast radius is non-trivial.
 6. Implement through the right specialist.
@@ -21,10 +29,21 @@ System/developer/user instructions > current repo files > spec > command evidenc
 8. Close with memory/spec recovery notes when useful.
 9. Evolve only from verified signals: repeated failures, user corrections, review loops, stale triggers, missing verification, or recurring workflow friction.
 
+## External Capability Fusion
+
+When the user asks to learn from another repository, agent, skill, or prompt system:
+
+1. Extract only reusable patterns.
+2. Re-express them as local primitives such as routing, frozen dispatch packets, output recovery, document intent, verification gates, and resume hints.
+3. Reject repository-specific stack assumptions, model assignments, path layouts, and ownership boundaries that do not generalize.
+4. Validate the fused result against current local files instead of trusting the external source.
+
 ## Handoff Rules
 
 - PM sends minimal frozen packets.
+- Frozen packets should include `user_provided_paths`, `priority_files`, `reference_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, and `source_provenance_refs` when those fields exist.
 - Specialists do not ask the user directly when delegated.
+- Specialists consume frozen paths and facts before reopening search.
 - Missing context returns `NEEDS_CONTEXT`.
 - Write sets must not overlap for parallel implementation.
 

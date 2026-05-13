@@ -14,6 +14,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 
 - Before first use in a new repository, prefer Copilot's official `/init` or `copilot init`.
 - Initialization output should write or update the target repository's `.github/copilot-instructions.md`.
+- Normalize `/init` output into reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, major ownership surfaces, and explicit `unknown` gaps instead of guesses.
 - If placeholders remain, use `repo-init-scan` for bounded repository scanning before large tasks.
 
 ## Build and Verification
@@ -31,6 +32,8 @@ This is a Markdown configuration template, not an application build. Verificatio
 ## Implementation Conventions
 
 - Repository-authoritative sources beat memory, chat history, and external references.
+- External repositories, prompts, skills, and plugins are reference inputs only; absorb them as local routing, context, verification, and recovery primitives instead of copying them wholesale.
+- Per-turn start timestamps and native closeout confirmation are hard requirements owned by `.github/instructions/must.instructions.md`; do not end a turn on prose alone.
 - Substantial tasks start with `Senior Project Expert`, then route to specialists.
 - New features and bug fixes should add tests or minimal reproducible checks when practical.
 - Public APIs, message formats, database schema, auth boundaries, dependencies, and CI/CD require blast-radius assessment first.

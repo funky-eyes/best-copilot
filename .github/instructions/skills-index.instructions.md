@@ -10,10 +10,10 @@ This file is only for discovery and routing. Match the current task to the index
 
 ## Initialization and Orchestration
 
-- `repo-init-scan`: first use in a target repository, placeholder project facts, or `/init` / `copilot init` repository learning.
-- `core-workflow-contract`: full team flow, state contract, handoff, memory/spec relationship, or closeout rules.
+- `repo-init-scan`: first use in a target repository, placeholder project facts, or `/init` / `copilot init` output that still needs to be normalized into reusable repo facts.
+- `core-workflow-contract`: full team flow, init recovery, frozen packet rules, external capability fusion, handoff, memory/spec relationship, or closeout rules.
 - `evolution-loop`: closeout, repeated failure, review loop, stale trigger, or user-requested agent/skill improvement; produces auditable and reversible evolution proposals.
-- `brainstorming`: top-level planning gate where direction or multi-route ambiguity must be resolved before spec or code.
+- `brainstorming`: top-level or PM planning gate where route-changing ambiguity must be locked through explicit direction confirmation before spec or code.
 - `writing-plans`: MEDIUM/LARGE tasks that need executable slices with files and verification.
 - `dispatching-parallel-agents`: independent frozen subtasks with non-overlapping write sets.
 
