@@ -6,7 +6,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 
 - Project name: `best-copilot`
 - Purpose: installable Copilot CLI agent-team plugin plus reusable Copilot/Codex repository customization template.
-- Primary install surface: root `plugin.json`, installed with `copilot plugin install`.
+- Primary install surface: `.github/plugin/marketplace.json`, registered with `copilot plugin marketplace add`, then installed with `copilot plugin install best-copilot@best-copilot`.
 - Canonical customization source: `.github/**`.
 - Codex bridge: `AGENTS.md`, `.codex/agents/*.toml`, and `.codex/{instructions,prompts,skills}` symlinks.
 
@@ -34,6 +34,7 @@ This is a Markdown configuration template, not an application build. Verificatio
 - Substantial tasks start with `Senior Project Expert`, then route to specialists.
 - New features and bug fixes should add tests or minimal reproducible checks when practical.
 - Public APIs, message formats, database schema, auth boundaries, dependencies, and CI/CD require blast-radius assessment first.
+- Frontend work should route through `Frontend Designer` and `frontend-design-guardrails`; prefer existing design systems and Ant Design-style enterprise patterns when present, freeze a small design-system packet before non-trivial UI work, and verify with browser evidence through `web-experience-audit`.
 - Do not write secrets, tokens, credentials, PII, raw long logs, or internal hosts into instructions, memory, spec, or README.
 - "Done", "passed", and "verified" require fresh command output, static checks, browser evidence, or replayable evidence.
 - Detect the user's primary language before responding. Pasted logs, code, stack traces, or API responses do not override the language used for the actual request.

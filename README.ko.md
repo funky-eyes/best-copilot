@@ -8,22 +8,23 @@
 
 ## 설치
 
-GitHub 저장소에서 설치:
+이 저장소를 Copilot CLI 플러그인 marketplace로 등록합니다.
 
 ```bash
-copilot plugin install <owner>/best-copilot
+copilot plugin marketplace add funky-eyes/best-copilot
 ```
 
-저장소 하위 디렉터리에서 설치:
+등록된 marketplace에서 플러그인을 설치합니다.
 
 ```bash
-copilot plugin install <owner>/<repo>:path/to/best-copilot
+copilot plugin install best-copilot@best-copilot
 ```
 
-현재 Copilot CLI 버전이 로컬 플러그인 소스를 지원하면 로컬 디렉터리에서도 설치할 수 있습니다. 지원하지 않으면 GitHub 저장소나 Git URL을 사용하세요.
+Copilot CLI에서는 저장소, URL, 로컬 경로에서 직접 플러그인을 설치하는 방식이 deprecated 상태입니다. 일반 설치에는 위 marketplace 흐름을 사용하세요. 로컬 개발 시에도 로컬 checkout을 marketplace로 등록합니다.
 
 ```bash
-copilot plugin install /absolute/path/to/best-copilot
+copilot plugin marketplace add /absolute/path/to/best-copilot
+copilot plugin install best-copilot@best-copilot
 ```
 
 설치 확인:
@@ -78,6 +79,23 @@ copilot init
 | Security Reviewer | 권한, 민감 데이터 흐름, 의존성 위험, release-surface 보안 | 일반 기능 QA |
 | Root Cause Fixer | 실패 분석, 최소 패치, 회귀 검증 | 근거 없는 리팩터링 |
 
+## 모델 전략
+
+이 역할들은 같은 범용 agent에 이름만 바꾼 것이 아닙니다. 각 agent는 `.github/agents/*.agent.md` frontmatter에서 명시적인 모델을 선언하며, 모델 선택은 역할에 필요한 추론 특성에 맞춰져 있습니다.
+
+| Agent | 모델 | 추론 특성 |
+| --- | --- | --- |
+| Senior Project Expert | GPT-5.4 | 장기 오케스트레이션, 범위 제어, fan-out/fan-in 판단, closeout 판단 |
+| Technical Architect | GPT-5.4 | 깊은 백엔드/풀스택 추론, 공개 계약 설계, 데이터/API 경계 분석, 메인 구현 전략 |
+| Specification Writer | Gemini 3.1 Pro (Preview) | 넓은 컨텍스트 종합, 구조화된 requirements/design/tasks, ADR, recovery records |
+| Developer | Gemini 3.1 Pro (Preview) | 고정된 slice의 집중 구현, 빠른 코드 컨텍스트 정렬, 테스트, 제한된 검증 |
+| Frontend Designer | Gemini 3.1 Pro (Preview) | UI/상태/컨텍스트 종합, Ant Design식 엔터프라이즈 패턴, 능동적인 디자인 시스템 추론, 반응형 동작, 상호작용 품질, 브라우저 증거 계획 |
+| Quality Assurance Expert | Claude Sonnet 4.6 | 저소음 리뷰, 회귀 추론, 테스트 충분성 판단, merge-readiness 판단 |
+| Security Reviewer | Gemini 3.1 Pro (Preview) | release surface 분석, 권한 경계, 민감 데이터 흐름, 의존성과 설정 리뷰 |
+| Root Cause Fixer | Claude Sonnet 4.6 | 실패 분류, 가설 제거, 최소 패치 선택, 회귀 증명 |
+
+라우팅 정책 자체가 제품의 일부입니다. 오케스트레이션과 아키텍처에는 깊은 계획에 맞는 모델을 사용하고, 구현과 명세에는 넓은 컨텍스트 실행 모델을 사용하며, QA/수정 역할에는 간결한 리뷰/디버깅 모델을 사용해 결론을 구체적이고 실행 가능하게 유지합니다.
+
 ## 큰 작업 흐름
 
 1. **Init**: 저장소 정보가 없으면 `/init` 또는 `copilot init`을 실행합니다.
@@ -105,7 +123,7 @@ copilot init
 
 ## 강점
 
-- Copilot-first이며 `copilot plugin install`로 설치할 수 있습니다.
+- Copilot-first이며 `copilot plugin marketplace add`로 marketplace를 추가한 뒤 `copilot plugin install best-copilot@best-copilot`로 설치할 수 있습니다.
 - Codex-compatible: `.codex` adapter가 같은 `.github` 진실 공급원을 재사용합니다.
 - `/init` 후 실행하여 새 저장소에서 추측을 줄입니다.
 - 큰 작업은 Senior PM이 단계적으로 조율합니다.
@@ -123,6 +141,7 @@ copilot init
 - [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [Open Design](https://github.com/nexu-io/open-design)
 - [claude-mem](https://github.com/thedotmack/claude-mem)
 - [fetch-skill](https://github.com/aresbit/fetch-skill/)
 - [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator)

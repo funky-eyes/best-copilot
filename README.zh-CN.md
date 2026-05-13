@@ -8,22 +8,23 @@
 
 ## 安装
 
-从 GitHub 仓库安装：
+先把这个仓库注册为 Copilot CLI 插件 marketplace：
 
 ```bash
-copilot plugin install <owner>/best-copilot
+copilot plugin marketplace add funky-eyes/best-copilot
 ```
 
-从仓库子目录安装：
+再从已注册的 marketplace 安装插件：
 
 ```bash
-copilot plugin install <owner>/<repo>:path/to/best-copilot
+copilot plugin install best-copilot@best-copilot
 ```
 
-如果当前 Copilot CLI 支持本地插件源，也可以从本地目录安装；否则使用 GitHub 仓库或 Git URL：
+Copilot CLI 已经弃用从仓库、URL 或本地路径直接安装插件的方式。正常安装请使用上面的 marketplace 流程。本地开发时，也应该把本地 checkout 注册成 marketplace：
 
 ```bash
-copilot plugin install /absolute/path/to/best-copilot
+copilot plugin marketplace add /absolute/path/to/best-copilot
+copilot plugin install best-copilot@best-copilot
 ```
 
 安装后检查：
@@ -78,6 +79,23 @@ copilot init
 | Security Reviewer | 权限、敏感数据流、依赖风险、发布面安全 | 普通功能 QA |
 | Root Cause Fixer | 失败分析、最小补丁、回归验证 | 无证据重构 |
 
+## 模型策略
+
+这些角色不是给同一个通用 agent 换名字。每个 agent 都在 `.github/agents/*.agent.md` frontmatter 中声明了明确模型，模型选择和角色需要的推理方式对应：
+
+| Agent | 模型 | 推理特性 |
+| --- | --- | --- |
+| Senior Project Expert | GPT-5.4 | 长程编排、范围控制、fan-out/fan-in 判断和收口决策 |
+| Technical Architect | GPT-5.4 | 深度后端/全栈推理、公开契约设计、数据/API 边界分析和主线实现策略 |
+| Specification Writer | Gemini 3.1 Pro (Preview) | 大上下文综合、结构化 requirements/design/tasks、ADR 和恢复记录 |
+| Developer | Gemini 3.1 Pro (Preview) | 冻结切片的聚焦实现、快速代码上下文对齐、测试和有界验证 |
+| Frontend Designer | Gemini 3.1 Pro (Preview) | UI/状态/上下文综合、Ant Design 式企业级模式、主动设计系统推理、响应式行为、交互质量和浏览器证据规划 |
+| Quality Assurance Expert | Claude Sonnet 4.6 | 低噪声审查、回归推理、测试充分性判断和可合并性结论 |
+| Security Reviewer | Gemini 3.1 Pro (Preview) | 发布面分析、权限边界、敏感数据流、依赖和配置审查 |
+| Root Cause Fixer | Claude Sonnet 4.6 | 失败分诊、假设排除、最小补丁选择和回归证明 |
+
+路由策略本身就是产品的一部分：编排和架构使用更适合深度规划的模型，实现和规格使用大上下文执行模型，QA/修复角色使用更偏审查和调试的模型，让结论保持具体、低噪声、可执行。
+
 ## 大型任务流程
 
 1. **Init**：缺仓库事实时运行 `/init` 或 `copilot init`。
@@ -105,7 +123,7 @@ copilot init
 
 ## 项目优点
 
-- Copilot-first，可通过 `copilot plugin install` 安装。
+- Copilot-first，可通过 `copilot plugin marketplace add` 加入 marketplace 后，再用 `copilot plugin install best-copilot@best-copilot` 安装。
 - Codex-compatible，通过 `.codex` adapter 复用 `.github` 真源。
 - 先 `/init` 再执行，减少新仓库盲猜。
 - 大型任务由 Senior PM 编排，分阶段审查、实现、验证和收口。
@@ -123,6 +141,7 @@ copilot init
 - [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [Open Design](https://github.com/nexu-io/open-design)
 - [claude-mem](https://github.com/thedotmack/claude-mem)
 - [fetch-skill](https://github.com/aresbit/fetch-skill/)
 - [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator)
