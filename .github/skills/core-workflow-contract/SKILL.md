@@ -34,6 +34,13 @@ External repositories, skill libraries, and prompt systems are reference inputs 
 8. Close with memory/spec recovery notes when useful.
 9. Evolve only from verified signals: repeated failures, user corrections, review loops, stale triggers, missing verification, or recurring workflow friction.
 
+## Native Ask Flow
+
+- Blocking clarification, route selection, execution approval, continuation, and closeout must use native structured UI when available: `ask_user` for Copilot CLI, or `vscode/askQuestions` / `askQuestions` / equivalent structured UI for VS Code.
+- Prose-only questions never satisfy confirmation, continuation, or closeout gates and must not be used as the final turn.
+- If the user has already authorized development, perform safe non-destructive setup directly. Ask only when a real human choice remains, and ask natively.
+- If native UI is unavailable and there is no single safe interpretation, return a blocked/partial state with `missing_native_ask_ui` instead of pretending the turn is complete.
+
 ## External Capability Fusion
 
 When the user asks to learn from another repository, agent, skill, or prompt system:

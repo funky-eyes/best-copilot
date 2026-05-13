@@ -28,3 +28,4 @@ This file is the thin Codex adapter. `.github/**` is the single source of truth 
 | edit | Top-level Codex uses `apply_patch` | `.github/**`, `AGENTS.md`, and `memories/repo/**` are handled inline by the top-level session. |
 | execute | `exec_command` | Real command evidence must include command and result. |
 | todo | `update_plan` | Session plan only; does not replace formal spec/task state. |
+| `vscode/askQuestions` / `askQuestions` / `ask_user` | Use the available native ask mechanism when present | Plain prose questions cannot replace native confirmation gates. If native ask is unavailable, continue only with a single safe interpretation or report a blocked/partial state. |
