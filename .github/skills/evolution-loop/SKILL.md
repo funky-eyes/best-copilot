@@ -15,7 +15,7 @@ Evolution is not free-form rewriting. It is a bounded loop:
 2. **Select** the smallest reusable improvement target: agent, skill, instruction, prompt, memory rule, README guidance, or spec template.
 3. **Propose** a protocol-bound mutation with evidence, scope, rollback, and validation.
 4. **Validate** with static checks, eval prompts, review, or command evidence.
-5. **Write** only accepted learnings back to the canonical `.github/**`, `memories/repo/**`, or `spec/**` owner.
+5. **Write** only accepted learnings back to the canonical `.github/**`, `memories/repo/**`, or `spec/**` owner in the target repository.
 
 ## EvolutionEvent
 
@@ -44,6 +44,7 @@ Record each accepted evolution as a compact event:
 - Do not evolve from a single weak signal unless the failure is severe and reproducible.
 - Do not write secrets, PII, raw logs, or private URLs into memory.
 - Do not change tool permissions, safety boundaries, public contracts, or install surfaces without explicit review.
+- Do not store target repository evolution or task state in the installed plugin package or plugin cache.
 - Prefer deprecating or tightening old rules over adding parallel rules.
 
 ## Output

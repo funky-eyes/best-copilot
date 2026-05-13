@@ -34,7 +34,7 @@ copilot plugin install best-copilot@best-copilot
 /skills list
 ```
 
-対象リポジトリにインストールされると、Copilot は `.github/agents`、`.github/skills`、`.github/instructions`、`.github/copilot-instructions.md` を読みます。Codex は `AGENTS.md` を読み、`.codex/instructions`、`.codex/prompts`、`.codex/skills` のシンボリックリンクをたどって `.github` に戻ります。
+対象リポジトリにインストールされると、plugin は自身の agents と skills を提供します。リポジトリ固有の事実は、引き続き対象リポジトリのローカルファイルから取得します。Codex テンプレートとして使う場合、Codex は `AGENTS.md` を読み、`.codex/instructions`、`.codex/prompts`、`.codex/skills` のシンボリックリンクをたどって `.github` に戻ります。
 
 ## 初回利用
 
@@ -51,6 +51,12 @@ copilot init
 ```
 
 `/init` は Copilot CLI の公式初期化フローです。リポジトリをスキャンし、`.github/copilot-instructions.md` を作成または更新します。`repo-init-scan` skill はこれを初回利用ゲートとして扱います。リポジトリ情報がまだ placeholder の場合は、先に初期化してから実タスクに入ります。
+
+プラグインのインストール自体には、保証された初回実行 hook はありません。そのため、このチームでは初回の実質タスクのゲートとして扱います。現在の runtime で shell コマンドを実行できる場合、Senior Project Expert は requirements analysis の前に `copilot init` を直接実行するべきです。Copilot の対話型 slash command しか使えない場合は、ユーザーに `/init` の実行を依頼します。初期化後は、可能な限り同じ会話で元の依頼を続けます。
+
+対象リポジトリに `.github/copilot-instructions.md` がすでに存在し、未解決の init placeholder がなく、build/test/check/dev コマンド情報と runtime/framework、entrypoint、module boundary 情報、または明示的な `unknown` gap が記録されている場合、`/init` は完了済みと扱います。新しい会話になっただけでは再実行しません。
+
+この永続状態は対象リポジトリに保存します。プロジェクト memory は `memories/repo/**`、spec は `spec/**` に置きます。plugin package に含まれる `memories/` と `spec/` はテンプレートおよび plugin リポジトリ自身の状態であり、plugin をインストールした全プロジェクトの共有ストレージではありません。
 
 ## 言語ポリシー
 

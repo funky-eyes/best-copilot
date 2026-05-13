@@ -34,7 +34,7 @@ Check the installation:
 /skills list
 ```
 
-When installed inside a target repository, Copilot reads `.github/agents`, `.github/skills`, `.github/instructions`, and `.github/copilot-instructions.md`. Codex reads `AGENTS.md` and follows `.codex/instructions`, `.codex/prompts`, and `.codex/skills` symlinks back to `.github`.
+When installed inside a target repository, the plugin contributes its agents and skills, while repository-specific facts still come from that target repository. Codex template use reads `AGENTS.md` and follows `.codex/instructions`, `.codex/prompts`, and `.codex/skills` symlinks back to `.github`.
 
 ## First Use
 
@@ -52,6 +52,10 @@ copilot init
 
 `/init` is Copilot CLI's official initialization flow. It scans the repository and writes or updates `.github/copilot-instructions.md`. The `repo-init-scan` skill treats this as a first-use gate: if repository facts are still placeholders, initialize first and only then start real work.
 
+Plugin installation itself does not provide a guaranteed first-run hook. The team enforces this at the first substantial task instead: if the active runtime can execute shell commands, the Senior Project Expert should run `copilot init` before requirements analysis; if only Copilot interactive slash commands are available, it should ask the user to run `/init`. After initialization, it should continue the original request in the same conversation whenever possible.
+
+If `.github/copilot-instructions.md` already exists in the target repository, has no unresolved init placeholders, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps, the team treats `/init` as already done and should not rerun it on every conversation.
+
 That first-use step is what makes the workflow portable. Instead of pretending every repository has the same runtime, commands, boundaries, and risk profile, `best-copilot` learns the local project first and then runs the same delivery contract on top of real repo facts.
 
 Recommended first facts:
@@ -60,6 +64,8 @@ Recommended first facts:
 - `memories/repo/project-state.md`: current project state and durable constraints.
 - `memories/repo/current-workstreams.md`: current focus, next resume action, and last verified fact.
 - `spec/INDEX.md`: active spec routing.
+
+These files are stored in the target repository. The plugin package's bundled `memories/` and `spec/` directories are templates and plugin-repository state, not shared storage for every project that installs the plugin.
 
 ## Language Policy
 

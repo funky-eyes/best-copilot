@@ -13,9 +13,21 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 ## First Repository Initialization
 
 - Before first use in a new repository, prefer Copilot's official `/init` or `copilot init`.
+- The plugin has no install-time or first-message hook that can force initialization before an agent is invoked. Treat initialization as the first-substantial-task gate instead.
+- Judge init state from target repository files, not from chat history. If `.github/copilot-instructions.md` exists, has no unresolved init placeholders, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or explicit `unknown` gaps, do not rerun init just because a new conversation started.
+- If the active runtime can execute shell commands, run `copilot init` directly before requirements analysis. If only Copilot interactive slash commands are available, ask the user to run `/init`.
 - Initialization output should write or update the target repository's `.github/copilot-instructions.md`.
 - Normalize `/init` output into reusable repo facts: runtime/framework, build/test/dev commands, entrypoints, module boundaries, major ownership surfaces, and explicit `unknown` gaps instead of guesses.
+- After initialization, continue the original user request in the same conversation whenever possible.
 - If placeholders remain, use `repo-init-scan` for bounded repository scanning before large tasks.
+
+## Target Repository State
+
+- Plugin installation contributes agents and skills; it does not provide shared per-project memory storage.
+- Store target project memory under that repository's `memories/repo/**`.
+- Store target project specs under that repository's `spec/**`.
+- The bundled `memories/` and `spec/` directories in this plugin are templates and plugin-repository state. Do not write another project's facts, workstreams, or specs into the plugin package or plugin cache.
+- If a target repository lacks these directories and persistent recovery is needed, create the minimal skeleton locally in the target repository.
 
 ## Build and Verification
 
