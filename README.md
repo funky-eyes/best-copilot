@@ -57,13 +57,13 @@ After local edits, reinstall or update the plugin before testing a fresh CLI ses
 
 Start requirement orchestration with the coordinator agent in [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md). This agent appears as **Senior Project Expert** and owns intent, scope, planning, dispatch, review fan-in, and closeout.
 
-- **Copilot CLI**: run `/agents`, select **Senior Project Expert**, then describe the work.
+- **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
 
 ## Quick Check
 
 ```text
-/agents
+/agent
 /skills list
 ```
 

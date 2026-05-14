@@ -57,13 +57,13 @@ copilot plugin install funky-eyes/best-copilot
 
 要求のオーケストレーションは [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md) のコーディネーターエージェントから始めます。このエージェントは UI では **Senior Project Expert** と表示され、意図、範囲、計画、ディスパッチ、レビュー fan-in、クローズを担当します。
 
-- **Copilot CLI**：`/agents` を実行し、**Senior Project Expert** を選択してから作業内容を伝えます。
+- **Copilot CLI**：`/agent` を実行し、**Senior Project Expert** を選択してから作業内容を伝えます。
 - **VS Code 拡張機能**：チャットのエージェントを手動で **Senior Project Expert** に切り替えてからタスクを開始します。
 
 ## クイックチェック
 
 ```text
-/agents
+/agent
 /skills list
 ```
 
