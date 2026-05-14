@@ -1,173 +1,199 @@
 # best-copilot
 
-[English](README.md) | 简体中文 | [한국어](README.ko.md) | [日本語](README.ja.md)
+[English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-`best-copilot` 是一套可安装、可复用、可持续进化的 AI agent 团队模板。它优先面向 GitHub Copilot CLI 插件，同时保留 `.github/**` 作为 Copilot 定制的单一真源，并通过 `AGENTS.md` 与 `.codex/**` 让 Codex 复用同一套团队契约。
+[![version](https://img.shields.io/badge/version-0.2.0-1d9bf0)](plugin.json)
+[![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
+[![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
+[![skills](https://img.shields.io/badge/skills-23-10b981)](skills/)
+[![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
-核心思路：大型工程任务先由 **Senior Project Expert** 统一理解、拆解和收口，再按需要进入架构、规格、实现、前端、QA、安全、修复和演进阶段。
+![best-copilot hero](assets/best-copilot-hero.png)
+
+`best-copilot` 是一套可安装的 Copilot CLI agent 团队，面向严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
+
+它以 Copilot CLI 为优先。根目录下的 `agents/` 与 `skills/` 通过 `plugin.json` 暴露能力；仓库级规则保存在 `.github/instructions/**`。
+
+## 为什么存在
+
+大型的 AI 编码任务在从模糊的需求直接跳到补丁时常常失败。`best-copilot` 补上缺失的交付纪律：
+
+- **一个资深入口**：由 Senior Project Expert 负责意图、范围、派发、fan-in、收口和可复用的工作流信号。
+- **八位专责 agent**：规划、架构、实现、前端、QA、安全、故障修复与规格工作各自分工。
+- **二十三项技能**：包含引导、搜索、规划、TDD、设计评审、执行、验证、前端审计与工作流演进等可安装技能。
+- **目标仓库本地的 memory 与 spec**：已安装的项目在目标仓库内保留事实、工作流、memory 与 spec，而非插件包内部。
+- **证据优先的收尾**：宣称“完成”必须有命令输出、静态检查、浏览器证据，或一个明确的阻塞说明。
 
 ## 安装
 
-先把这个仓库注册为 Copilot CLI 插件 marketplace：
+把本仓库注册为 Copilot CLI 插件 marketplace：
 
 ```bash
 copilot plugin marketplace add funky-eyes/best-copilot
 ```
 
-再从已注册的 marketplace 安装插件：
+从已注册的 marketplace 安装插件：
 
 ```bash
 copilot plugin install best-copilot@best-copilot
 ```
 
-Copilot CLI 已经弃用从仓库、URL 或本地路径直接安装插件的方式。正常安装请使用上面的 marketplace 流程。本地开发时，也应该把本地 checkout 注册成 marketplace：
+本地开发时同样可用：
 
 ```bash
 copilot plugin marketplace add /absolute/path/to/best-copilot
 copilot plugin install best-copilot@best-copilot
 ```
 
-Copilot CLI 会从已安装插件缓存中读取插件内容。本地 checkout 里的 agents、skills 或 instructions 改动后，测试新的 CLI 会话前请重新安装或更新插件；否则会话可能仍在使用上一次安装的副本。
+当前 Copilot CLI 仍能直接从仓库安装，但 CLI 会提示直接安装已弃用，未来将仅支持 `plugin@marketplace`：
 
-安装后检查：
+```bash
+copilot plugin install funky-eyes/best-copilot
+```
+
+本地修改后请重新安装或更新插件以测试新会话，因为 Copilot CLI 会从已安装插件缓存中读取 agents 与 skills。
+
+## 快速检查
 
 ```text
 /agent
 /skills list
 ```
 
-安装到目标仓库后，plugin 提供自己的 agents 和 skills。第一次使用时，Senior Project Expert 可以在目标仓库本地初始化 instructions、memory、spec 脚手架，让后续会话从这个仓库自己的状态恢复。
+预期的包结构：
 
-## 第一次使用
+```text
+best-copilot
+├── plugin.json
+├── marketplace.json
+├── agents/
+│   ├── pm-coordinator.agent.md
+│   ├── tech-architect.agent.md
+│   ├── developer.agent.md
+│   ├── frontend-designer.agent.md
+│   ├── risk-qa.agent.md
+│   ├── security-agent.agent.md
+│   ├── auto-fixer.agent.md
+│   └── spec-writer.agent.md
+├── skills/
+└── .github/
+    ├── instructions/
+    └── plugin/
+```
 
-新仓库第一次执行有意义任务前，先让 Copilot 学习仓库：
+## 工作流
+
+```text
+User request
+  -> init or repo fact check
+  -> Senior Project Expert freezes scope
+  -> brainstorming or direct planning
+  -> requirements / design / tasks when risk is non-trivial
+  -> design review before implementation
+  -> specialist implementation
+  -> cross review
+  -> QA / security / frontend verification
+  -> closeout with evidence and resume point
+```
+
+对于小范围改动，流程保持精简；对于跨模块、对外契约、依赖、权限或模糊产品方向的工作，较重的门控是有意为之。
+
+## Agent 团队
+
+| Agent | 负责 | 不负责 |
+| --- | --- | --- |
+| Senior Project Expert | 意图、范围、编排、派发、fan-in、收口、演进信号 | 直接编写生产代码 |
+| Specification Writer | 发现证据、requirements、design、tasks、ADR、memory/spec 恢复 | 生产实现 |
+| Technical Architect | 后端/全栈设计、API/数据/服务边界、主线实现、架构评审 | 前端细节 |
+| Developer | 冻结的实现切片、实现可行性评审、对架构师负责代码的实现评审 | 架构变更或范围扩展 |
+| Frontend Designer | 页面、组件、交互、响应式、浏览器证据 | 后端主线 |
+| Quality Assurance Expert | 功能验证、回归风险、代码审查、合并准备 | 安全专项 |
+| Security Reviewer | 权限、敏感数据流、依赖、发布面安全 | 普通功能 QA |
+| Root Cause Fixer | 失败诊断、最小补丁、回归验证 | 无证据的重构 |
+
+## 技能地图
+
+| Area | Skills |
+| --- | --- |
+| Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
+| Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
+| Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
+| Verification | `change-verification`, `verification-before-completion`, `web-experience-audit`, `frontend-design-guardrails` |
+| Evolution | `evolution-loop` |
+
+## 首次在目标仓库中使用
+
+在新仓库中开始有意义任务前，让 Copilot 学习项目：
 
 ```text
 /init
 ```
 
-或执行：
+或：
 
 ```bash
 copilot init
 ```
 
-初始化后，大型或跨模块任务从 **Senior Project Expert** 开始。它会基于仓库事实理解需求，补齐缺失的本地 workflow 脚手架，规划工作、按需路由 specialist，并保证验证证据清楚。
+然后由 **Senior Project Expert** 开始实质工作。该角色应将有用的仓库事实标准化到目标仓库本地文件，创建缺失的本地脚手架，并在继续实施前验证这些文件存在。
 
-## 语言策略
+目标本地状态属于目标仓库：
 
-每个 agent 必须先识别用户输入的主要语言。混合输入很常见：用户可能用一种语言描述问题，同时贴上另一种语言的日志、堆栈、代码或 API 响应。主要语言取决于用户实际提问或解释所用语言，而不是粘贴证据里的 incidental language。
+```text
+.github/instructions/project.instructions.md
+.github/instructions/must.instructions.md
+.github/instructions/skills-index.instructions.md
+memories/repo/INDEX.md
+memories/repo/current-workstreams.md
+spec/INDEX.md
+spec/templates/
+```
 
-默认用识别出的主要语言回复，除非用户明确指定其他语言。
-
-## 团队入口
-
-大型任务先找 **Senior Project Expert**。它不直接写生产代码，负责：
-
-面对一个真正的大需求，Senior Project Expert 不是简单“分派一下 agent”，而是像项目总控一样把模糊请求压成一条可审计、可复盘、可验证的交付链。它跑的不是随手分工，而是这套仓库真正依赖的 workflow：先在有歧义时做 brainstorming 锁方向，再把方向落成 Spec Kit，然后拉多方会审，之后按 spec-driven、test-driven 的方式推进实现，代码出来后还要经过架构师/开发工程师互评，再进入 QA、安全和前端验证。
-
-它带来的价值不只是流程更完整，而是同时把质量和效率往上拉：质量更高，是因为高风险假设会在写代码前就被 challenge；效率更高，是因为团队不会在错误方向上连续白干两三轮。
-
-比如用户说“把这个回调链路优化一下”，它不会立刻把任务丢给实现 agent 开改，而是先用 brainstorming 锁清楚这句话到底是在说性能、正确性、重试安全、接口收敛，还是发布风险，然后把锁定后的方向落成 requirements、design、tasks。这个动作看起来多了一步，但实际是在避免后面两三轮都在错误目标上返工。
-
-再比如一个需求同时碰 API 契约、后台任务和前端交互，它也不会让所有内容混在一条长对话里一起失控，而是先冻结范围和非目标，落成 Spec Kit，先让 Technical Architect、Developer、QA 对方案做会审，涉及安全或前端体验时再把 Security Reviewer 或 Frontend Designer 拉进来。设计过关后，主线交给 Technical Architect，独立切片交给 Developer，页面和交互交给 Frontend Designer；新增行为或 bugfix 在可行时先写失败测试，再按 spec 推进实现；代码写完以后，再强制架构师与开发工程师互相审查各自负责的代码，最后才进 QA / 安全 / 前端验证。这样做的好处是：问题会更早暴露，责任边界更清楚，review 不会退化成“作者自己说没问题”。
-
-最终效果不是“agent 更多了”，而是整条链路更难跑偏：开始阶段少盲猜，中间阶段少重复搜仓库，实施阶段少脱离 spec 硬写代码，收尾阶段少在 QA 或发布前才爆出大坑。
-
-- 理解用户意图和成功标准。
-- 判断是否需要 `/init`、spec、计划、设计审查或并行拆分。
-- 冻结范围、非目标、验收标准和验证预算。
-- 路由到合适 specialist，并综合 fan-out / fan-in 结果。
-- 收口时更新 spec、memory、验证证据和下一步恢复入口。
-
-## Agent 分工
-
-| Agent | 负责 | 不负责 |
-| --- | --- | --- |
-| Senior Project Expert | 意图、范围、编排、并行派发、fan-in、收口、演进信号 | 直接写生产代码 |
-| Specification Writer | 证据、requirements/design/tasks、ADR、进度记录、memory/spec 恢复 | 生产实现 |
-| Technical Architect | 后端/全栈设计与主线实现、API/数据/服务边界、审查 Developer 负责代码的架构适配性 | 前端细节、小切片 |
-| Developer | 已冻结实现切片、实现可行性审查、审查 Technical Architect 负责代码的落地复杂度 | 架构变更或扩范围 |
-| Frontend Designer | 页面、组件、交互、响应式、浏览器行为、视觉验证 | 后端主线 |
-| Quality Assurance Expert | 功能验证、回归风险、代码审查、可合并性 | 安全专项和修复 |
-| Security Reviewer | 权限、敏感数据流、依赖风险、发布面安全 | 普通功能 QA |
-| Root Cause Fixer | 失败分析、最小补丁、回归验证 | 无证据重构 |
+如果必需的事实或脚手架无法创建，工作应以 `BLOCKED first_use_gate_incomplete` 停止，而不是基于猜测继续进行。
 
 ## 模型策略
 
-这些角色不是给同一个通用 agent 换名字。每个 agent 都在 `.github/agents/*.agent.md` frontmatter 中声明了明确模型，模型选择和角色需要的推理方式对应：
+每个 agent 在 `agents/*.agent.md` 中声明模型与路由策略：
 
-| Agent | 模型 | 推理特性 |
-| --- | --- | --- |
-| Senior Project Expert | GPT-5.4 | 长程编排、范围控制、fan-out/fan-in 判断和收口决策 |
-| Technical Architect | GPT-5.4 | 深度后端/全栈推理、公开契约设计、数据/API 边界分析、主线实现策略，以及对 Developer 负责代码的审查 |
-| Specification Writer | Gemini 3.1 Pro (Preview) | 大上下文综合、结构化 requirements/design/tasks、ADR 和恢复记录 |
-| Developer | Gemini 3.1 Pro (Preview) | 冻结切片的聚焦实现、对主线代码的实现可行性审查、快速代码上下文对齐、测试和有界验证 |
-| Frontend Designer | Gemini 3.1 Pro (Preview) | UI/状态/上下文综合、Ant Design 式企业级模式、主动设计系统推理、响应式行为、交互质量和浏览器证据规划 |
-| Quality Assurance Expert | Claude Sonnet 4.6 | 低噪声审查、回归推理、测试充分性判断和可合并性结论 |
-| Security Reviewer | Gemini 3.1 Pro (Preview) | 发布面分析、权限边界、敏感数据流、依赖和配置审查 |
-| Root Cause Fixer | Claude Sonnet 4.6 | 失败分诊、假设排除、最小补丁选择和回归证明 |
+| Agent | Model |
+| --- | --- |
+| Senior Project Expert | GPT-5.4 |
+| Technical Architect | GPT-5.4 |
+| Specification Writer | Gemini 3.1 Pro (Preview) |
+| Developer | Gemini 3.1 Pro (Preview) |
+| Frontend Designer | Gemini 3.1 Pro (Preview) |
+| Quality Assurance Expert | Claude Sonnet 4.6 |
+| Security Reviewer | Gemini 3.1 Pro (Preview) |
+| Root Cause Fixer | Claude Sonnet 4.6 |
 
-路由策略本身就是产品的一部分：编排和架构使用更适合深度规划的模型，实现和规格使用大上下文执行模型，QA/修复角色使用更偏审查和调试的模型，让结论保持具体、低噪声、可执行。
+## 验证此包
 
-## 大型任务流程
+```bash
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -ryaml -e 'Dir["{agents,skills}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
+find agents -maxdepth 1 -name '*.agent.md' | sort
+find skills -maxdepth 3 -name SKILL.md | sort
+git diff --check
+```
 
-大需求不会从 prompt 直接跳到代码提交。它会经过一条有检查点的流程，目的是尽早打掉坏假设，把设计评审和独立审查前置，把实现、互评、验证拆开处理。
+## 演进规则
 
-1. **Init**：缺仓库事实时运行 `/init` 或 `copilot init`。
-2. **Discover**：冻结目标、范围、风险和验收标准。
-3. **Brainstorm**：如果需求存在歧义或路线会影响实现方向，先用 `brainstorming` 锁定方向，避免在错误语义分支上开工。
-4. **Spec Kit**：由 Specification Writer 把已锁定方向落成仓库里的 Spec Kit，也就是 `requirements.md`、`design.md`、`tasks.md`。
-5. **Design Review**：先由 Technical Architect、Developer、QA 共同审 Spec Kit；涉及安全或前端体验时，再加入 Security Reviewer 或 Frontend Designer，让高风险假设在实现前就被挑战。
-6. **SDD/TDD Implementation**：主线交给 Technical Architect，独立切片交给 Developer，前端交给 Frontend Designer。实现以 Spec Kit 为锚点推进；新增行为或 bugfix 在可行时先写失败测试，而不是先写代码再回头补理由。
-7. **Cross Review**：Technical Architect 审 Developer 负责的代码，Developer 审 Technical Architect 负责的代码，任何实现者都不能给自己写的代码放行。
-8. **Verify**：QA 做最小充分验证；前端补浏览器证据；没过就进入 fix loop，而不是口头说“应该没问题”。
-9. **Secure**：存在发布面、依赖、权限或敏感数据流时做安全审查。
-10. **Fix Loop**：确认失败后由 Root Cause Fixer 最小修复并复测。
-11. **Close**：总结改动、证据、风险和恢复入口。
-12. **Evolve**：重复失败、老化触发词、review 回环或可复用经验变成 EvolutionEvent。
+`best-copilot` 不允许 agent 任意重写自身。工作流变更应来自已验证的信号：失败的命令、重复的 review 发现、用户修正、路由陈旧或安装/运行时偏差。
 
-## 自进化能力
+可接受的改进应当小、可回滚，并写入到拥有的表面：根目录 `agents/`、`skills/`、`.github/instructions/**`，或目标仓库本地的 memory/spec 文件。
 
-`best-copilot` 不允许 agent 随意重写自己。演进必须基于证据且可回滚：
+## 致谢
 
-1. **Read**：读取任务结果、失败命令、review finding、用户纠正、memory 和 spec drift。
-2. **Select**：选择最小改进目标：agent、skill、instruction、prompt、memory、README 或 spec template。
-3. **Propose**：生成带证据、范围、验证和回滚的 Evolution Proposal。
-4. **Validate**：通过 frontmatter/schema、触发词 eval、静态检查、review 或命令证据验证。
-5. **Write**：只把已接受的经验写回相关 `.github/**` 自定义内容，或写入由 bootstrap skills 创建的目标仓库本地 memory/spec 文件。
-
-接受的改进记录为 `EvolutionEvent`: `signal -> target -> mutation -> validation -> rollback -> status`。
-
-## 项目优点
-
-- 先评审再实现：大需求先经过设计审查，而不是代码写完了再补理由。
-- Spec Kit + TDD 驱动实现：方向先落成 requirements/design/tasks，新行为或 bugfix 在可行时先写测试，再推进实现。
-- 架构师与开发互评：主线 owner 和切片 owner 互相审查，避免实现者自己给自己放行。
-- Copilot-first，可通过 `copilot plugin marketplace add` 加入 marketplace 后，再用 `copilot plugin install best-copilot@best-copilot` 安装。
-- Codex-compatible，通过 `.codex` adapter 复用 `.github` 真源。
-- 先 `/init` 再执行，减少新仓库盲猜。
-- 大型任务由 Senior PM 编排，分阶段审查、实现、验证和收口。
-- RAG-lite memory：用 Markdown index 和 current workstream 恢复上下文。
-- Spec-memory 联动：spec 管需求和验收，memory 管恢复和验证事实。
-- 精简默认 skills，只保留高频工程能力。
-- Evidence-first：完成结论必须有命令、静态检查、浏览器证据或明确阻塞。
-- 可审计进化：已验证经验沉淀为可回滚 EvolutionEvent。
-
-## 致谢与参考
-
-感谢这些项目带来的公开思想和设计启发：
+`best-copilot` 借鉴并学习了若干公开的工作流与技能系统思想，例如：
 
 - [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
 - [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
-- [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [spec-kit](https://github.com/github/spec-kit)
 - [Open Design](https://github.com/nexu-io/open-design)
+- [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
 - [claude-mem](https://github.com/thedotmack/claude-mem)
 - [fetch-skill](https://github.com/aresbit/fetch-skill/)
-- [spec-kit](https://github.com/github/spec-kit)
-- [Anthropic skill-creator](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/skill-creator)
-- [Anthropic code-simplifier](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-simplifier)
-- [Anthropic code-review](https://github.com/anthropics/claude-plugins-official/tree/main/plugins/code-review)
 - [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills)
 - [Evolver](https://github.com/EvoMap/evolver)

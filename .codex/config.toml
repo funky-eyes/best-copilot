@@ -1,6 +1,0 @@
-[features]
-multi_agent = true
-
-[agents]
-max_threads = 8
-max_depth = 1

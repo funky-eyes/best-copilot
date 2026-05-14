@@ -6,7 +6,7 @@ applyTo: "**"
 
 # Repo Skills Index
 
-This file is only for discovery and routing. Match the current task to the index, then read the needed parts of `.github/skills/<skill>/SKILL.md`. Do not preload the entire `.github/skills` tree.
+This file is only for discovery and routing. Match the current task to the index, then read the needed parts of `skills/<skill>/SKILL.md`. Do not preload the entire `skills` tree.
 
 ## Initialization and Orchestration
 

@@ -27,7 +27,8 @@ For each ready task, follow this exact order:
 4. `REVIEW_STAGE_1`: check spec/task compliance first. Confirm that the task did exactly the requested work, no more and no less.
 5. `REVIEW_STAGE_2`: check code quality, maintainability, release risk, dead code, and test adequacy.
 6. `RECORD`: write task status, verification result, verification coverage, command/check evidence, and residual risk.
-7. `DECIDE`: proceed, fix, return to spec, or block with evidence.
+7. `SNAPSHOT`: update the ready-artifact list with changed files, verification command, review outputs, blocked items, and next resume action.
+8. `DECIDE`: proceed, fix, return to spec, or block with evidence.
 
 Do not invert the two review stages. A task that fails spec compliance is not ready for code-quality signoff.
 
@@ -36,6 +37,7 @@ Do not invert the two review stages. A task that fails spec compliance is not re
 - `task_status`: `DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED`
 - `verification_result`: `passed | failed | blocked`
 - `verification_coverage`: `complete | partial | blocked`
+- `ready_artifacts`: changed files, verification evidence, review outputs, blocked items, next resume action
 
 Never use a test result as the task status. Never claim `DONE` without real evidence.
 

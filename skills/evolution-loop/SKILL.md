@@ -15,7 +15,7 @@ Evolution is not free-form rewriting. It is a bounded loop:
 2. **Select** the smallest reusable improvement target: agent, skill, instruction, memory rule, README guidance, or spec template.
 3. **Propose** a protocol-bound mutation with evidence, scope, rollback, and validation.
 4. **Validate** with static checks, eval prompts, review, or command evidence.
-5. **Write** only accepted learnings back to the canonical `.github/**`, `memories/repo/**`, or `spec/**` owner in the target repository.
+5. **Write** only accepted learnings back to the canonical root `agents/`, root `skills/`, `.github/instructions/**`, `memories/repo/**`, or `spec/**` owner in the target repository.
 
 ## EvolutionEvent
 
