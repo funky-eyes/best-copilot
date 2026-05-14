@@ -49,10 +49,17 @@ copilot plugin install funky-eyes/best-copilot
 
 로컬 수정 후에는 새 CLI 세션에서 테스트하기 전에 플러그인을 재설치 또는 업데이트하세요.
 
+## 사용 방법
+
+요구사항 오케스트레이션은 [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md)의 코디네이터 에이전트에서 시작해야 합니다. 이 에이전트는 UI에서 **Senior Project Expert**로 표시되며 의도, 범위, 계획, 디스패치, 리뷰 fan-in, 종료를 담당합니다.
+
+- **Copilot CLI**: `/agents`를 실행하고 **Senior Project Expert**를 선택한 뒤 작업을 설명합니다.
+- **VS Code 확장**: 채팅 에이전트를 **Senior Project Expert**로 수동 전환한 뒤 작업을 시작합니다.
+
 ## 빠른 확인
 
 ```text
-/agent
+/agents
 /skills list
 ```
 
