@@ -2,10 +2,10 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | 한국어 | [日本語](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.2.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.3.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-23-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-25-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -20,7 +20,7 @@ Copilot CLI 우선 설계입니다. 루트의 `agents/`와 `skills/`는 `plugin.
 
 - **하나의 시니어 진입점**: Senior Project Expert는 의도, 범위, 디스패치, fan-in, 수렴, 재사용 가능한 워크플로 신호를 담당합니다.
 - **여덟 개의 전문 에이전트**: 기획, 아키텍처, 구현, 프론트엔드, QA, 보안, 근본 원인 수정, 명세 작업 등이 각각 책임을 가집니다.
-- **스물세 개의 스킬**: 부트스트랩, 검색, 기획, TDD, 설계 검토, 실행, 검증, 프런트엔드 감사 및 워크플로 진화를 포함합니다.
+- **스물다섯 개의 스킬**: 부트스트랩, 검색, 기획, TDD, 설계 검토, 실행, Java/Python 코딩 가이드라인, 검증, 프런트엔드 감사 및 워크플로 진화를 포함합니다.
 - **대상 저장소 로컬의 메모리/스펙**: 설치된 프로젝트는 사실, 워크스트림, 메모리 및 스펙을 플러그인 패키지가 아닌 대상 저장소에 보관합니다.
 - **증거 우선의 종료**: ‘완료’ 선언은 명령 출력, 정적 검사, 브라우저 증거 또는 명확한 차단자 중 하나가 있어야 합니다.
 
@@ -114,6 +114,7 @@ User request
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
 | Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
 | Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |

@@ -2,10 +2,10 @@
 
 English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.2.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.3.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-23-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-25-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -20,7 +20,7 @@ Large AI coding tasks fail when they jump straight from a vague request to a pat
 
 - **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable workflow signals.
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
-- **Twenty-three skills**: bootstrap, search, planning, TDD, design review, execution, verification, frontend audit, and workflow evolution are installable skills.
+- **Twenty-five skills**: bootstrap, search, planning, TDD, design review, execution, Java/Python coding guidelines, verification, frontend audit, and workflow evolution are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
 - **Evidence-first closure**: “done” requires command output, static checks, browser evidence, or an explicit blocker.
 
@@ -118,6 +118,7 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
 | Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
 | Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
@@ -185,4 +186,4 @@ Accepted improvements should be small, reversible, and written to the owning sur
 
 ## Acknowledgements
 
-`best-copilot` learns from public workflow and skill-system ideas, including [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent), [Superpowers](https://github.com/obra/superpowers), [gstack](https://github.com/garrytan/gstack), [spec-kit](https://github.com/github/spec-kit), [Open Design](https://github.com/nexu-io/open-design), [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), [claude-mem](https://github.com/thedotmack/claude-mem), [fetch-skill](https://github.com/aresbit/fetch-skill/), [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills), and [Evolver](https://github.com/EvoMap/evolver). The implementation here is a Copilot CLI plugin layout with its own agents, skills, routing rules, and verification gates.
+`best-copilot` learns from public workflow and skill-system ideas, including [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent), [Superpowers](https://github.com/obra/superpowers), [gstack](https://github.com/garrytan/gstack), [spec-kit](https://github.com/github/spec-kit), [Open Design](https://github.com/nexu-io/open-design), [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), [claude-mem](https://github.com/thedotmack/claude-mem), [fetch-skill](https://github.com/aresbit/fetch-skill/), [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills), [Evolver](https://github.com/EvoMap/evolver), and Tongdun Java/Python coding-guideline skills. The implementation here is a Copilot CLI plugin layout with its own agents, skills, routing rules, and verification gates.

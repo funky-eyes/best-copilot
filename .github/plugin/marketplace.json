@@ -5,13 +5,13 @@
   },
   "metadata": {
     "description": "Reusable Copilot CLI agent-team plugins and repository workflow customization.",
-    "version": "0.2.0"
+    "version": "0.3.0"
   },
   "plugins": [
     {
       "name": "best-copilot",
       "description": "A senior-agent team plugin for GitHub Copilot CLI, with planning, architecture, implementation, QA, security, fix, memory, and spec workflows.",
-      "version": "0.2.0",
+      "version": "0.3.0",
       "source": "."
     }
   ]
