@@ -2,10 +2,10 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.2.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.3.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-23-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-25-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -20,7 +20,7 @@ Copilot CLI を第一に想定しています。ルートの `agents/` と `skil
 
 - **ひとつのシニア入口**：Senior Project Expert が意図、範囲、ディスパッチ、fan-in、集約、再利用可能なワークフロシグナルを担います。
 - **8 つの専門エージェント**：計画、アーキテクチャ、実装、フロントエンド、QA、セキュリティ、根本原因修正、仕様作成を分担します。
-- **23 のスキル**：ブートストラップ、検索、計画、TDD、設計レビュー、実行、検証、フロントエンド監査、ワークフローの進化などを提供します。
+- **25 のスキル**：ブートストラップ、検索、計画、TDD、設計レビュー、実行、Java/Python コーディングガイドライン、検証、フロントエンド監査、ワークフローの進化などを提供します。
 - **ターゲットリポジトリのローカルメモリとスペック**：インストールされたプロジェクトは事実、ワークストリーム、メモリ、スペックをプラグインパッケージではなくターゲットリポジトリに保持します。
 - **証拠優先のクローズ**：`done` の宣言はコマンド出力、静的チェック、ブラウザの証拠、または明示的なブロッカーが必要です。
 
@@ -118,6 +118,7 @@ User request
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
 | Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
 | Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
