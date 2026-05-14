@@ -11,10 +11,11 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 ## Project Positioning
 
 - Project name: `best-copilot`
-- Purpose: installable Copilot CLI agent-team plugin plus reusable Copilot/Codex repository customization template.
-- Primary install surface: `.github/plugin/marketplace.json`, registered with `copilot plugin marketplace add`, then installed with `copilot plugin install best-copilot@best-copilot`.
-- Canonical customization source: `.github/**`.
-- Codex bridge: `AGENTS.md`, `.codex/agents/*.toml`, and `.codex/{instructions,skills}` symlinks.
+- Purpose: installable Copilot CLI agent-team plugin plus reusable repository workflow customization templates.
+- Primary install surfaces: root `plugin.json` for direct repository install, and root `marketplace.json` for `copilot plugin marketplace add`.
+- Plugin discovery source: root `agents/` and `skills/`, declared by `plugin.json`.
+- Repository instruction source: `.github/instructions/**`.
+- Current compatibility target: Copilot CLI plugin installation. Codex compatibility is not a release target for this layout.
 
 ## First Repository Initialization
 
@@ -39,7 +40,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - Store target project facts under that repository's `.github/instructions/project.instructions.md`.
 - Store target project memory under that repository's `memories/repo/**`.
 - Store target project specs under that repository's `spec/**`.
-- This plugin checkout does not keep active target-project instruction/memory/spec files. Installed projects get durable local files from `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, not by copying this plugin's `.github/instructions/**`, `memories/**`, or `spec/**`.
+- This plugin checkout does not keep active target-project instruction/memory/spec files. Installed projects get durable local files from `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, not by copying this plugin's root `agents/`, root `skills/`, `.github/instructions/**`, `memories/**`, or `spec/**`.
 - If a target repository lacks local instructions, memory, or spec scaffolds and persistent recovery is needed, create the minimal skeleton locally in the target repository.
 
 ## Build and Verification
@@ -48,10 +49,11 @@ This is a Markdown configuration template, not an application build. Verificatio
 
 | Scenario | Command |
 | --- | --- |
-| List plugin skills | `find .github/skills -maxdepth 2 -name SKILL.md | sort` |
-| Check Codex bridge | `readlink .codex/instructions .codex/skills` |
+| List plugin skills | `find skills -maxdepth 3 -name SKILL.md | sort` |
+| List plugin agents | `find agents -maxdepth 1 -name "*.agent.md" | sort` |
 | Check JSON manifest | `ruby -rjson -e 'JSON.parse(File.read("plugin.json")); puts "plugin.json ok"'` |
-| Check YAML frontmatter | `ruby -ryaml -e 'Dir[".github/{agents,skills}/**/*.{md,agent.md}"].each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'` |
+| Check marketplace catalog | `ruby -rjson -e 'JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "marketplace json ok"'` |
+| Check YAML frontmatter | `ruby -ryaml -e 'Dir["{agents,skills}/**/*.{md,agent.md}"].each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'` |
 | Residual scan | `rg --hidden -n "legacy-template-name|project-specific-name|internal-host" .` |
 
 For local plugin development, reinstall or update the plugin after changing agents, skills, or instructions. Copilot CLI reads installed plugin components from its plugin cache, so an unreinstalled local checkout can make tests appear to ignore recent edits.

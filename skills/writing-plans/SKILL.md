@@ -16,6 +16,9 @@ Each task must include:
 - `dependencies`
 - `parallel_ready`
 - `context_mode`
+- `context_budget`
+- `ready_artifacts`
+- `stop_conditions`
 - `implementation_steps`
 - `acceptance_checks`
 - `verification_command`
@@ -26,6 +29,8 @@ Each task must include:
 - Tasks should be independently understandable in 2-5 minutes.
 - Split by file ownership and dependency order, not by vague phases.
 - Mark parallel only when write sets do not overlap.
+- Give each task a small `ready_artifacts` list so fan-in can check outputs without rereading the whole conversation.
+- Include `stop_conditions` for tasks that might otherwise expand into broad discovery.
 - Public API, data model, auth, dependency, CI, or runtime config changes require blast radius notes.
 - Avoid placeholders such as TODO, TBD, “add proper validation”, or “similar to previous task”.
 

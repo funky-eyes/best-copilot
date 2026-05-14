@@ -32,15 +32,21 @@ This section is a fail-closed gate. If required repository facts or first-use sc
 
 1. Init if repo facts are missing.
 2. Parse intent and success criteria.
-3. Freeze scope and non-goals, including explicit user paths, already-read context, authoritative repo facts, and forbidden approaches when they matter.
-4. Plan if task is MEDIUM/LARGE.
-5. Run `spec-review-gauntlet` before implementation when the task is MEDIUM/LARGE, cross-module, security-sensitive, dependency-affecting, or changes workflow routing.
-6. Adjudicate design-review findings by `finding_kind`; `spec_blocker` and `clarification_needed` return to spec or native clarification, while `implementation_todo` and `risk_note` proceed with tracking.
-7. Implement through the right specialist only after the current plan revision is execution-confirmed when planning produced a revision.
-8. Execute multi-step plans with `subagent-driven-development` or `executing-plans`, not ad hoc serial coding.
-9. For every implementation task, run Stage 1 spec-compliance review before Stage 2 code-quality/release-risk review, then verify with concrete evidence.
-10. Close with memory/spec recovery notes when useful.
-11. Evolve only from verified signals: repeated failures, user corrections, review loops, stale triggers, missing verification, or recurring workflow friction.
+3. Classify work mode before broad context loading:
+   - `micro`: explicit tiny edit or check; use direct scoped execution and targeted verification.
+   - `standard`: bounded file set or one owner surface; use a lean context packet and focused review.
+   - `full`: ambiguous, cross-module, public contract, auth/security, dependency, CI/release, frontend experience, or multi-agent execution; use spec/planning/design-review gates.
+4. For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when the missing answer changes the route; otherwise record the gap and proceed safely.
+5. Freeze scope and non-goals, including explicit user paths, already-read context, authoritative repo facts, forbidden approaches, context budget, and stop conditions when they matter.
+6. Plan if task is MEDIUM/LARGE or `full`.
+7. Run `spec-review-gauntlet` before implementation when the task is `full`, cross-module, security-sensitive, dependency-affecting, or changes workflow routing.
+8. Adjudicate design-review findings by `finding_kind`; `spec_blocker` and `clarification_needed` return to spec or native clarification, while `implementation_todo` and `risk_note` proceed with tracking.
+9. Implement through the right specialist only after the current plan revision is execution-confirmed when planning produced a revision.
+10. Execute multi-step plans with `subagent-driven-development` or `executing-plans`, not ad hoc serial coding.
+11. For every implementation task, run Stage 1 spec-compliance review before Stage 2 code-quality/release-risk review, then verify with concrete evidence.
+12. Keep fan-in compact with a ready-artifact snapshot: changed files, completed tasks, verification commands, review findings, blocked items, and next resume action.
+13. Close with memory/spec recovery notes when useful.
+14. Evolve only from verified signals: repeated failures, user corrections, review loops, stale triggers, missing verification, or recurring workflow friction.
 
 ## Native Ask Flow
 
@@ -73,6 +79,7 @@ When the user asks to learn from another repository, agent, skill, or prompt sys
 
 - PM sends minimal frozen packets.
 - Frozen packets should include `user_provided_paths`, `priority_files`, `reference_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, and `source_provenance_refs` when those fields exist.
+- Frozen packets should also include `work_mode`, `context_budget`, `stop_conditions`, and `ready_artifacts` when they materially reduce rediscovery or fan-in cost.
 - For approved plan execution, packets should also include `plan_revision`, `execution_confirmed`, `task_id`, task text, dependencies, acceptance checks, verification budget, and review lanes.
 - Specialists do not ask the user directly when delegated.
 - Specialists consume frozen paths and facts before reopening search.

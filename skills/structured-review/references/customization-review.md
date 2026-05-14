@@ -6,8 +6,8 @@ Use this in addition to the normal code review rules when changed files define a
 
 Apply to files under or equivalent to:
 
-- `.github/agents/`
-- `.github/skills/`
+- `agents/`
+- `skills/`
 - `.github/instructions/`
 - `project.instructions.md`
 - plugin manifests, marketplace metadata, agent YAML, skill markdown, workflow instruction files
