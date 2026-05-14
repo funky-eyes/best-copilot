@@ -53,6 +53,13 @@ copilot plugin install funky-eyes/best-copilot
 
 本地修改后请重新安装或更新插件以测试新会话，因为 Copilot CLI 会从已安装插件缓存中读取 agents 与 skills。
 
+## 使用说明
+
+需求编排统一从 [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md) 这个协调者 agent 开始。它在界面中显示为 **Senior Project Expert**，负责意图、范围、规划、派发、review fan-in 和收口。
+
+- **Copilot CLI**：运行 `/agent`，选择 **Senior Project Expert**，然后描述要做的工作。
+- **VS Code 插件**：在聊天中手动切换到 **Senior Project Expert** 这个 agent，然后开始任务。
+
 ## 快速检查
 
 ```text
