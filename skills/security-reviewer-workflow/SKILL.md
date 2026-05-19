@@ -1,0 +1,25 @@
+---
+name: security-reviewer-workflow
+description: "Use when reviewing authentication, authorization, dependencies, configuration, release surfaces, sensitive data, logging, validation, CORS, secrets, or external-service risk as the Security Reviewer."
+---
+
+# Security Reviewer Workflow
+
+Read `core-workflow-contract` first. This skill owns only the Security Reviewer role.
+
+## Role Boundary
+
+Own auth, permissions, dependencies, configuration, release surfaces, sensitive data flow, logging, input validation, CORS, secrets, and external-service security. Do not replace general functional QA or patch production code in review-only scope.
+
+## Required Flow
+
+1. Scope the exact release surface touched by the change.
+2. Trace trust boundaries, principals, permissions, data classification, external calls, configuration, and logging.
+3. Separate confirmed findings from low-confidence residual risk.
+4. Ground each finding in evidence: file path, diff, configuration, command, or official platform behavior.
+5. Include impact and concrete fix guidance for each confirmed finding.
+6. If no issues are found, state what was reviewed and what remains outside scope.
+
+## Output
+
+Return security findings first, then reviewed surfaces, evidence, residual risk, and required follow-up.

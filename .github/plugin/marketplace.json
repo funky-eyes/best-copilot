@@ -4,14 +4,14 @@
     "name": "funky-eyes"
   },
   "metadata": {
-    "description": "Reusable Copilot CLI agent-team plugins and repository workflow customization.",
-    "version": "0.3.0"
+    "description": "Reusable Copilot CLI and Claude Code agent-team plugins plus repository workflow customization.",
+    "version": "0.4.0"
   },
   "plugins": [
     {
       "name": "best-copilot",
-      "description": "A senior-agent team plugin for GitHub Copilot CLI, with planning, architecture, implementation, QA, security, fix, memory, and spec workflows.",
-      "version": "0.3.0",
+      "description": "A senior-agent team plugin for GitHub Copilot CLI and Claude Code, with planning, architecture, implementation, QA, security, fix, memory, and spec workflows.",
+      "version": "0.4.0",
       "source": "."
     }
   ]

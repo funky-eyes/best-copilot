@@ -2,17 +2,18 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.3.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.4.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
 [![skills](https://img.shields.io/badge/skills-25-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
 
-`best-copilot` は、インストール可能な Copilot CLI エージェントチームのテンプレートで、真剣なエンジニアリング作業を対象としています。リポジトリに対してシニア品質のデリバリーフローを提供します：事実の初期化、範囲の固定、設計→構築、専門役割による実装、独立したレビュー、証拠に基づく検証、および次回セッションのための復帰ポイントの保持。
+`best-copilot` は、Copilot CLI と Claude Code で利用できるインストール可能なエージェントチームテンプレートで、真剣なエンジニアリング作業を対象としています。リポジトリに対してシニア品質のデリバリーフローを提供します：事実の初期化、範囲の固定、設計→構築、専門役割による実装、独立したレビュー、証拠に基づく検証、および次回セッションのための復帰ポイントの保持。
 
-Copilot CLI を第一に想定しています。ルートの `agents/` と `skills/` は `plugin.json` 経由で公開され、リポジトリレベルのルールは `.github/instructions/**` にあります。
+Copilot CLI は `plugin.json` 経由でルートの `agents/` と `skills/` を使います。Claude Code は `.claude-plugin/plugin.json`、ルート `skills/`、および `claude-agents/` の lowercase-hyphen アダプターを使います。リポジトリレベルのルールは `.github/instructions/**` にあります。
 
 ## なぜ存在するのか
 
@@ -25,6 +26,8 @@ Copilot CLI を第一に想定しています。ルートの `agents/` と `skil
 - **証拠優先のクローズ**：`done` の宣言はコマンド出力、静的チェック、ブラウザの証拠、または明示的なブロッカーが必要です。
 
 ## インストール
+
+### Copilot CLI
 
 リポジトリを Copilot CLI プラグインの marketplace として登録します：
 
@@ -53,12 +56,67 @@ copilot plugin install funky-eyes/best-copilot
 
 ローカルの変更後は、新しい CLI セッションでテストする前にプラグインを再インストールまたは更新してください。
 
+### Claude Code
+
+Claude Code は独自の marketplace システムを使います。このリポジトリを Claude Code marketplace として追加し、プラグインをインストールします：
+
+```text
+/plugin marketplace add funky-eyes/best-copilot
+/plugin install best-copilot@best-copilot
+/reload-plugins
+```
+
+ローカル開発または現在の checkout から直接使う場合は、プラグインディレクトリを読み込めます：
+
+```bash
+claude --plugin-dir /absolute/path/to/best-copilot
+```
+
+Claude Code agent team を使う場合は、起動前に agent teams を有効にします。Agent teams は Claude Code の実験的機能で、Claude Code v2.1.32 以降が必要です：
+
+```bash
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot
+```
+
+Claude Code は次を検出します：
+
+- marketplace メタデータ：[.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
+- プラグインメタデータ：[.claude-plugin/plugin.json](.claude-plugin/plugin.json)
+- 共有スキル：[skills/](skills/)、呼び出し名は `/best-copilot:<skill-name>`
+- Claude 互換 subagent：[claude-agents/](claude-agents/)
+- 既定のメイン agent：[settings.json](settings.json) の `best-copilot:senior-project-expert`
+
+ローカル変更またはプラグイン更新後は、Claude Code 内で `/reload-plugins` を実行するか、セッションを再起動してください。
+
 ## 使い方
 
 要求のオーケストレーションは [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md) のコーディネーターエージェントから始めます。このエージェントは UI では **Senior Project Expert** と表示され、意図、範囲、計画、ディスパッチ、レビュー fan-in、クローズを担当します。
 
 - **Copilot CLI**：`/agent` を実行し、**Senior Project Expert** を選択してから作業内容を伝えます。
 - **VS Code 拡張機能**：チャットのエージェントを手動で **Senior Project Expert** に切り替えてからタスクを開始します。
+- **Claude Code**：`claude --plugin-dir /absolute/path/to/best-copilot` で開始します。プラグインの既定 agent は `best-copilot:senior-project-expert` です。`/agents` でプラグイン agent を確認し、`/best-copilot:<skill-name>` でスキルを直接呼び出せます。
+
+Claude Code multi-agent プロンプト例：
+
+```text
+Create an agent team for this task. Use best-copilot:senior-project-expert as the lead.
+Spawn teammates using best-copilot:technical-architect, best-copilot:developer,
+best-copilot:quality-assurance-expert, and best-copilot:security-reviewer
+where their scopes apply. Keep write sets non-overlapping,
+prevent self-review, and report command evidence before closeout.
+```
+
+Claude Code は plugin agents、skills、agent teams によって Copilot 風の multi-agent ワークフローを実現できます。ただし Copilot のような複数モデルプロバイダー間のルーティングは再現しません。Claude アダプターは `model: inherit` を使うため、実際のモデルは Claude Code セッションの `/model`、`--model`、またはユーザー設定で決まります。
+
+## ランタイムアダプター構成
+
+共通の cross-role ルールは [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md) に置きます。各ロール固有の workflow は `skills/*-workflow/` に分けます：`senior-project-expert-workflow`、`specification-writer-workflow`、`technical-architect-workflow`、`developer-workflow`、`frontend-designer-workflow`、`quality-assurance-workflow`、`security-reviewer-workflow`、`root-cause-fixer-workflow`。Copilot 専用の内容は [agents/](agents/) に置きます：モデル名、Copilot ツール、`user-invocable`、`agents`、`handoffs`。Claude 専用の内容は [claude-agents/](claude-agents/) の対応ファイルに置きます：scoped plugin agent 名、`model: inherit`、読み取り専用制限、agent-team モードで `skills` frontmatter が teammate に自動適用されない制限。
+
+この構造は、共通動作、ロール固有動作、互換性のない runtime metadata を分離し、各 agent が共通 contract と自分のロール workflow の両方を読み込むようにします。
+
+Claude agent の frontmatter は `core-workflow-contract` と対応するロール workflow だけをプリロードします。`structured-review`、`test-driven-development`、`web-experience-audit` などの focused skills は agent 本文で必要時に呼び出す形にして、起動時コンテキストを削減します。
+
+この構成により、ワークフロー契約は単一ソースで保ちつつ、各ランタイムで共存できない metadata を分離します。
 
 ## クイックチェック
 
@@ -72,8 +130,20 @@ copilot plugin install funky-eyes/best-copilot
 ```text
 best-copilot
 ├── plugin.json
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
 ├── marketplace.json
 ├── agents/
+│   ├── pm-coordinator.agent.md
+│   ├── tech-architect.agent.md
+│   ├── developer.agent.md
+│   ├── frontend-designer.agent.md
+│   ├── risk-qa.agent.md
+│   ├── security-agent.agent.md
+│   ├── auto-fixer.agent.md
+│   └── spec-writer.agent.md
+├── claude-agents/
 │   ├── pm-coordinator.agent.md
 │   ├── tech-architect.agent.md
 │   ├── developer.agent.md
@@ -132,19 +202,19 @@ User request
 
 ## 初回のターゲットリポジトリでの使用
 
-新しいリポジトリで有意義な作業を始める前に Copilot にリポジトリを学習させてください：
+新しいリポジトリで有意義な作業を始める前に、現在のランタイムにプロジェクトを確認させてください：
 
 ```text
 /init
 ```
 
-または：
+Copilot CLI では shell コマンドも使えます：
 
 ```bash
 copilot init
 ```
 
-その後、**Senior Project Expert** から実作業を始めます。対象のリポジトリ内で有用な事実を正規化し、欠けているローカルのスキャフォールドを作成し、実装に入る前にこれらのファイルが存在することを検証します。
+その後、**Senior Project Expert** / `best-copilot:senior-project-expert` から実作業を始めます。対象のリポジトリ内で有用な事実を正規化し、欠けているローカルのスキャフォールドを作成し、実装に入る前にこれらのファイルが存在することを検証します。
 
 ターゲットローカル状態はターゲットリポジトリに属します：
 
@@ -175,12 +245,15 @@ spec/templates/
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
+Claude Code は Claude モデルのみを実行します。`claude-agents/*.agent.md` の Claude アダプターは役割分離を保ち、`model: inherit` を使うため、実際のモデルは現在の Claude Code セッションが制御します。
+
 ## このパッケージの検証
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
-ruby -ryaml -e 'Dir["{agents,skills}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
+find claude-agents -maxdepth 1 -name '*.agent.md' | sort
 find skills -maxdepth 3 -name SKILL.md | sort
 git diff --check
 ```

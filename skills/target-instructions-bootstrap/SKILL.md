@@ -14,6 +14,7 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 - Do not copy this plugin repository's instruction files or active workflow state into the target repository. Generate only the neutral target-local scaffold below.
 - Do not overwrite project-specific rules, language policy, build commands, or existing `AGENTS.md`.
 - Keep generated files short. They are routing and safety scaffolds, not a full manual.
+- Keep generated files runtime-neutral across Copilot CLI, Claude Code, VS Code Copilot, and Codex. If a runtime-specific command is mentioned, label it as runtime-specific.
 
 ## Files
 
@@ -103,7 +104,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 - Read `.github/instructions/project.instructions.md` before non-trivial work.
 - Treat `.github/instructions/project.instructions.md` as initialized only when it is not the untouched neutral scaffold, contains concrete build/test/check/dev command facts or bounded-scan `unknown`, plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
-- If facts are missing, run the repository init flow before real requirements analysis. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
+- If facts are missing, run the active runtime's repository init flow before real requirements analysis. Use `/init` when available in Copilot CLI, VS Code Copilot, or Claude Code; use `copilot init` only when the Copilot CLI command exists. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
 - Do not guess project stack, module ownership, security boundaries, or build commands.
 
 ## Memory And Spec
@@ -120,6 +121,12 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Use the user's primary language unless they ask otherwise.
 - Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route.
 - If a native ask UI exists, use it for blocking route, approval, or continuation choices.
+
+## Runtime Notes
+
+- In Copilot CLI, plugin agents normally appear through `/agent`, and plugin skills appear through the runtime's skills interface.
+- In Claude Code, plugin skills are namespaced as `/best-copilot:<skill-name>` after installation, plugin subagents appear in `/agents`, and agent teams can reference plugin subagent types by scoped name such as `best-copilot:technical-architect`.
+- When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed namespaced skill or include the needed checklist in the spawn prompt.
 
 ## Verification
 
@@ -150,6 +157,16 @@ Read only the selected skill, not the whole skill tree.
 
 ## Planning And Execution
 
+- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, handoff packet shape, review/verification, memory/spec, and closeout rules.
+- Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
+  - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
+  - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
+  - `technical-architect-workflow`: architecture, service boundaries, data/API contracts, blast radius, and mainline implementation strategy.
+  - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT`, and verification evidence.
+  - `frontend-designer-workflow`: UI implementation/review, design-system reuse, responsive/browser evidence, and visual quality.
+  - `quality-assurance-workflow`: functional verification, regression risk, test sufficiency, and merge-readiness review.
+  - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
+  - `root-cause-fixer-workflow`: concrete failure evidence, minimal root-cause patching, and regression proof.
 - `brainstorming`: ambiguous MEDIUM/LARGE direction before spec or code.
 - `writing-plans`: confirmed MEDIUM/LARGE direction into executable tasks.
 - `spec-review-gauntlet`: pre-implementation readiness and multi-lane design review for Spec Bundles and execution plans.
@@ -167,6 +184,10 @@ Read only the selected skill, not the whole skill tree.
 - `change-verification`: prove changed behavior after edits.
 - `verification-before-completion`: final evidence check before closeout.
 - `structured-review`: review code, customization, design, review handoff, feedback intake, and targeted re-review.
+
+## Claude Code Skill Names
+
+After installing this plugin in Claude Code, invoke plugin skills as `/best-copilot:<skill-name>`, for example `/best-copilot:repo-init-scan`, `/best-copilot:structured-review`, and `/best-copilot:verification-before-completion`. Invoke plugin subagents with scoped names such as `best-copilot:senior-project-expert`.
 ```
 
 ## `AGENTS.md`
@@ -191,6 +212,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - When resuming multi-step work, read `memories/repo/INDEX.md`, then `current-workstreams.md`, then only linked spec or memory shards.
 - Do not treat plugin package state as active project state.
 - Detect the user's primary language and answer in that language unless the user asks otherwise.
+- When running under Claude Code, use plugin skills as `/best-copilot:<skill-name>` and plugin subagents through `/agents` or agent teams with scoped names such as `best-copilot:senior-project-expert`.
 ```
 
 ## Verification

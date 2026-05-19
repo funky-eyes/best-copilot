@@ -14,7 +14,16 @@ This file is only for discovery and routing. Match the current task to the index
 - `target-instructions-bootstrap`: create missing target-local `.github/instructions/**`, including the neutral project facts scaffold, and optional `AGENTS.md`.
 - `target-memory-bootstrap`: create missing target-local `memories/repo/**` skeleton for persistent task recovery.
 - `target-spec-bootstrap`: create missing target-local `spec/INDEX.md` and `spec/templates/**` before spec-driven work.
-- `core-workflow-contract`: full team flow, init recovery, frozen packet rules, external capability fusion, handoff, memory/spec relationship, or closeout rules.
+- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, work modes, handoff packet shape, review/verification, memory/spec, and closeout rules.
+- Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
+  - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
+  - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
+  - `technical-architect-workflow`: architecture, service boundaries, data/API contracts, blast radius, and mainline implementation strategy.
+  - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT`, and verification evidence.
+  - `frontend-designer-workflow`: UI implementation/review, design-system reuse, responsive/browser evidence, and visual quality.
+  - `quality-assurance-workflow`: functional verification, regression risk, test sufficiency, and merge-readiness review.
+  - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
+  - `root-cause-fixer-workflow`: concrete failure evidence, minimal root-cause patching, and regression proof.
 - `evolution-loop`: closeout, repeated failure, review loop, stale trigger, or user-requested agent/skill improvement; produces auditable and reversible evolution proposals.
 - `brainstorming`: top-level or PM planning gate where route-changing ambiguity must be locked through explicit direction confirmation before spec or code.
 - `writing-plans`: MEDIUM/LARGE tasks that need executable slices with files and verification.
