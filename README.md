@@ -6,7 +6,7 @@ English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japa
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-25-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-33-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -21,7 +21,7 @@ Large AI coding tasks fail when they jump straight from a vague request to a pat
 
 - **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable workflow signals.
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
-- **Twenty-five skills**: bootstrap, search, planning, TDD, design review, execution, Java/Python coding guidelines, verification, frontend audit, and workflow evolution are installable skills.
+- **Thirty-three skills**: role workflows, bootstrap, search, planning, TDD, design review, execution, Java/Python coding guidelines, verification, frontend audit, and workflow evolution are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
 - **Evidence-first closure**: “done” requires command output, static checks, browser evidence, or an explicit blocker.
 
@@ -104,6 +104,8 @@ Spawn teammates using best-copilot:technical-architect, best-copilot:developer,
 best-copilot:quality-assurance-expert, and best-copilot:security-reviewer
 where their scopes apply. Keep write sets non-overlapping,
 prevent self-review, and report command evidence before closeout.
+For each teammate, invoke /best-copilot:core-workflow-contract plus its
+matching role workflow skill, or include the minimal role checklist fallback.
 ```
 
 Claude Code can match the Copilot-style multi-agent workflow through plugin agents, skills, and agent teams. It does not reproduce Copilot's cross-provider model routing: Claude adapters use `model: inherit`, so choose the Claude model for the session with `/model`, `--model`, or your normal Claude Code settings.
@@ -115,6 +117,8 @@ Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/
 This keeps shared behavior, role-specific behavior, and incompatible runtime metadata isolated while requiring every agent to load both the shared contract and its role workflow.
 
 Claude agent frontmatter preloads only `core-workflow-contract` and the matching role workflow skill. Focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
+
+Copilot handoffs are fail-closed: each PM handoff prompt requires `core-workflow-contract` plus the target role workflow skill. If the runtime cannot load those skills, the handoff includes a minimal role checklist fallback; without either, the specialist returns `NEEDS_CONTEXT missing_required_skill`.
 
 ## Quick Check
 
@@ -190,6 +194,7 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 
 | Area | Skills |
 | --- | --- |
+| Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
 | Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
