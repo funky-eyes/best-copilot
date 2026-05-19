@@ -1,6 +1,6 @@
 # Repository Entry
 
-This file is the local repository entry for this checkout. The plugin package is currently Copilot CLI first: installable agents live in root `agents/`, installable skills live in root `skills/`, and repository instructions live in `.github/instructions/**`. Platform, system, and explicit user instructions have higher priority than repository files; when there is no conflict, read the entries below.
+This file is the local repository entry for this checkout. The plugin package supports Copilot CLI and Claude Code: Copilot installable agents live in root `agents/`, Claude Code agent adapters live in root `claude-agents/`, shared installable skills live in root `skills/`, role-specific workflow skills live in `skills/*-workflow/`, and repository instructions live in `.github/instructions/**`. Platform, system, and explicit user instructions have higher priority than repository files; when there is no conflict, read the entries below.
 
 ## Required Entries
 
@@ -8,6 +8,7 @@ This file is the local repository entry for this checkout. The plugin package is
 2. `.github/instructions/skills-index.instructions.md`: lightweight repo skill index.
 3. `.github/instructions/project.instructions.md`: repository facts, build/test commands, and high-frequency conventions.
 4. `skills/target-*-bootstrap/SKILL.md`: installable templates used to create target-local instructions, memory, and spec scaffolds after repo init.
+5. `.claude-plugin/plugin.json` and `claude-agents/*.agent.md`: Claude Code plugin manifest and lowercase-hyphen subagent adapters.
 
 ## Local Conventions
 
@@ -15,7 +16,7 @@ This file is the local repository entry for this checkout. The plugin package is
 - When choosing a skill, read `.github/instructions/skills-index.instructions.md` first, then open only the selected skill under root `skills/`. Do not bulk-read `skills/`.
 - When working in a target repository that has its own memory, progressively read that target repository's `memories/repo/INDEX.md -> current-workstreams.md -> linked_spec/linked_memory`.
 - This plugin checkout does not keep active target-project `memories/**` or `spec/**`; installed projects should be initialized through the bootstrap skills.
-- Edit installable agents and skills through root `agents/` and `skills/`; edit repository instructions through `.github/instructions/**`.
+- Edit Copilot installable agents through root `agents/`; edit Claude Code adapters through root `claude-agents/`; edit shared installable skills through root `skills/`; edit repository instructions through `.github/instructions/**`.
 - Do not commit or run destructive commands unless explicitly requested.
 - Detect the user's primary language and answer in that language unless the user asks otherwise.
 

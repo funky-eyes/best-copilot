@@ -2,17 +2,18 @@
 
 [English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.3.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.4.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-25-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-33-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
 
-`best-copilot` 是一套可安装的 Copilot CLI agent 团队，面向严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
+`best-copilot` 是一套面向 Copilot CLI 和 Claude Code 的可安装 agent 团队，服务严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
 
-它以 Copilot CLI 为优先。根目录下的 `agents/` 与 `skills/` 通过 `plugin.json` 暴露能力；仓库级规则保存在 `.github/instructions/**`。
+Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claude Code 通过 `.claude-plugin/plugin.json` 使用根目录 `skills/` 和 `claude-agents/` 中的 lowercase-hyphen 适配器。仓库级规则保存在 `.github/instructions/**`。
 
 ## 为什么存在
 
@@ -20,11 +21,13 @@
 
 - **一个资深入口**：由 Senior Project Expert 负责意图、范围、派发、fan-in、收口和可复用的工作流信号。
 - **八位专责 agent**：规划、架构、实现、前端、QA、安全、故障修复与规格工作各自分工。
-- **二十五项技能**：包含引导、搜索、规划、TDD、设计评审、执行、Java/Python 编码规约、验证、前端审计与工作流演进等可安装技能。
+- **三十三项技能**：包含角色 workflow、引导、搜索、规划、TDD、设计评审、执行、Java/Python 编码规约、验证、前端审计与工作流演进等可安装技能。
 - **目标仓库本地的 memory 与 spec**：已安装的项目在目标仓库内保留事实、工作流、memory 与 spec，而非插件包内部。
 - **证据优先的收尾**：宣称“完成”必须有命令输出、静态检查、浏览器证据，或一个明确的阻塞说明。
 
 ## 安装
+
+### Copilot CLI
 
 把本仓库注册为 Copilot CLI 插件 marketplace：
 
@@ -53,12 +56,69 @@ copilot plugin install funky-eyes/best-copilot
 
 本地修改后请重新安装或更新插件以测试新会话，因为 Copilot CLI 会从已安装插件缓存中读取 agents 与 skills。
 
+### Claude Code
+
+Claude Code 使用自己的 marketplace 系统。先把本仓库添加为 Claude Code marketplace，再安装插件：
+
+```text
+/plugin marketplace add funky-eyes/best-copilot
+/plugin install best-copilot@best-copilot
+/reload-plugins
+```
+
+本地开发或直接从当前 checkout 使用时，也可以直接加载插件目录：
+
+```bash
+claude --plugin-dir /absolute/path/to/best-copilot
+```
+
+如果要使用 Claude Code agent team，多 agent 会话启动前先启用 agent teams。Agent teams 在 Claude Code 中仍是实验能力，并要求 Claude Code v2.1.32 或更高版本：
+
+```bash
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot
+```
+
+Claude Code 会发现：
+
+- marketplace 元数据：[.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
+- 插件元数据：[.claude-plugin/plugin.json](.claude-plugin/plugin.json)
+- 共享技能：[skills/](skills/)，调用名形如 `/best-copilot:<skill-name>`
+- Claude 兼容 subagents：[claude-agents/](claude-agents/)
+- 默认主 agent：[settings.json](settings.json) 中的 `best-copilot:senior-project-expert`
+
+本地修改或插件更新后，在 Claude Code 内运行 `/reload-plugins`，或重启会话。
+
 ## 使用说明
 
 需求编排统一从 [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md) 这个协调者 agent 开始。它在界面中显示为 **Senior Project Expert**，负责意图、范围、规划、派发、review fan-in 和收口。
 
 - **Copilot CLI**：运行 `/agent`，选择 **Senior Project Expert**，然后描述要做的工作。
 - **VS Code 插件**：在聊天中手动切换到 **Senior Project Expert** 这个 agent，然后开始任务。
+- **Claude Code**：运行 `claude --plugin-dir /absolute/path/to/best-copilot`；插件默认主 agent 是 `best-copilot:senior-project-expert`。用 `/agents` 检查插件 agent，用 `/best-copilot:<skill-name>` 直接调用技能。
+
+Claude Code multi-agent 提示示例：
+
+```text
+Create an agent team for this task. Use best-copilot:senior-project-expert as the lead.
+Spawn teammates using best-copilot:technical-architect, best-copilot:developer,
+best-copilot:quality-assurance-expert, and best-copilot:security-reviewer
+where their scopes apply. Keep write sets non-overlapping,
+prevent self-review, and report command evidence before closeout.
+For each teammate, invoke /best-copilot:core-workflow-contract plus its
+matching role workflow skill, or include the minimal role checklist fallback.
+```
+
+Claude Code 可以通过插件 agents、skills 和 agent teams 达到 Copilot 风格的多 agent 工作流效果。它不会复刻 Copilot 的跨模型厂商路由：Claude 适配器使用 `model: inherit`，实际模型由当前 Claude Code 会话的 `/model`、`--model` 或用户配置决定。
+
+## 运行时适配架构
+
+跨角色公共规则放在 [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md)。每个角色自己的 workflow 放在 `skills/*-workflow/`：`senior-project-expert-workflow`、`specification-writer-workflow`、`technical-architect-workflow`、`developer-workflow`、`frontend-designer-workflow`、`quality-assurance-workflow`、`security-reviewer-workflow`、`root-cause-fixer-workflow`。Copilot-only 的内容留在 [agents/](agents/)：模型名、Copilot 工具、`user-invocable`、`agents` 和 `handoffs`。Claude-only 的内容留在 [claude-agents/](claude-agents/) 里的同名文件：scoped plugin agent 名称、`model: inherit`、只读限制，以及 agent-team 模式下 `skills` frontmatter 不会自动应用到 teammate 的限制。
+
+这样公共行为、角色专属行为、无法共存的 runtime metadata 三层隔离；每个 agent 都必须同时加载公共 contract 和自己的角色 workflow。
+
+Claude agent 的 frontmatter 只预加载 `core-workflow-contract` 和对应角色 workflow。`structured-review`、`test-driven-development`、`web-experience-audit` 这类 focused skills 保留在 agent 正文里按需触发，避免启动时默认吃掉过多上下文。
+
+Copilot handoff 是 fail-closed：每个 PM handoff prompt 都要求 `core-workflow-contract` 加目标角色 workflow skill。如果运行时不能加载这些 skill，handoff 会带上最小角色 checklist fallback；两者都没有时，specialist 必须返回 `NEEDS_CONTEXT missing_required_skill`。
 
 ## 快速检查
 
@@ -72,8 +132,20 @@ copilot plugin install funky-eyes/best-copilot
 ```text
 best-copilot
 ├── plugin.json
+├── .claude-plugin/
+│   ├── plugin.json
+│   └── marketplace.json
 ├── marketplace.json
 ├── agents/
+│   ├── pm-coordinator.agent.md
+│   ├── tech-architect.agent.md
+│   ├── developer.agent.md
+│   ├── frontend-designer.agent.md
+│   ├── risk-qa.agent.md
+│   ├── security-agent.agent.md
+│   ├── auto-fixer.agent.md
+│   └── spec-writer.agent.md
+├── claude-agents/
 │   ├── pm-coordinator.agent.md
 │   ├── tech-architect.agent.md
 │   ├── developer.agent.md
@@ -122,6 +194,7 @@ User request
 
 | Area | Skills |
 | --- | --- |
+| Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
 | Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
@@ -132,19 +205,19 @@ User request
 
 ## 首次在目标仓库中使用
 
-在新仓库中开始有意义任务前，让 Copilot 学习项目：
+在新仓库中开始有意义任务前，让当前运行时先检查项目：
 
 ```text
 /init
 ```
 
-或：
+在 Copilot CLI 中，也可以使用 shell 命令：
 
 ```bash
 copilot init
 ```
 
-然后由 **Senior Project Expert** 开始实质工作。该角色应将有用的仓库事实标准化到目标仓库本地文件，创建缺失的本地脚手架，并在继续实施前验证这些文件存在。
+然后由 **Senior Project Expert** / `best-copilot:senior-project-expert` 开始实质工作。该角色应将有用的仓库事实标准化到目标仓库本地文件，创建缺失的本地脚手架，并在继续实施前验证这些文件存在。
 
 目标本地状态属于目标仓库：
 
@@ -175,12 +248,15 @@ spec/templates/
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
+Claude Code 只能运行 Claude 模型。`claude-agents/*.agent.md` 中的 Claude 适配器保留角色分工，并使用 `model: inherit`，实际模型由当前 Claude Code 会话控制。
+
 ## 验证此包
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
-ruby -ryaml -e 'Dir["{agents,skills}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
+find claude-agents -maxdepth 1 -name '*.agent.md' | sort
 find skills -maxdepth 3 -name SKILL.md | sort
 git diff --check
 ```

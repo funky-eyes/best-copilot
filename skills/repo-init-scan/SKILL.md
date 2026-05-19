@@ -22,8 +22,8 @@ This skill is a first-substantial-task gate, not a plugin install hook. It canno
 This skill is fail-closed once selected. If repository facts or required first-use scaffolds are missing, do not continue to requirements analysis, planning, framework migration, dependency changes, security rewrites, or implementation until the required files have been created or a `BLOCKED` result has been returned. Reading package/build files is allowed only as bounded evidence for creating `.github/instructions/project.instructions.md`; it is not permission to start the substantive task.
 
 - Before real requirements analysis, check whether repository facts are already initialized and whether target-local scaffolds exist.
-- If repository facts are incomplete and shell execution is available, run `copilot init` directly, normalize useful output or artifacts into `.github/instructions/project.instructions.md`, and then continue the user's task in the same conversation only after required artifacts are verified.
-- If repository facts are incomplete and only Copilot interactive slash commands are available, ask the user to run `/init`, consume the resulting output or artifacts, normalize them into `.github/instructions/project.instructions.md`, and then continue the user's task in the same conversation only after required artifacts are verified.
+- If repository facts are incomplete and the active runtime exposes `/init`, run or ask the user to run `/init`, consume the resulting output or artifacts, normalize them into `.github/instructions/project.instructions.md`, and then continue the user's task in the same conversation only after required artifacts are verified.
+- If repository facts are incomplete, shell execution is available, and `copilot init` exists, run `copilot init` directly, normalize useful output or artifacts into `.github/instructions/project.instructions.md`, and then continue the user's task in the same conversation only after required artifacts are verified.
 - If official init is unavailable or incomplete, do the bounded manual scan below and record unknowns explicitly.
 - After repository facts exist, initialize missing target-local instruction, memory, and spec scaffolds through the bootstrap skills in this plugin.
 - A `skill(repo-init-scan)` marker alone is not success. Success requires on-disk verification of the target files listed in `Required First-Use Artifacts`.
@@ -62,9 +62,9 @@ Treat the repository as initialized when all of these are true:
 - It records at least one concrete build, test, check, lint, or dev command, or explicitly says those commands are `unknown` or not applicable after a bounded scan.
 - It records concrete project facts for runtime/framework, entrypoints, and module boundaries, or explicitly marks unknown gaps as `unknown` after a bounded scan.
 
-Do not rerun `/init` or `copilot init` merely because a new conversation started or because scaffolds are missing. Rerun official init only when the file is missing, still placeholder-heavy, or lacks the core fact categories above. If facts are current but scaffolds are missing, skip official init and run only the bootstrap skills.
+Do not rerun `/init` or `copilot init` merely because a new conversation started or because scaffolds are missing. Rerun the active runtime's official init only when the file is missing, still placeholder-heavy, or lacks the core fact categories above. If facts are current but scaffolds are missing, skip official init and run only the bootstrap skills.
 
-The `copilot init` command returning output is not enough. Immediately after running it, write or repair `.github/instructions/project.instructions.md` from official output and bounded repository evidence, then re-check it on disk. If the file is still missing or incomplete, record `official_init_no_write` or `official_init_incomplete` and continue only with bounded manual scan plus local file creation.
+An official init command returning output is not enough. Immediately after running it, write or repair `.github/instructions/project.instructions.md` from official output and bounded repository evidence, then re-check it on disk. If the file is still missing or incomplete, record `official_init_no_write` or `official_init_incomplete` and continue only with bounded manual scan plus local file creation.
 
 ## Target Repository State
 
@@ -81,9 +81,9 @@ Do not copy this plugin repository's instruction files, memory files, specs, or 
 
 ## Steps
 
-1. Prefer the official Copilot initializer before substantive analysis only when repository facts are incomplete:
-   - From a shell-capable runtime, run `copilot init` directly.
-   - In Copilot CLI interactive mode, ask the user to run `/init`.
+1. Prefer the active runtime's official initializer before substantive analysis only when repository facts are incomplete:
+   - Use `/init` when the current runtime exposes it, including Copilot CLI, VS Code Copilot, or Claude Code.
+   - From a shell-capable runtime, run `copilot init` directly only when the Copilot CLI command exists.
    - Do not stop after initialization; normalize the facts and resume the original user request in the same conversation.
 2. Normalize and verify official init by reading the target repository file:
    - Write useful `/init` or `copilot init` output into `.github/instructions/project.instructions.md` when the file is missing or incomplete.
