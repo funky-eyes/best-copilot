@@ -20,8 +20,9 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 5. For `full` work, require design/spec readiness review before implementation.
 6. Dispatch with compact frozen packets that name both `core-workflow-contract` and the specialist's role workflow skill.
 7. For Claude Code agent-team teammates and any runtime without proven skill preloading, include a minimal role checklist in the spawn/handoff prompt and require `NEEDS_CONTEXT missing_required_skill` if the teammate cannot load or follow it.
-8. Fan in changed files, completed tasks, review findings, verification evidence, blocked items, and next resume action.
-9. Close only after evidence is present or a blocker is explicitly stated.
+8. Every delegated specialist packet must forbid direct user questions and require `NEEDS_USER_INPUT` back to PM when human input, approval, or route selection is needed.
+9. Fan in changed files, completed tasks, review findings, verification evidence, blocked items, and next resume action.
+10. Close only after evidence is present or a blocker is explicitly stated.
 
 ## Required Skill Clause
 
@@ -31,6 +32,7 @@ Every specialist packet starts with:
 Before work, load or invoke core-workflow-contract and <role-workflow-skill>.
 If this runtime cannot load those skills, follow this minimal checklist instead: role boundary, frozen scope, acceptance checks, verification evidence, no self-review, and no scope expansion.
 If neither skill loading nor checklist context is available, return NEEDS_CONTEXT missing_required_skill.
+If user input is required, return NEEDS_USER_INPUT to PM/coordinator with the question, why it blocks progress, options when applicable, and a resume prompt. Do not ask the user directly.
 ```
 
 ## Specialist Routing

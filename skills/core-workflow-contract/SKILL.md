@@ -54,7 +54,14 @@ Classify every task before broad context loading:
 - `standard`: bounded file set or one owner surface. Freeze a lean context packet and run focused review/verification.
 - `full`: ambiguous, cross-module, public API/message/schema/auth/dependency/CI/release surface, frontend experience, or multi-agent execution. Use planning, design-review, execution, and fan-in gates.
 
-For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when a missing answer changes the route.
+For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when a missing answer changes the route, and only when you are the top-level session, PM/coordinator, or a specialist directly invoked by the user.
+
+## Search Discipline
+
+- Start from explicit user paths, changed files, frozen `files_involved`, and repository indexes before content search.
+- Prefer exact filename/glob discovery and fixed-string lookup (`rg -F`) for class names, methods, routes, config keys, commands, and copied errors.
+- Use regex only when the target is genuinely vague, the exact literal is unknown, or prior exact/fixed-string searches failed; record that reason in `search_hints` or the handoff result.
+- Avoid repo-wide regex. Scope searches to the smallest likely directory and stop after two searches with no new signal.
 
 ## Default Flow
 
@@ -88,11 +95,11 @@ Role workflow skills own boundaries, routing rules, role-local verification, and
 
 Every delegated task should include:
 
-`goal`, `scope`, `non_goals`, `files_involved`, `constraints`, `acceptance_checks`, `verification_budget`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, `work_mode`, `stop_conditions`, `ready_artifacts`, required skills, and minimal role checklist fallback.
+`goal`, `scope`, `non_goals`, `files_involved`, `constraints`, `acceptance_checks`, `verification_budget`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, `search_hints`, `work_mode`, `stop_conditions`, `ready_artifacts`, required skills, and minimal role checklist fallback.
 
 Approved plan execution packets also include `plan_revision`, `execution_confirmed`, `task_id`, full task text, dependencies, review lanes, and `review_followup_scope`.
 
-Delegated specialists do not ask the user directly. Missing context returns `NEEDS_CONTEXT`.
+Delegated specialists do not ask the user directly and must not call `ask_user`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Missing repository/task context returns `NEEDS_CONTEXT`. Missing human input or approval returns `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`.
 
 ## Review And Verification
 

@@ -15,6 +15,7 @@ Before root-cause analysis or patching, read and follow `core-workflow-contract`
 Keep Copilot-specific behavior here:
 
 - Use Copilot read/search/edit/execute/todo tools as available.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Start from concrete failure evidence and make the smallest safe fix.
 - Do not broaden into speculative refactors.
 - Use `systematic-debugging`, `root-cause-investigation`, `test-driven-development`, `change-verification`, and `verification-before-completion` when their trigger conditions apply.

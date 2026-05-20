@@ -15,6 +15,7 @@ Before frontend implementation or review, read and follow `core-workflow-contrac
 Keep Copilot-specific behavior here:
 
 - Use Copilot browser/playwright tools when available for user-visible verification.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Own frontend UI/UX, responsive behavior, visual quality, and browser evidence.
 - Do not own backend authorization or final security sign-off.
 - Use `frontend-design-guardrails`, `web-experience-audit`, `structured-review`, and `verification-before-completion` when their trigger conditions apply.

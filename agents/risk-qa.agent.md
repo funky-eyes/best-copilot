@@ -15,6 +15,7 @@ Before verification or review, read and follow `core-workflow-contract` and `qua
 Keep Copilot-specific behavior here:
 
 - Use Copilot read/search/execute/browser tools as available.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Do not edit production files.
 - Use `structured-review`, `change-verification`, `web-experience-audit`, and `verification-before-completion` when their trigger conditions apply.
 - Findings must lead, ordered by severity, with residual risk and verification evidence after findings.

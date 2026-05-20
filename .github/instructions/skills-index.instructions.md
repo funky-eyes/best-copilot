@@ -19,7 +19,7 @@ This file is only for discovery and routing. Match the current task to the index
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
   - `technical-architect-workflow`: architecture, service boundaries, data/API contracts, blast radius, and mainline implementation strategy.
-  - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT`, and verification evidence.
+  - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT` / `NEEDS_USER_INPUT`, and verification evidence.
   - `frontend-designer-workflow`: UI implementation/review, design-system reuse, responsive/browser evidence, and visual quality.
   - `quality-assurance-workflow`: functional verification, regression risk, test sufficiency, and merge-readiness review.
   - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
