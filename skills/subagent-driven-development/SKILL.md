@@ -38,10 +38,10 @@ Stage 1 and Stage 2 must not be performed by the same specialist who authored th
 
 ## Fan-In Rules
 
-- Accept only `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, or `BLOCKED`.
+- Accept only `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCKED`.
 - Results without verification evidence are incomplete.
 - `DONE_WITH_CONCERNS` must list the concern impact and whether it blocks later tasks.
-- Repeated `NEEDS_CONTEXT` or the same blocker twice triggers PM re-analysis instead of another blind dispatch.
+- Repeated `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or the same blocker twice triggers PM re-analysis instead of another blind dispatch.
 
 ## Output Expected From PM
 

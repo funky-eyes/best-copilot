@@ -26,7 +26,7 @@ This skill is fail-closed once selected. If repository facts or required first-u
 - If repository facts are incomplete, shell execution is available, and `copilot init` exists, run `copilot init` directly, normalize useful output or artifacts into `.github/instructions/project.instructions.md`, and then continue the user's task in the same conversation only after required artifacts are verified.
 - If official init is unavailable or incomplete, do the bounded manual scan below and record unknowns explicitly.
 - After repository facts exist, initialize missing target-local instruction, memory, and spec scaffolds through the bootstrap skills in this plugin.
-- A `skill(repo-init-scan)` marker alone is not success. Success requires on-disk verification of the target files listed in `Required First-Use Artifacts`.
+- A `skill(repo-init-scan)` marker alone is not success. Success requires on-disk verification of the target files listed in `Required First-Use Artifacts` plus the required content checks for instruction files.
 
 ## Required First-Use Artifacts
 
@@ -49,6 +49,18 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 - `spec/templates/tasks-template.md`
 
 If the project facts file is missing and the current runtime has file-write capability, create or repair it from official init output and bounded repository evidence. Create the remaining missing scaffolds by executing the matching bootstrap skill. If file-write capability is unavailable or the target repository path is ambiguous, return `BLOCKED` with `first_use_artifacts_missing` and list the missing paths. Do not continue the original task in the same turn until this barrier passes.
+
+Instruction files that exist but are older short scaffolds are not sufficient. Before `next_task_ready: yes`, verify:
+
+- `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`.
+- That same file contains the native closeout requirement, the latest-runtime native ask availability rule, continuation/free-text invalidation, executable closeout-reply handling, and answer-only follow-up non-exemption.
+- That same file says: when a closeout or continuation choice is needed, keep selectable options in the native structured prompt, not in a prose `1/2/3` list.
+- That same file says PM-delegated specialists must not ask the user directly and must return `NEEDS_USER_INPUT` to PM/coordinator for human input or approval.
+- That same file contains `## Search Precision` with fixed-string lookup before regex search.
+- That same file contains the first-use scaffold gate naming `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- `.github/instructions/skills-index.instructions.md` contains bootstrap skill routing and the `## Claude Code Skill Names` note.
+
+If any of these content checks fail and file-write capability exists, run `target-instructions-bootstrap` as a repair step even when the files already exist. If repair is not possible, return `BLOCKED instruction_scaffold_incomplete` with the missing sections.
 
 ## Init State Detection
 
@@ -103,14 +115,17 @@ Do not copy this plugin repository's instruction files, memory files, specs, or 
    - `target-memory-bootstrap`: create missing `memories/repo/**` skeleton during first substantial plugin use, and later whenever persistent recovery is needed.
    - `target-spec-bootstrap`: create missing `spec/INDEX.md` and `spec/templates/**` during first substantial plugin use, and later before writing any spec.
 6. Re-check the `Required First-Use Artifacts` paths on disk. If any required file is still absent, stop with `BLOCKED`; do not downgrade this to `unknown` and do not proceed to dependency, framework, security, or application analysis.
-7. Keep instructions short. Do not paste long command output, logs, dependency trees, private hosts, tokens, or PII.
-8. Normalize for reuse:
+7. Re-check required instruction content. Old short scaffolds must be repaired through `target-instructions-bootstrap`; path existence alone is not enough.
+8. Keep instructions short. Do not paste long command output, logs, dependency trees, private hosts, tokens, or PII.
+9. Normalize for reuse:
    - Keep the facts generic enough to survive future tasks in the same repository.
    - Mark unresolved facts explicitly as `unknown` instead of guessing.
    - Record only the smallest set of repo facts needed for later routing and verification.
-9. Verify:
+10. Verify:
    - `.github/instructions/project.instructions.md` exists on disk in the target repository.
    - Any bootstrap-created files exist on disk in the target repository and did not overwrite existing project-specific content.
+   - `.github/instructions/must.instructions.md` contains the `Per-Request Hard Gates` section, PM-delegated specialist ask boundary, `Search Precision`, and first-use scaffold gate.
+   - `.github/instructions/skills-index.instructions.md` contains bootstrap routing and the `## Claude Code Skill Names` guidance.
    - No `<fill:` placeholders remain for facts that were discoverable.
    - Any unknown facts are explicitly marked `unknown`, not guessed.
    - At least one real build/test/check command is documented, or the reason is recorded.

@@ -15,6 +15,7 @@ Before architecture, mainline implementation, or review, read and follow `core-w
 Keep Copilot-specific behavior here:
 
 - Use Copilot `read`, `search`, `edit`, `execute`, `todo`, and native ask tools as available.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Own backend/full-stack architecture-sensitive work and review Developer-owned changes.
 - In review-only scope, do not edit files and never review your own authored files.
 - Use `structured-review`, `spec-execution-fastpath`, `test-driven-development`, `change-verification`, and `verification-before-completion` when their trigger conditions apply.

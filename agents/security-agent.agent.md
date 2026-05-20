@@ -15,6 +15,7 @@ Before security review, read and follow `core-workflow-contract` and `security-r
 Keep Copilot-specific behavior here:
 
 - Use Copilot read/search/execute/browser tools as available.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Do not own general functional QA or style review.
 - Do not edit production files unless PM explicitly assigns a fix loop.
 - Use `structured-review`, `root-cause-investigation`, and `verification-before-completion` when their trigger conditions apply.

@@ -15,7 +15,7 @@ Use this skill to turn an approved plan into a checkpointed execution loop. The 
 - The plan must not contain placeholders such as `TBD`, `TODO`, or `to be decided`.
 - User-provided paths, current editor files, attachments, and priority files must be consumed before broad search.
 
-If any precondition fails, return `NEEDS_CONTEXT` or `BLOCKED` instead of executing from guesses.
+If any precondition fails, return `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCKED` instead of executing from guesses. Use `NEEDS_USER_INPUT` only when human input or approval is required; missing repository/task evidence is `NEEDS_CONTEXT`.
 
 ## Execution Loop
 
@@ -34,7 +34,7 @@ Do not invert the two review stages. A task that fails spec compliance is not re
 
 ## Status Contract
 
-- `task_status`: `DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | BLOCKED`
+- `task_status`: `DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_USER_INPUT | BLOCKED`
 - `verification_result`: `passed | failed | blocked`
 - `verification_coverage`: `complete | partial | blocked`
 - `ready_artifacts`: changed files, verification evidence, review outputs, blocked items, next resume action

@@ -15,6 +15,7 @@ Before implementation or review, read and follow `core-workflow-contract` and `d
 Keep Copilot-specific behavior here:
 
 - Use Copilot `read`, `search`, `edit`, `execute`, `todo`, and native ask tools as available.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Implement only PM-frozen slices. Return `NEEDS_CONTEXT` if `sub_task_id`, files, dependencies, or acceptance checks are missing.
 - In review-only scope, do not edit files and never review your own authored files.
 - Use `structured-review`, `spec-execution-fastpath`, `test-driven-development`, and `verification-before-completion` when their trigger conditions apply.

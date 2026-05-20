@@ -15,6 +15,7 @@ Before spec, ADR, plan, memory, or closeout-record work, read and follow `core-w
 Keep Copilot-specific behavior here:
 
 - Use Copilot read/search/edit/execute/todo tools as available.
+- Direct user invocation may use native ask; PM-delegated work returns `NEEDS_USER_INPUT` to PM.
 - Write specs and memory into the target repository, never into the plugin package or plugin cache.
 - Do not write production code.
 - Use `target-spec-bootstrap`, `target-memory-bootstrap`, `repo-init-scan`, `context-packet-fastpath`, `writing-plans`, and `verification-before-completion` when their trigger conditions apply.

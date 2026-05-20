@@ -18,12 +18,23 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 
 ## Files
 
-Create these files when absent:
+Create these files when absent, and repair them when present but missing the
+required runtime-neutral scaffold sections below:
 
 - `.github/instructions/project.instructions.md`
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `AGENTS.md` when the runtime includes Codex or the user wants Codex compatibility.
+
+Existing target files must be handled as follows:
+
+- Never replace an existing file wholesale.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Priority`.
+- If `.github/instructions/must.instructions.md` exists but its hard gates do not distinguish PM/coordinator or directly user-invoked specialists from PM-delegated specialists, repair that section from this skill.
+- If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Search Precision`, append that section from this skill.
+- If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
+- If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
 ## `.github/instructions/project.instructions.md`
 
@@ -93,7 +104,9 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 ## Per-Request Hard Gates
 
-- Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, first trigger a native closeout prompt through `ask_user`, `vscode/askQuestions`, `askQuestions`, or an equivalent structured choice UI. Do not close on prose-only summary.
+- Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session, PM/coordinator, or a specialist directly invoked by the user may trigger a native closeout prompt through `ask_user`, `vscode/askQuestions`, `askQuestions`, or an equivalent structured choice UI. Do not close on prose-only summary.
+- PM-delegated specialists must not ask the user directly and must not use native closeout prompts. If user input, approval, or route selection is needed, return `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`.
+- When a closeout or continuation choice is needed, present the decision surface through the native ask UI itself rather than a prose summary plus options list. Do not mix a written `1/2/3` choice list into the same closing prose; keep the actual selectable options in the structured prompt.
 - Native ask availability must be judged from the latest runtime tool inventory. If a native ask tool is available now, use it immediately; do not reuse an older "native UI unavailable" conclusion.
 - If a previous turn could only return a staged, blocked, or partial prose response because native ask was unavailable, and the latest tool inventory or tool-change notice restores `ask_user`, `vscode/askQuestions`, `askQuestions`, or an equivalent native UI, the next direct closeout must first perform a native closeout prompt. Earlier prose does not become retroactive closeout authorization.
 - If the user replies through a native closeout or continuation prompt with free text, technical feedback, a selected continuation, a file path, a fix request, an investigation direction, or any new executable instruction, that reply is a new ordinary user message. The previous closeout state is invalidated immediately.
@@ -107,6 +120,13 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - If facts are missing, run the active runtime's repository init flow before real requirements analysis. Use `/init` when available in Copilot CLI, VS Code Copilot, or Claude Code; use `copilot init` only when the Copilot CLI command exists. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
 - Do not guess project stack, module ownership, security boundaries, or build commands.
 
+## Search Precision
+
+- Start from user-provided paths, changed files, `.github/instructions/project.instructions.md`, and target-local `spec/INDEX.md` / `memories/repo/INDEX.md` before content search.
+- Prefer exact filename/glob lookup and fixed-string `rg -F` for class names, method names, route strings, config keys, command names, and copied errors.
+- Use regex only when the user description is vague, the exact literal is unknown, or earlier exact/fixed-string searches failed.
+- Avoid repo-wide regex; scope searches to the smallest likely directory and stop after two searches with no new signal.
+
 ## Memory And Spec
 
 - Persistent memory belongs in this target repository under `memories/repo/**`.
@@ -119,8 +139,9 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ## Interaction
 
 - Use the user's primary language unless they ask otherwise.
-- Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route.
+- Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route, and only when you are the top-level session, PM/coordinator, or directly invoked by the user.
 - If a native ask UI exists, use it for blocking route, approval, or continuation choices.
+- If you are a PM-delegated specialist, return `NEEDS_CONTEXT` for missing repository/task context and `NEEDS_USER_INPUT` for questions that require the human; PM/coordinator owns the actual user prompt.
 
 ## Runtime Notes
 
@@ -162,7 +183,7 @@ Read only the selected skill, not the whole skill tree.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
   - `technical-architect-workflow`: architecture, service boundaries, data/API contracts, blast radius, and mainline implementation strategy.
-  - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT`, and verification evidence.
+  - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT` / `NEEDS_USER_INPUT`, and verification evidence.
   - `frontend-designer-workflow`: UI implementation/review, design-system reuse, responsive/browser evidence, and visual quality.
   - `quality-assurance-workflow`: functional verification, regression risk, test sufficiency, and merge-readiness review.
   - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
@@ -218,6 +239,11 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 ## Verification
 
 - Confirm generated files exist in the target repository.
+- path existence alone is not enough; required sections must also be present after create or repair.
 - Confirm existing files were not overwritten.
+- Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, and the PM-delegated specialist `NEEDS_USER_INPUT` rule.
+- Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
+- Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
 - If this skill was invoked because `.github/instructions/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.
