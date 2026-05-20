@@ -112,6 +112,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - If the user replies through a native closeout or continuation prompt with free text, technical feedback, a selected continuation, a file path, a fix request, an investigation direction, or any new executable instruction, that reply is a new ordinary user message. The previous closeout state is invalidated immediately.
 - When a closeout/continuation reply contains new executable work, do the substantial action for that new task next, or ask one minimal native clarification if it is genuinely ambiguous. Do not send another summary-only response or another closeout prompt first.
 - Answer-only follow-ups such as why/how questions, principle explanations, solution comparisons, rule clarifications, and review-response discussion are not closeout exemptions. If the answer would be the last prose message in the current batch, trigger a fresh native closeout prompt after answering and before ending.
+- Do not reinterpret any final-answer formatting rule, brevity rule, or “provide a summary/next steps” instruction as permission to skip the native ask step. Closeout gating wins over stylistic closeout guidance.
 
 ## Repository Truth
 
