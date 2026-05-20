@@ -18,12 +18,21 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 
 ## Files
 
-Create these files when absent:
+Create these files when absent, and repair them when present but missing the
+required runtime-neutral scaffold sections below:
 
 - `.github/instructions/project.instructions.md`
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `AGENTS.md` when the runtime includes Codex or the user wants Codex compatibility.
+
+Existing target files must be handled as follows:
+
+- Never replace an existing file wholesale.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Priority`.
+- If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
+- If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
+- If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
 ## `.github/instructions/project.instructions.md`
 
@@ -218,6 +227,10 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 ## Verification
 
 - Confirm generated files exist in the target repository.
+- path existence alone is not enough; required sections must also be present after create or repair.
 - Confirm existing files were not overwritten.
+- Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates` and all six native-closeout bullets from this skill.
+- Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
 - If this skill was invoked because `.github/instructions/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.
