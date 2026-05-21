@@ -19,6 +19,7 @@ Own auth, permissions, dependencies, configuration, release surfaces, sensitive 
 4. Ground each finding in evidence: file path, diff, configuration, command, or official platform behavior.
 5. Include impact and concrete fix guidance for each confirmed finding.
 6. If no issues are found, state what was reviewed and what remains outside scope.
+7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
 ## Output
 

@@ -55,7 +55,7 @@ Instruction files that exist but are older short scaffolds are not sufficient. B
 - `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`.
 - That same file contains the native closeout requirement, the latest-runtime native ask availability rule, continuation/free-text invalidation, executable closeout-reply handling, and answer-only follow-up non-exemption.
 - That same file says: when a closeout or continuation choice is needed, keep selectable options in the native structured prompt, not in a prose `1/2/3` list.
-- That same file says PM-delegated specialists must not ask the user directly and must return `NEEDS_USER_INPUT` to PM/coordinator for human input or approval.
+- That same file says specialists must not ask the user directly and must return `NEEDS_USER_INPUT` to PM/coordinator when one exists, or `BLOCKED missing_top_level_question` otherwise.
 - That same file contains `## Search Precision` with fixed-string lookup before regex search.
 - That same file contains the first-use scaffold gate naming `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
 - `.github/instructions/skills-index.instructions.md` contains bootstrap skill routing and the `## Claude Code Skill Names` note.
@@ -124,7 +124,7 @@ Do not copy this plugin repository's instruction files, memory files, specs, or 
 10. Verify:
    - `.github/instructions/project.instructions.md` exists on disk in the target repository.
    - Any bootstrap-created files exist on disk in the target repository and did not overwrite existing project-specific content.
-   - `.github/instructions/must.instructions.md` contains the `Per-Request Hard Gates` section, PM-delegated specialist ask boundary, `Search Precision`, and first-use scaffold gate.
+   - `.github/instructions/must.instructions.md` contains the `Per-Request Hard Gates` section, the specialist ask boundary plus `NEEDS_USER_INPUT`/`BLOCKED` fallback rule, `Search Precision`, and first-use scaffold gate.
    - `.github/instructions/skills-index.instructions.md` contains bootstrap routing and the `## Claude Code Skill Names` guidance.
    - No `<fill:` placeholders remain for facts that were discoverable.
    - Any unknown facts are explicitly marked `unknown`, not guessed.

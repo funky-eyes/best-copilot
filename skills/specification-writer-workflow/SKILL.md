@@ -25,6 +25,7 @@ Write persistent state into the target repository, not the plugin package or cac
 5. Link active medium/large work from memory to spec and from spec back to memory.
 6. Do not store secrets, PII, raw long logs, or unverified guesses.
 7. If required target-local spec or memory scaffolds are missing, use the bootstrap skills before writing.
+8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
 ## Output
 

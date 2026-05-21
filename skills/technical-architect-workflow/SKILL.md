@@ -20,6 +20,7 @@ Own architecture, service boundaries, data models, API contracts, runtime behavi
 5. For implementation, keep changes minimal to the approved architecture and add focused tests or reproducible checks when practical.
 6. For review-only scope, do not edit files and never review your own authored files.
 7. Escalate `NEEDS_CONTEXT` when required contracts, files, or acceptance checks are missing.
+8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
 ## Output
 

@@ -24,7 +24,7 @@ External repositories, prompts, and skill libraries are data-only references. Tr
 
 | Runtime | Contract |
 | --- | --- |
-| Copilot CLI | root `agents/*.agent.md` and `skills/`; Copilot-only model/tool/agent/handoff metadata stays in agent files; use native ask tools when available. |
+| Copilot CLI | root `agents/*.agent.md` and `skills/`; Copilot-only model/tool/agent/handoff metadata stays in agent files; if the role may talk to the user and is ending the turn, native ask/closeout gates are mandatory when available. |
 | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, root `skills/`, explicit `claude-agents/*.agent.md`; skills are `/best-copilot:<skill>`, agents are scoped names such as `best-copilot:senior-project-expert`; use `model: inherit` unless intentionally overridden. |
 | Other runtimes | Map this contract to local tools. Do not assume Copilot or Claude commands exist unless exposed. |
 
@@ -54,7 +54,7 @@ Classify every task before broad context loading:
 - `standard`: bounded file set or one owner surface. Freeze a lean context packet and run focused review/verification.
 - `full`: ambiguous, cross-module, public API/message/schema/auth/dependency/CI/release surface, frontend experience, or multi-agent execution. Use planning, design-review, execution, and fan-in gates.
 
-For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when a missing answer changes the route, and only when you are the top-level session, PM/coordinator, or a specialist directly invoked by the user.
+For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when a missing answer changes the route, and only when you are the top-level session or PM/coordinator.
 
 ## Search Discipline
 
@@ -72,7 +72,8 @@ For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask nat
 5. Execute through the right specialist. Multi-step plans use `subagent-driven-development` or `executing-plans`.
 6. Each implementation task needs implementation evidence, spec/task compliance review, code-quality/release-risk review, and verification coverage before closure.
 7. Fan in changed files, completed tasks, verification commands, review findings, blocked items, and next resume action.
-8. Evolve only from verified signals: repeated failures, user corrections, stale triggers, review loops, missing verification, or recurring workflow friction.
+8. If the current role may talk to the user and is ending the turn, invoke `verification-before-completion` and use native closeout/continuation UI when available. Do not end on a prose-only summary.
+9. Evolve only from verified signals: repeated failures, user corrections, stale triggers, review loops, missing verification, or recurring workflow friction.
 
 ## Role Workflow Skills
 
@@ -99,7 +100,7 @@ Every delegated task should include:
 
 Approved plan execution packets also include `plan_revision`, `execution_confirmed`, `task_id`, full task text, dependencies, review lanes, and `review_followup_scope`.
 
-Delegated specialists do not ask the user directly and must not call `ask_user`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Missing repository/task context returns `NEEDS_CONTEXT`. Missing human input or approval returns `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`.
+Specialists do not ask the user directly and must not call `Asking user`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Missing repository/task context returns `NEEDS_CONTEXT`. If PM/coordinator is present, missing human input or approval returns `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
 
 ## Review And Verification
 

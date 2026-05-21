@@ -30,7 +30,7 @@ Existing target files must be handled as follows:
 
 - Never replace an existing file wholesale.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Priority`.
-- If `.github/instructions/must.instructions.md` exists but its hard gates do not distinguish PM/coordinator or directly user-invoked specialists from PM-delegated specialists, repair that section from this skill.
+- If `.github/instructions/must.instructions.md` exists but its hard gates do not reserve native user prompts to the top-level session or PM/coordinator, repair that section from this skill.
 - If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Search Precision`, append that section from this skill.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Command Output Budget`, append that section from this skill after `## Search Precision` when that heading exists, otherwise append it before `## Memory And Spec` when possible.
@@ -105,11 +105,11 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 ## Per-Request Hard Gates
 
-- Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session, PM/coordinator, or a specialist directly invoked by the user may trigger a native closeout prompt through `ask_user`, `vscode/askQuestions`, `askQuestions`, or an equivalent structured choice UI. Do not close on prose-only summary.
-- PM-delegated specialists must not ask the user directly and must not use native closeout prompts. If user input, approval, or route selection is needed, return `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`.
+- Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may trigger a native closeout prompt through `Asking user`, `vscode/askQuestions`, `askQuestions`, or an equivalent structured choice UI. Do not close on prose-only summary.
+- Specialists must not ask the user directly and must not use native closeout prompts. If PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
 - When a closeout or continuation choice is needed, present the decision surface through the native ask UI itself rather than a prose summary plus options list. Do not mix a written `1/2/3` choice list into the same closing prose; keep the actual selectable options in the structured prompt.
 - Native ask availability must be judged from the latest runtime tool inventory. If a native ask tool is available now, use it immediately; do not reuse an older "native UI unavailable" conclusion.
-- If a previous turn could only return a staged, blocked, or partial prose response because native ask was unavailable, and the latest tool inventory or tool-change notice restores `ask_user`, `vscode/askQuestions`, `askQuestions`, or an equivalent native UI, the next direct closeout must first perform a native closeout prompt. Earlier prose does not become retroactive closeout authorization.
+- If a previous turn could only return a staged, blocked, or partial prose response because native ask was unavailable, and the latest tool inventory or tool-change notice restores `Asking user`, `vscode/askQuestions`, `askQuestions`, or an equivalent native UI, the next direct closeout must first perform a native closeout prompt. Earlier prose does not become retroactive closeout authorization.
 - If the user replies through a native closeout or continuation prompt with free text, technical feedback, a selected continuation, a file path, a fix request, an investigation direction, or any new executable instruction, that reply is a new ordinary user message. The previous closeout state is invalidated immediately.
 - When a closeout/continuation reply contains new executable work, do the substantial action for that new task next, or ask one minimal native clarification if it is genuinely ambiguous. Do not send another summary-only response or another closeout prompt first.
 - Answer-only follow-ups such as why/how questions, principle explanations, solution comparisons, rule clarifications, and review-response discussion are not closeout exemptions. If the answer would be the last prose message in the current batch, trigger a fresh native closeout prompt after answering and before ending.
@@ -148,9 +148,9 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ## Interaction
 
 - Use the user's primary language unless they ask otherwise.
-- Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route, and only when you are the top-level session, PM/coordinator, or directly invoked by the user.
+- Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route, and only when you are the top-level session or PM/coordinator.
 - If a native ask UI exists, use it for blocking route, approval, or continuation choices.
-- If you are a PM-delegated specialist, return `NEEDS_CONTEXT` for missing repository/task context and `NEEDS_USER_INPUT` for questions that require the human; PM/coordinator owns the actual user prompt.
+- If you are a specialist, return `NEEDS_CONTEXT` for missing repository/task context and route human questions through `NEEDS_USER_INPUT` when PM/coordinator is present, or `BLOCKED missing_top_level_question` otherwise; the actual user prompt belongs to the top-level session or PM/coordinator.
 
 ## Runtime Notes
 
@@ -250,7 +250,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm generated files exist in the target repository.
 - path existence alone is not enough; required sections must also be present after create or repair.
 - Confirm existing files were not overwritten.
-- Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, and the PM-delegated specialist `NEEDS_USER_INPUT` rule.
+- Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, and the specialist `NEEDS_USER_INPUT`/`BLOCKED missing_top_level_question` rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Command Output Budget` and the default `COMMAND 2>&1 | head -c 4000` pattern.
 - Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.

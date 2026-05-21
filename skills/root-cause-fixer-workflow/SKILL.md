@@ -19,6 +19,7 @@ Own concrete failure evidence, root-cause analysis, minimal patching, and regres
 4. Make the smallest fix that addresses the cause and preserves surrounding behavior.
 5. Add or run a focused regression check when practical.
 6. Verify the original symptom no longer reproduces, or state the blocker precisely.
+7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
 ## Output
 

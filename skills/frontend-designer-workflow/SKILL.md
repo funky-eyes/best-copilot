@@ -19,6 +19,7 @@ Own user-facing frontend implementation and review: pages, components, interacti
 4. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
 5. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
 6. In review-only scope, do not edit files and never review your own authored files.
+7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
 ## Output
 

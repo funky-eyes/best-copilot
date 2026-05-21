@@ -32,4 +32,4 @@ description: "Use to prepare a minimal context packet for a delegated subtask or
 - If a delegate needs new files, return to PM to widen scope.
 - A delegate should consume `ready_artifacts` before reopening search.
 - A delegate should stop at `context_budget` and return `NEEDS_CONTEXT` instead of broad-scanning.
-- A PM-delegated specialist should return `NEEDS_USER_INPUT` to PM when human input or approval is required; it must not ask the user directly.
+- Specialists must not ask the user directly. If PM/coordinator is present and human input or approval is required, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question.

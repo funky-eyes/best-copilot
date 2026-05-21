@@ -20,6 +20,7 @@ Own frozen implementation slices and peer review of Technical Architect-owned co
 5. Use TDD or a minimal reproducible check for new behavior or bug fixes when practical.
 6. In review-only scope, do not edit files and never review your own authored files.
 7. Report exact verification commands and results.
+8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
 ## Output
 
