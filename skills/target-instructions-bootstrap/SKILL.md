@@ -33,6 +33,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but its hard gates do not distinguish PM/coordinator or directly user-invoked specialists from PM-delegated specialists, repair that section from this skill.
 - If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Search Precision`, append that section from this skill.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Command Output Budget`, append that section from this skill after `## Search Precision` when that heading exists, otherwise append it before `## Memory And Spec` when possible.
 - If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
 - If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
@@ -127,6 +128,13 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Prefer exact filename/glob lookup and fixed-string `rg -F` for class names, method names, route strings, config keys, command names, and copied errors.
 - Use regex only when the user description is vague, the exact literal is unknown, or earlier exact/fixed-string searches failed.
 - Avoid repo-wide regex; scope searches to the smallest likely directory and stop after two searches with no new signal.
+
+## Command Output Budget
+
+- Protect context usage before command output enters the prompt. Any command with unknown, potentially large, repo-wide, or log-like output must be byte-capped by default.
+- Default shell pattern: `COMMAND 2>&1 | head -c 4000`.
+- Raise the cap only for a scoped file window or specific verification need; prefer focused reruns over pasting full logs.
+- If a capped result truncates critical evidence, rerun a narrower command. Do not use output caps to hide failures, skip verification, or omit important error details.
 
 ## Memory And Spec
 
@@ -244,6 +252,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm existing files were not overwritten.
 - Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, and the PM-delegated specialist `NEEDS_USER_INPUT` rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
+- Confirm `.github/instructions/must.instructions.md` contains `## Command Output Budget` and the default `COMMAND 2>&1 | head -c 4000` pattern.
 - Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
