@@ -26,6 +26,13 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 11. If this role is about to end the turn and native ask UI exists, use it for continuation or closeout unless the latest user message already came from that gate and chose to end. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; in Copilot CLI, use `Asking user` when available. Do not close on a prose-only summary.
 12. Close only after evidence is present or a blocker is explicitly stated.
 
+## PM Native Ask Trigger Gate
+
+- Use native ask for every PM-owned blocking clarification, route selection, execution approval, specialist `NEEDS_USER_INPUT` handback, fan-in continuation, and closeout. This applies whether the need came from brainstorming, review, verification, workspace isolation, branch closeout, or any other skill.
+- Do not treat brainstorming as the only native-ask trigger. If the user says a popup is required, a prose question is not an acceptable substitute when a native ask tool exists.
+- When the Copilot PM adapter frontmatter lists `Asking user` or `vscode_askQuestions`, treat that as an availability signal and attempt the concrete native ask before saying it is unavailable.
+- If the latest tool inventory truly lacks native ask support and a human choice still matters, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact question, options, safe default when one exists, and resume state. Do not close the turn as a normal summary.
+
 ## Dispatch Packet Contract
 
 Every specialist dispatch preserves the shared six-block packet from `core-workflow-contract`:
