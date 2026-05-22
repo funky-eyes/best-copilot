@@ -13,6 +13,8 @@ description: "Use before claiming work is done, fixed, passing, or ready. Requir
 - Tests, build, browser checks, or static validation were run where appropriate.
 - Failed or skipped verification is explicitly reported.
 - Residual risk and next steps are clear.
+- If the current role is delegated, the handback includes `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
+- If a delegated handback uses `status=NEEDS_CONTEXT`, it also includes `clarification_request` and `pm_action: "pm_clarify"`.
 - If the current role is the top-level session or PM/coordinator and is about to end the turn, native closeout or continuation evidence exists unless the latest user message already came from that native gate and chose to end.
 - Specialists must not ask the user directly. If PM/coordinator is present, return `NEEDS_USER_INPUT` when human input is required. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
 - If the task exposed a reusable workflow weakness, include an `evolution_signal` instead of silently moving on.
@@ -30,6 +32,7 @@ description: "Use before claiming work is done, fixed, passing, or ready. Requir
 - PM/coordinator adapters must invoke this skill before their final user-facing response, not only when they happen to remember it.
 - Specialist adapters must invoke this skill before any completion claim or turn-ending summary, but they must not open native user prompts themselves.
 - Agent or skill text must not weaken this requirement into "may use native ask" or "use ask when required" without the turn-ending hard gate.
+- Agent or skill text must not weaken the shared handback contract by renaming owner-controlled fields or making them runtime-specific.
 
 ## Final Evidence Format
 

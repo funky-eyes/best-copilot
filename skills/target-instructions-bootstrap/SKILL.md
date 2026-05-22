@@ -29,11 +29,19 @@ required runtime-neutral scaffold sections below:
 Existing target files must be handled as follows:
 
 - Never replace an existing file wholesale.
-- If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Priority`.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Request Flow`, append that whole section exactly as shown in this skill after `## Priority`.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Request Flow` when that heading exists, or after `## Priority`.
 - If `.github/instructions/must.instructions.md` exists but its hard gates do not reserve native user prompts to the top-level session or PM/coordinator, repair that section from this skill.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Shared State Contracts`, append that section from this skill after `## Repository Truth` when that heading exists, otherwise append it after `## Per-Request Hard Gates`.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Memory And Spec`, append that section from this skill after `## Command Output Budget` when that heading exists, otherwise append it after `## Shared State Contracts`.
 - If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
+- If `.github/instructions/must.instructions.md` exists but lacks the progressive-disclosure memory rule under `## Memory And Spec`, append that bullet from this skill into that section.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Search Precision`, append that section from this skill.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Command Output Budget`, append that section from this skill after `## Search Precision` when that heading exists, otherwise append it before `## Memory And Spec` when possible.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Interaction`, append that section from this skill after `## Memory And Spec` when that heading exists, otherwise append it after `## Command Output Budget`.
+- If `.github/instructions/must.instructions.md` exists but lacks the mixed-language rule under `## Interaction`, append that bullet from this skill into that section.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Agents and Dispatch`, append that section from this skill after `## Runtime Notes` when that heading exists, otherwise append it after `## Memory And Spec`.
+- If `.github/instructions/must.instructions.md` exists but lacks `## Implementation and Verification`, append that section from this skill after `## Agents and Dispatch` when that heading exists, otherwise append it after `## Runtime Notes` when that heading exists, or after `## Interaction`.
 - If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
 - If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
@@ -103,6 +111,15 @@ applyTo: "**"
 
 System, platform, and explicit user instructions outrank repository files. Current repository files and command output outrank memory, old specs, and external references.
 
+## Request Flow
+
+1. Parse literal request, real intent, and success criteria.
+2. Before the first substantial action in a turn, record a per-request start timestamp. If that timestamp was missed, do not backfill a fake duration later.
+3. Read explicit user paths and any `/init` or `copilot init` artifacts first. If repository facts are incomplete, normalize official init output into `.github/instructions/project.instructions.md`; command output without that file is `official_init_no_write`, and substantive work stays blocked until the file exists and is verified.
+4. Before editing, freeze a minimal packet with at least `goal`, `scope`, `constraints`, `expected_outcome`, `acceptance_checks`, `verification_budget`, `work_mode`, and `task_type`. When multi-agent dispatch is used, preserve the shared six-block packet from `core-workflow-contract`.
+5. Search at most three rounds and stop after two rounds with no new signal. Prefer explicit paths, filename/glob lookup, and fixed-string `rg -F` before regex.
+6. Before completion, provide real verification evidence or state the blocker explicitly.
+
 ## Per-Request Hard Gates
 
 - Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may trigger a native closeout prompt through `Asking user`, `vscode/askQuestions`, `askQuestions`, or an equivalent structured choice UI. Do not close on prose-only summary.
@@ -121,6 +138,15 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Treat `.github/instructions/project.instructions.md` as initialized only when it is not the untouched neutral scaffold, contains concrete build/test/check/dev command facts or bounded-scan `unknown`, plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
 - If facts are missing, run the active runtime's repository init flow before real requirements analysis. Use `/init` when available in Copilot CLI, VS Code Copilot, or Claude Code; use `copilot init` only when the Copilot CLI command exists. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
 - Do not guess project stack, module ownership, security boundaries, or build commands.
+
+## Shared State Contracts
+
+- `work_mode` is the scope/orchestration field. Allowed values: `micro | standard | full`.
+- `task_type` is the execution-mode field. Allowed values: `implementation | design_review | verification | fix | spec`.
+- `planning_state`, `execution_confirmed`, and `decision_provenance` are owned only by the top-level session or PM/coordinator.
+- `pm_action` is a delegated handback control field used only with `status=NEEDS_CONTEXT`. The current allowed value is `pm_clarify`, which tells PM/coordinator to repair the packet or clarify missing context before redispatch.
+- Delegated specialists return structured handbacks. Missing repository/task context returns `NEEDS_CONTEXT`. Missing human choice returns `NEEDS_USER_INPUT` to PM/coordinator when one exists, otherwise `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
+- When consuming older dispatch prompts that still use `TASK`, `EXPECTED OUTCOME`, `REQUIRED TOOLS`, `MUST DO`, `MUST NOT DO`, or `CONTEXT`, normalize them into the current packet before further delegation.
 
 ## Search Precision
 
@@ -144,10 +170,12 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - On first substantial plugin use, if `.github/instructions/**`, `memories/repo/**`, or `spec/**` scaffolds are missing, create them through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify the paths on disk before substantive work. If they cannot be created, stop with `BLOCKED first_use_gate_incomplete` and list the missing paths.
 - MEDIUM/LARGE active work should link both ways: spec points to memory, and `memories/repo/current-workstreams.md` points to spec.
 - Memory stores recovery state, decisions, and verified facts. Spec stores requirements, design, tasks, and acceptance checks.
+- Use progressive disclosure: read routing indexes and current workstream state first, then only the linked or relevant shards. Do not load whole memory trees, whole specs, or logs by default.
 
 ## Interaction
 
 - Use the user's primary language unless they ask otherwise.
+- For mixed-language input, treat the language used for the actual request or explanation as primary; pasted code, logs, stack traces, and file content do not override it.
 - Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route, and only when you are the top-level session or PM/coordinator.
 - If a native ask UI exists, use it for blocking route, approval, or continuation choices.
 - If you are a specialist, return `NEEDS_CONTEXT` for missing repository/task context and route human questions through `NEEDS_USER_INPUT` when PM/coordinator is present, or `BLOCKED missing_top_level_question` otherwise; the actual user prompt belongs to the top-level session or PM/coordinator.
@@ -158,8 +186,19 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - In Claude Code, plugin skills are namespaced as `/best-copilot:<skill-name>` after installation, plugin subagents appear in `/agents`, and agent teams can reference plugin subagent types by scoped name such as `best-copilot:technical-architect`.
 - When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed namespaced skill or include the needed checklist in the spawn prompt.
 
-## Verification
+## Agents and Dispatch
 
+- The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code for medium or large work.
+- Parallel subtasks are allowed only when file write sets do not overlap.
+- Multi-agent dispatch should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`.
+- Delegated specialists do not ask users directly. If repository or task context is missing, return `NEEDS_CONTEXT`; if human input or approval is required, return `NEEDS_USER_INPUT` for PM/coordinator to ask.
+- Delegated handbacks must preserve shared field names such as `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`, and when blocked on missing context, `clarification_request` plus `pm_action: "pm_clarify"`.
+
+## Implementation and Verification
+
+- Prefer existing code, tools, components, and patterns.
+- Public APIs, message formats, schema, auth boundaries, CI/CD, and dependency upgrades are high-risk; assess blast radius first.
+- Medium or large implementation should run from an approved plan or reviewed execution packet, with evidence, peer review, and verification before closure.
 - Before claiming work is done, run the smallest useful verification available or state exactly why it could not run.
 - Record important verification evidence in the task closeout and update memory/spec for larger work.
 - Do not store secrets, tokens, private logs, or PII in durable memory, specs, or instructions.
@@ -250,10 +289,13 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm generated files exist in the target repository.
 - path existence alone is not enough; required sections must also be present after create or repair.
 - Confirm existing files were not overwritten.
+- Confirm `.github/instructions/must.instructions.md` contains `## Request Flow` with the per-request timestamp rule, init normalization rule, and packet freeze rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, and the specialist `NEEDS_USER_INPUT`/`BLOCKED missing_top_level_question` rule.
+- Confirm `.github/instructions/must.instructions.md` contains `## Shared State Contracts` with `work_mode`, `task_type`, and `pm_action`.
 - Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Command Output Budget` and the default `COMMAND 2>&1 | head -c 4000` pattern.
 - Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, and `## Implementation and Verification`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
 - If this skill was invoked because `.github/instructions/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

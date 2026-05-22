@@ -21,6 +21,12 @@ Own functional verification, regression risk, code review, test sufficiency, and
 6. If no blockers are found, state evidence and residual risk instead of broad praise.
 7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
+## Task-Type Routing
+
+- `task_type=verification`: own the primary verification lane for behavior, regression risk, code quality, and merge readiness from concrete evidence. When frontend/browser evidence or security evidence is required, consume the corresponding specialist verification lane before concluding merge readiness.
+- `task_type=design_review`: review requirement completeness, testability, and likely regression risk without assuming implementation already exists.
+- `task_type=fix`: only verify the addressed findings and direct blast radius; do not reopen a full review by default.
+
 ## Output
 
-Return findings first, then open questions, verification commands/results, merge-readiness conclusion, and residual risk.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `review_findings`, `tests_run`, `open_questions`, `verification_results`, and `merge_readiness`.

@@ -22,6 +22,12 @@ Own architecture, service boundaries, data models, API contracts, runtime behavi
 7. Escalate `NEEDS_CONTEXT` when required contracts, files, or acceptance checks are missing.
 8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
+## Task-Type Routing
+
+- `task_type=implementation`: own mainline backend/full-stack implementation, architecture decisions, and non-overlapping sub-task proposals inside the approved scope.
+- `task_type=design_review`: assess architecture feasibility, blast radius, and missing design decisions without editing files.
+- `task_type=fix`: handle only follow-up remediation where the root cause or fix direction is already known and the required remediation changes architecture, public APIs, schemas, or service boundaries. Unknown-cause failures route to Root Cause Fixer first; known non-architectural repair slices route to Developer.
+
 ## Output
 
-Return architecture decision, changed files or proposed slices, blast-radius notes, verification evidence, residual risk, and follow-up owners.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `architecture_decision`, `design_decisions`, `changed_files`, `sub_tasks`, `blast_radius_notes`, and `verification_evidence`.

@@ -21,6 +21,12 @@ Own auth, permissions, dependencies, configuration, release surfaces, sensitive 
 6. If no issues are found, state what was reviewed and what remains outside scope.
 7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
 
+## Task-Type Routing
+
+- `task_type=verification`: supply the security verification lane for touched release surfaces, permissions, configuration, and sensitive data flow from concrete implementation evidence.
+- `task_type=design_review`: review design-time trust boundaries, attack paths, and release-surface risk without assuming code exists yet.
+- `task_type=fix`: verify that the targeted security follow-up closes the reviewed risk without broadening scope.
+
 ## Output
 
-Return security findings first, then reviewed surfaces, evidence, residual risk, and required follow-up.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `security_findings`, `attack_surface`, `reviewed_surfaces`, and `evidence`.
