@@ -13,7 +13,7 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 
 ## Required Flow
 
-1. Enforce repo init and fact gates before substantive work.
+1. Start with `repo-init-gate`. If the target root `best-copilot.md` already matches the current init contract version, skip `repo-init-scan`. Otherwise invoke `repo-init-scan` before classifying, planning, dispatching, or answering any first substantial task when its trigger conditions may apply. Continue only after its report has `next_task_ready: yes`; otherwise return the repo-init blocker instead of routing the substantive task.
 2. Classify work as `micro`, `standard`, or `full`.
 3. Freeze context as the shared six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`.
 4. Choose specialist lanes and non-overlapping write sets.

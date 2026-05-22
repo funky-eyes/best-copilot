@@ -10,7 +10,10 @@ This file is only for discovery and routing. Match the current task to the index
 
 ## Initialization and Orchestration
 
-- `repo-init-scan`: first use in a target repository, placeholder project facts, missing target-local scaffolds, or `/init` / `copilot init` output that still needs to be normalized into reusable repo facts.
+- `repo-init-gate`: read only the target root `best-copilot.md` and decide whether the current init contract version is already satisfied.
+- `repo-init-scan`: heavy init/repair flow used only after `repo-init-gate` fails. Typical triggers are first use in a target repository, placeholder or stale project facts, missing or mismatched `best-copilot.md`, missing target-local scaffolds, or `/init` / `copilot init` output that still needs to be normalized into reusable repo facts.
+- `repo-init-official`: official `/init` or `copilot init` stage used inside `repo-init-scan` before manual fallback.
+- `repo-init-manual-fallback`: bounded manual scan, scaffold bootstrap, artifact verification, and sentinel rewrite used when official init is unavailable or incomplete.
 - `target-instructions-bootstrap`: create missing target-local `.github/instructions/**`, including the neutral project facts scaffold, plus runtime adapters such as `AGENTS.md` for Codex and `CLAUDE.md` for Claude Code when applicable.
 - `target-memory-bootstrap`: create missing target-local `memories/repo/**` skeleton for persistent task recovery.
 - `target-spec-bootstrap`: create missing target-local `spec/INDEX.md` and `spec/templates/**` before spec-driven work.

@@ -5,7 +5,7 @@ description: "Create the target repository's local AI instruction scaffold durin
 
 # Target Instructions Bootstrap
 
-Use this skill during `repo-init-scan` when target-local instruction entrypoints are missing. It may create a neutral `.github/instructions/project.instructions.md` scaffold, but that scaffold is not enough to pass initialization until `repo-init-scan` replaces the neutral markers with bounded repository facts or bounded-scan `unknown` gaps.
+Use this skill during `repo-init-scan` when target-local instruction entrypoints are missing. It may create a neutral `.github/instructions/project.instructions.md` scaffold, but that scaffold is not enough to pass initialization until `repo-init-scan` replaces the neutral markers with bounded repository facts or bounded-scan `unknown` gaps, updates the `## Init Status` record, and writes the root `best-copilot.md` version sentinel after full verification.
 
 ## Boundary
 
@@ -16,6 +16,17 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 - Keep generated files short. They are routing and safety scaffolds, not a full manual.
 - Keep generated files runtime-neutral across Copilot CLI, Claude Code, VS Code Copilot, and Codex. If a runtime-specific command is mentioned, label it as runtime-specific.
 - Do not generate, require, or assume plugin hooks, local scripts, Python, Node, shell, or other interpreter-based closeout enforcement. The native-ask and closeout gates must be self-contained instruction text because target repositories may not have those runtimes installed.
+- Do not create `best-copilot.md` in this skill. That file is the verified-init sentinel and must be written only by `repo-init-scan` after the full initialization barrier passes.
+
+## Verified Init Sentinel
+
+`repo-init-scan` writes the target root `best-copilot.md` only after full init verification. Its expected content is:
+
+```md
+---
+version: "0.4.1"
+---
+```
 
 ## Files
 
@@ -101,6 +112,14 @@ applyTo: "**"
 
 - Init source: manual scaffold
 - Last verified: unknown
+
+## Init Status
+
+- Init ready: no
+- Required artifacts verified: no
+- Bootstrap contract version: 0.4.1
+- Last full verification: unknown
+- Reentry rule: best-copilot-version-sentinel-first
 ```
 
 ## `.github/instructions/must.instructions.md`
@@ -243,7 +262,10 @@ Read only the selected skill, not the whole skill tree.
 
 ## Initialization
 
-- `repo-init-scan`: first substantial task, missing scaffolds, missing or placeholder `.github/instructions/project.instructions.md`, or incomplete `/init` output.
+- `repo-init-gate`: read only the target root `best-copilot.md` and decide whether full init is needed.
+- `repo-init-scan`: use only after `repo-init-gate` fails; typical triggers are first substantial task, missing scaffolds, missing or placeholder `.github/instructions/project.instructions.md`, missing or mismatched `best-copilot.md`, or incomplete `/init` output.
+- `repo-init-official`: try official `/init` or `copilot init` and normalize the resulting project facts file.
+- `repo-init-manual-fallback`: do the bounded manual scan, bootstrap missing scaffolds, verify required artifacts, and write `best-copilot.md`.
 - `target-instructions-bootstrap`: create missing `.github/instructions/**`, optional `AGENTS.md`, and Claude Code `CLAUDE.md` when applicable.
 - `target-memory-bootstrap`: create missing `memories/repo/**` skeleton.
 - `target-spec-bootstrap`: create missing `spec/**` skeleton and spec templates.
@@ -282,7 +304,7 @@ Read only the selected skill, not the whole skill tree.
 
 ## Claude Code Skill Names
 
-After installing this plugin in Claude Code, invoke plugin skills as `/best-copilot:<skill-name>`, for example `/best-copilot:repo-init-scan`, `/best-copilot:structured-review`, and `/best-copilot:verification-before-completion`. Invoke plugin subagents with scoped names such as `best-copilot:senior-project-expert`.
+After installing this plugin in Claude Code, invoke plugin skills as `/best-copilot:<skill-name>`, for example `/best-copilot:repo-init-gate`, `/best-copilot:repo-init-scan`, `/best-copilot:structured-review`, and `/best-copilot:verification-before-completion`. Invoke plugin subagents with scoped names such as `best-copilot:senior-project-expert`.
 ```
 
 ## `AGENTS.md`

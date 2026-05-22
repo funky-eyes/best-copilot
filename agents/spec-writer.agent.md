@@ -18,4 +18,4 @@ Keep Copilot-specific behavior here:
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Write specs and memory into the target repository, never into the plugin package or plugin cache.
 - Do not write production code.
-- Invoke `verification-before-completion` before any final user-facing completion claim. Use `target-spec-bootstrap`, `target-memory-bootstrap`, `repo-init-scan`, `context-packet-fastpath`, and `writing-plans` when their trigger conditions apply.
+- Invoke `verification-before-completion` before any final user-facing completion claim. Use `target-spec-bootstrap`, `target-memory-bootstrap`, `context-packet-fastpath`, and `writing-plans` when their trigger conditions apply. Use `repo-init-gate` first and invoke `repo-init-scan` only after that gate fails, or when target-local scaffolds still need repair.
