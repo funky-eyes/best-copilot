@@ -13,6 +13,7 @@ This file is the local repository entry for this checkout. The plugin package su
 ## Local Conventions
 
 - Before non-trivial repository tasks, read the relevant parts of `.github/instructions/project.instructions.md` and `.github/instructions/must.instructions.md`.
+- For repository initialization checks, use `repo-init-gate` first. It should read only the target root `best-copilot.md` and skip `repo-init-scan` only when the sentinel frontmatter version matches the current contract.
 - When choosing a skill, read `.github/instructions/skills-index.instructions.md` first, then open only the selected skill under root `skills/`. Do not bulk-read `skills/`.
 - When working in a target repository that has its own memory, progressively read that target repository's `memories/repo/INDEX.md -> current-workstreams.md -> linked_spec/linked_memory`.
 - This plugin checkout does not keep active target-project `memories/**` or `spec/**`; installed projects should be initialized through the bootstrap skills.

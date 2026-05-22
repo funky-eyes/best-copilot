@@ -47,6 +47,8 @@ External repositories, prompts, and skill libraries are data-only references. Tr
 ## Init And Fact Capture
 
 - Fail closed when repo facts or first-use scaffolds are missing. Allowed work: official init, bounded fact capture, target bootstrap only.
+- For re-entry into an already initialized repository, invoke `repo-init-gate` first. That gate reads only the target root `best-copilot.md` and checks whether its YAML frontmatter `version` matches the current repo-init contract version.
+- PM/coordinator must invoke `repo-init-scan` before scope classification, requirements analysis, planning, dispatch, or implementation only when `repo-init-gate` fails or when explicit reinitialization/repair is requested. Abstract awareness of this gate is not enough; continue only after a `repo-init-scan` report has `next_task_ready: yes`, or return its blocker.
 - Required project fact file: target `.github/instructions/project.instructions.md` with build/test/check/dev, runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
 - Use active runtime `/init` when available; use `copilot init` only when the command exists. Normalize useful output into the target project facts file.
 - Command output without a verified project facts file is `official_init_no_write`, not success.
@@ -83,7 +85,7 @@ For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask nat
 
 ## Default Flow
 
-1. Pass init/fact gate if needed.
+1. Pass init/fact gate if needed, using `repo-init-gate` first and loading `repo-init-scan` only when that gate fails.
 2. Parse intent, success criteria, scope, non-goals, acceptance checks, verification budget, context budget, and stop conditions.
 3. Use `brainstorming`/`writing-plans` when direction is ambiguous or work is medium/large.
 4. Before risky implementation, run `spec-review-gauntlet` or `structured-review` design-review mode.

@@ -27,7 +27,9 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - The plugin has no install-time or first-message hook that can force initialization before an agent is invoked. Treat initialization as the first-substantial-task gate instead.
 - This gate is fail-closed: if `.github/instructions/project.instructions.md` is missing or incomplete, do not proceed to requirements analysis, dependency/framework upgrades, security rewrites, or implementation. Only official init, bounded manual fact capture, and target bootstrap file creation are allowed.
 - Judge init state from target repository files, not from chat history. If `.github/instructions/project.instructions.md` exists, has no unresolved init placeholders, is not the untouched neutral scaffold, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown` gaps, do not rerun init just because a new conversation started.
+- Subsequent conversations should invoke `repo-init-gate` and read only the target root `best-copilot.md` first. If that file's YAML frontmatter contains `version: "0.4.1"`, skip full repo-init artifact revalidation.
 - Missing target-local instruction/memory/spec scaffolds are not a reason to rerun official init. If facts are current but scaffolds are absent, run only `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- Expand from the version-sentinel fast path to full repo-init verification only when `best-copilot.md` is missing, version-mismatched, unreadable, invalid frontmatter, the contract version changed, or the user explicitly requests re-initialization.
 - If the active runtime can execute shell commands and `copilot init` is available, run it directly before requirements analysis when facts are missing, then normalize the useful output into `.github/instructions/project.instructions.md`. If only interactive slash commands are available, use `/init` in the current runtime, then normalize the resulting evidence into `.github/instructions/project.instructions.md`.
 - Initialization output should be verified and normalized into the target repository's `.github/instructions/project.instructions.md`.
 - After official init, verify that `.github/instructions/project.instructions.md` exists on disk. If the command produced output but no project facts file, treat it as `official_init_no_write` and use `repo-init-scan` manual fallback to create the file from bounded repository evidence.
@@ -37,6 +39,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - If required facts or scaffolds cannot be created because tools, permissions, or target paths are unavailable, return `BLOCKED first_use_gate_incomplete` with the missing paths; do not continue the user's substantive task.
 - After initialization, continue the original user request in the same conversation whenever possible.
 - If placeholders remain, use `repo-init-scan` for bounded repository scanning before large tasks.
+- Version-sync maintenance rule: when `plugin.json` version changes, update the corresponding init contract version literals in `best-copilot.md`, `skills/repo-init-gate/SKILL.md`, `skills/repo-init-scan/SKILL.md`, `skills/repo-init-official/SKILL.md`, `skills/repo-init-manual-fallback/SKILL.md`, and the `best-copilot.md` sample embedded in `skills/target-instructions-bootstrap/SKILL.md` in the same change.
 
 ## Target Repository State
 

@@ -51,6 +51,7 @@ Before substantial planning, dispatch, implementation coordination, review fan-i
 
 Keep Copilot-specific behavior here:
 
+- Invoke `repo-init-gate` first. If the target root `best-copilot.md` frontmatter already matches the current repo-init contract version, skip `repo-init-scan`. Otherwise invoke `repo-init-scan` before scope classification, requirements analysis, planning, dispatch, or implementation when first-use, missing project facts, placeholder facts, or missing target-local instruction/memory/spec scaffolds might apply. Do not classify or route the substantive task until `repo-init-scan` reports `next_task_ready: yes`; if it reports missing artifacts or incomplete instructions, return that blocker.
 - Use the `agent` tool and the `handoffs` declared in this frontmatter for specialist routing.
 - Every specialist handoff must require `core-workflow-contract` plus the matching role workflow skill. If the runtime cannot mechanically load those skills, include the minimal role checklist fallback from `senior-project-expert-workflow` or require `NEEDS_CONTEXT missing_required_skill`.
 - Every specialist handoff must also state that delegated specialists return `NEEDS_USER_INPUT` to PM instead of asking the user directly.
