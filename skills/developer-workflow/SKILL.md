@@ -20,7 +20,14 @@ Own frozen implementation slices and peer review of Technical Architect-owned co
 5. Use TDD or a minimal reproducible check for new behavior or bug fixes when practical.
 6. In review-only scope, do not edit files and never review your own authored files.
 7. Report exact verification commands and results.
+8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Task-Type Routing
+
+- `task_type=implementation`: implement only the frozen slice and return concrete verification evidence.
+- `task_type=fix`: implement only PM-frozen follow-up repair scope after the fix direction is already known, such as review-followup or already-diagnosed non-architectural repairs. Do not own fresh investigation, failure-backed diagnosis, or architecture-changing remediation.
+- `task_type=design_review`: review architect-owned code or plan text without editing files.
 
 ## Output
 
-Return task id, changed files, acceptance status, verification evidence, residual risk, and any required PM/architect follow-up.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `changed_files`, `self_check`, `acceptance_status`, and `verification_evidence`.

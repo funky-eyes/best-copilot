@@ -1,6 +1,6 @@
 ---
 name: td-java-coding-guidelines
-description: Tongdun Java development guideline assistant. Use when writing Java code, reviewing Java code, discussing Java coding standards or best practices, creating Java project structure, writing SQL/MyBatis code, or handling Java exceptions and logging. Based on Alibaba Java Coding Guidelines, it provides guidance for naming, OOP, collections, concurrency, exceptions, logging, MySQL, project layering, and security.
+description: "Use when writing or reviewing Java code involving Tongdun/Alibaba Java rules, exceptions, logging, SQL/MyBatis, security, middleware, concurrency, virtual threads, or project layering."
 ---
 
 # TONGDUN Java Development Guidelines

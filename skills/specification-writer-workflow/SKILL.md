@@ -25,7 +25,14 @@ Write persistent state into the target repository, not the plugin package or cac
 5. Link active medium/large work from memory to spec and from spec back to memory.
 6. Do not store secrets, PII, raw long logs, or unverified guesses.
 7. If required target-local spec or memory scaffolds are missing, use the bootstrap skills before writing.
+8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Task-Type Routing
+
+- `task_type=spec`: maintain requirements, design, tasks, ADRs, execution state, and closeout records without editing production code.
+- `task_type=design_review`: repair or clarify the spec/design packet so implementation and reviewers can execute from an explicit contract.
+- `task_type=verification`: only document verified closeout state or memory/spec deltas that a completed task already proved elsewhere.
 
 ## Output
 
-Return updated files, unresolved questions, traceability notes, verification performed, and the next owner/action.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `updated_files`, `requirements_delta`, `design_delta`, `tasks_delta`, `unresolved_questions`, `traceability_notes`, and `verification_performed`.

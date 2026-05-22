@@ -19,7 +19,14 @@ Own user-facing frontend implementation and review: pages, components, interacti
 4. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
 5. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
 6. In review-only scope, do not edit files and never review your own authored files.
+7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Task-Type Routing
+
+- `task_type=implementation`: own pages, components, interaction behavior, and browser-visible delivery within the frozen scope.
+- `task_type=design_review`: assess user-visible states, visual hierarchy, and interaction risks without editing files.
+- `task_type=verification`: supply the frontend/browser verification lane for completed frontend work when PM/coordinator or QA needs browser-visible evidence; do not replace QA as the primary merge-readiness owner.
 
 ## Output
 
-Return changed UI surfaces, states covered, browser/equivalent evidence, visual/accessibility residual risk, and follow-up owners.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `changed_ui_surfaces`, `states_covered`, `experience_evidence`, and `browser_evidence`.

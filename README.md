@@ -6,7 +6,7 @@ English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japa
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-33-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -21,7 +21,7 @@ Large AI coding tasks fail when they jump straight from a vague request to a pat
 
 - **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable workflow signals.
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
-- **Thirty-three skills**: role workflows, bootstrap, search, planning, TDD, design review, execution, Java/Python coding guidelines, verification, frontend audit, and workflow evolution are installable skills.
+- **Thirty-five skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, and workflow evolution are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
 - **Evidence-first closure**: “done” requires command output, static checks, browser evidence, or an explicit blocker.
 
@@ -197,10 +197,10 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
-| Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Execution | `workspace-isolation`, `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
 | Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
 | Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
-| Verification | `change-verification`, `verification-before-completion`, `web-experience-audit`, `frontend-design-guardrails` |
+| Verification | `change-verification`, `verification-before-completion`, `development-branch-closeout`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
 
 ## First Use In A Target Repository
@@ -225,6 +225,7 @@ Target-local state belongs to the target repository:
 .github/instructions/project.instructions.md
 .github/instructions/must.instructions.md
 .github/instructions/skills-index.instructions.md
+CLAUDE.md  # when Claude Code compatibility is needed
 memories/repo/INDEX.md
 memories/repo/current-workstreams.md
 spec/INDEX.md
