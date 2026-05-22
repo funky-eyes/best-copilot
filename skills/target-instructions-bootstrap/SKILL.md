@@ -34,6 +34,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but lacks `## Request Flow`, append that whole section exactly as shown in this skill after `## Priority`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Request Flow` when that heading exists, or after `## Priority`.
 - If `.github/instructions/must.instructions.md` exists but its hard gates do not reserve native user prompts to the top-level session or PM/coordinator, repair that section from this skill.
+- If `.github/instructions/must.instructions.md` exists but lacks `### PM Native Ask Trigger Gate`, append that subsection from this skill under `## Per-Request Hard Gates`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Shared State Contracts`, append that section from this skill after `## Repository Truth` when that heading exists, otherwise append it after `## Per-Request Hard Gates`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Memory And Spec`, append that section from this skill after `## Command Output Budget` when that heading exists, otherwise append it after `## Shared State Contracts`.
 - If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
@@ -134,6 +135,14 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - When a closeout/continuation reply contains new executable work, do the substantial action for that new task next, or ask one minimal native clarification if it is genuinely ambiguous. Do not send another summary-only response or another closeout prompt first.
 - Answer-only follow-ups such as why/how questions, principle explanations, solution comparisons, rule clarifications, and review-response discussion are not closeout exemptions. If the answer would be the last prose message in the current batch, trigger a fresh native closeout prompt after answering and before ending.
 - Do not reinterpret any final-answer formatting rule, brevity rule, or “provide a summary/next steps” instruction as permission to skip the native ask step. Closeout gating wins over stylistic closeout guidance.
+
+### PM Native Ask Trigger Gate
+
+- Native ask is not owned by one focused skill. The top-level session or PM/coordinator must use it for every blocking clarification, route choice, execution approval, specialist `NEEDS_USER_INPUT` handback, continuation choice, and closeout choice when the runtime exposes native ask.
+- Do not treat brainstorming as the only native-ask trigger. Review, verification, workspace isolation, branch closeout, and answer-only follow-ups use the same native ask path when they require a user decision or closeout.
+- If a PM/coordinator adapter frontmatter declares `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, or `askQuestions`, treat that declaration as an availability signal and attempt the concrete native ask before any prose fallback.
+- A "native ask unavailable" statement is valid only after checking the latest tool inventory and confirming the concrete tool is absent or impossible in the current runtime.
+- If native ask is unavailable and a human choice still blocks progress or closeout, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact question, options, safe default when one exists, and resume state. Do not replace the popup with a prose-only question.
 
 ## Repository Truth
 
@@ -313,6 +322,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm existing files were not overwritten.
 - Confirm `.github/instructions/must.instructions.md` contains `## Request Flow` with the per-request timestamp rule, init normalization rule, and packet freeze rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, the VS Code `vscode_askQuestions` exact-tool priority, and the specialist `NEEDS_USER_INPUT`/`BLOCKED missing_top_level_question` rule.
+- Confirm `.github/instructions/must.instructions.md` contains `### PM Native Ask Trigger Gate`, including the rule that brainstorming is not the only native ask trigger and the rule that PM/coordinator frontmatter ask tools are an availability signal.
 - Confirm `.github/instructions/must.instructions.md` contains `## Shared State Contracts` with `work_mode`, `task_type`, and `pm_action`.
 - Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Command Output Budget` and the default `COMMAND 2>&1 | head -c 4000` pattern.

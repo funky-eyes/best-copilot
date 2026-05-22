@@ -56,6 +56,7 @@ Instruction files that exist but are older short scaffolds are not sufficient. B
 - `.github/instructions/must.instructions.md` contains `## Request Flow` with the per-request timestamp rule, init normalization rule, and packet freeze rule.
 - `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`.
 - That same file contains the native closeout requirement, the latest-runtime native ask availability rule, the VS Code `vscode_askQuestions` exact-tool priority, continuation/free-text invalidation, executable closeout-reply handling, and answer-only follow-up non-exemption.
+- That same file contains `### PM Native Ask Trigger Gate`, including the rule that `brainstorming` is not the only native ask trigger and PM/coordinator frontmatter ask tools are an availability signal.
 - That same file says: when a closeout or continuation choice is needed, keep selectable options in the native structured prompt, not in a prose `1/2/3` list.
 - That same file says specialists must not ask the user directly, must not call `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, or `askQuestions`, and must return `NEEDS_USER_INPUT` to PM/coordinator when one exists, or `BLOCKED missing_top_level_question` otherwise.
 - That same file contains `## Shared State Contracts` with `work_mode`, `task_type`, and `pm_action`.
@@ -131,7 +132,7 @@ Do not copy this plugin repository's instruction files, memory files, specs, or 
    - `.github/instructions/project.instructions.md` exists on disk in the target repository.
    - Any bootstrap-created files exist on disk in the target repository and did not overwrite existing project-specific content.
    - `.github/instructions/must.instructions.md` contains `Request Flow`, `Per-Request Hard Gates`, `Shared State Contracts`, `Search Precision`, `Command Output Budget`, `Memory And Spec`, `Agents and Dispatch`, and `Implementation and Verification`.
-   - `.github/instructions/must.instructions.md` contains the specialist ask boundary plus `NEEDS_USER_INPUT`/`BLOCKED` fallback rule, `work_mode`, `task_type`, `pm_action`, fixed-string-before-regex search, VS Code `vscode_askQuestions` exact-tool priority, and the first-use scaffold gate.
+   - `.github/instructions/must.instructions.md` contains the specialist ask boundary plus `NEEDS_USER_INPUT`/`BLOCKED` fallback rule, the PM Native Ask Trigger Gate, `work_mode`, `task_type`, `pm_action`, fixed-string-before-regex search, VS Code `vscode_askQuestions` exact-tool priority, and the first-use scaffold gate.
    - `.github/instructions/skills-index.instructions.md` contains bootstrap routing and the `## Claude Code Skill Names` guidance.
    - When Claude Code compatibility is required, `CLAUDE.md` imports or references the target `.github/instructions/**` files so Claude can load the shared project rules.
    - No `<fill:` placeholders remain for facts that were discoverable.

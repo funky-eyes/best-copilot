@@ -23,6 +23,8 @@ description: "Use before claiming work is done, fixed, passing, or ready. Requir
 
 - A final prose response is allowed only after verification evidence is ready and closeout/continuation state is valid.
 - If the current role is the top-level session or PM/coordinator and needs to ask whether to continue, choose a follow-up path, approve a next step, or end the turn, it must use native structured UI when available. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; in Copilot CLI, use `Asking user` when available.
+- Do not treat brainstorming as the only native-ask trigger. Review fan-in, verification results, `NEEDS_USER_INPUT` handbacks, branch/worktree choices, answer-only follow-ups, and closeout all use the same native ask requirement when a human choice or end-of-turn authorization is needed.
+- If a PM/coordinator adapter declares ask tools in frontmatter, attempt the concrete native ask before saying native UI is unavailable.
 - Specialists are not allowed to use native ask tools directly, including `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. If PM/coordinator is present, they report `NEEDS_USER_INPUT` with the question and blocking reason for PM/coordinator. Otherwise they report `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
 - Ordinary prose questions, "reply A/B/C" instructions, and summary-plus-question endings are not valid closeout evidence.
 - If native ask UI is unavailable and a human choice is still required, report `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_native_ask_ui`; do not claim normal completion.

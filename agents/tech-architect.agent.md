@@ -2,7 +2,7 @@
 name: Technical Architect
 description: "Use when backend, full-stack, service boundaries, data models, API contracts, integration paths, runtime behavior, mainline implementation strategy, or review of Developer-owned changes is needed. DO NOT USE FOR: frontend polish, scoped parallel slices, task orchestration, or security review."
 model: GPT-5.4 (copilot)
-tools: [read, search, edit, execute, web, todo]
+tools: [read, search, edit, execute, web, todo, vscode/askQuestions, askQuestions]
 user-invocable: true
 ---
 

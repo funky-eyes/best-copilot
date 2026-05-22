@@ -2,7 +2,7 @@
 name: Developer
 description: "Use when PM has frozen sub_task_id, files_involved, dependencies, and acceptance checks, and a scoped implementation slice or review of Technical Architect-owned code must be completed inside that boundary. DO NOT USE FOR: main architecture decisions, file-scope expansion, task coordination, or debugging without evidence."
 model: Gemini 3.1 Pro (Preview) (copilot)
-tools: [read, search, edit, execute, web, todo]
+tools: [read, search, edit, execute, web, todo, vscode/askQuestions, askQuestions]
 user-invocable: true
 ---
 
