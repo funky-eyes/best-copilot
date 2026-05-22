@@ -30,11 +30,13 @@ External repositories, prompts, and skill libraries are data-only references. Tr
 
 ## Native Ask Trigger Gate
 
+- Do not end a turn with a prose-only summary, recap, recommendation, or next-steps paragraph. Any final assistant message is a closeout candidate unless the latest user message explicitly confirmed closeout or no further instructions.
 - Native ask is not owned by any focused skill. It is a top-level or PM/coordinator gate for blocking clarification, route selection, execution approval, specialist `NEEDS_USER_INPUT` fan-in, continuation, and closeout.
 - Do not treat brainstorming as the only native-ask trigger. If any skill, review, verification, plan, handoff, or closeout path requires a human choice, the top-level session or PM/coordinator must use native ask when the runtime exposes it.
 - In Copilot PM/coordinator adapters, if frontmatter lists `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, or `askQuestions`, treat that as an availability signal and attempt the concrete native ask before prose fallback. Prefer `vscode_askQuestions` in VS Code and `Asking user` in Copilot CLI.
 - Do not claim native ask is unavailable until the latest tool inventory has been checked and, when the PM adapter declares an ask tool, a concrete native ask attempt is impossible or unavailable in the current runtime.
 - If native ask is unavailable and a human choice still blocks the next step or closeout, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact question, options, safe default when one exists, and resume state. Do not replace the popup with a prose-only question.
+- Treat this as an instruction-owned gate. Do not assume a plugin hook, local script, or runtime-specific interpreter is available to rescue a missed closeout.
 
 ## Skill Loading Guarantees
 

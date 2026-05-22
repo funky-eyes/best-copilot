@@ -37,6 +37,15 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 
 ## 3. Native Ask and Continuation Gates
 
+### No Silent Closeout
+
+- Do not end a turn with a prose-only summary, recap, recommendation, or next-steps paragraph.
+- Any response that would be the last assistant message in the turn counts as a closeout candidate.
+- Before any such response, if a native ask tool is available in the latest runtime tool inventory, the top-level session or PM/coordinator must use it and wait for the result. Do not replace the native prompt with prose.
+- If native ask is unavailable and the latest user message was not an explicit closeout confirmation, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact question, options, safe default when one exists, and resume state. Do not improvise a prose closeout.
+- If the native ask reply contains free text or a new instruction, treat it as a new ordinary user request and continue from there.
+- This gate must be enforceable from instruction text alone. Do not rely on plugin hooks, local scripts, or runtime-specific interpreters as the default closeout backstop.
+
 - Any question that blocks execution, changes direction, requests approval, chooses between follow-up paths, or asks whether to continue must use a native ask tool when available, but only from the top-level session or PM/coordinator.
 - Native ask tools are runtime-specific. VS Code Copilot Chat priority is the concrete `vscode_askQuestions` tool when it appears in the latest tool inventory; only fall back to `vscode/askQuestions`, `askQuestions`, or equivalent structured UI when that concrete tool is absent. Copilot CLI priority is `Asking user` when available. Use choices for 2-4 options; closeout prompts must also allow free-form follow-up unless the answer must be strictly enumerated.
 - Only the top-level session or PM/coordinator may call native ask tools. Copilot specialist agent frontmatter must not include `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Specialists must not call them directly; if PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
