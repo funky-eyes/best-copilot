@@ -11,7 +11,7 @@ Use this skill to make the agent team learn the target repository before doing r
 
 - First use of `best-copilot` in a repository.
 - `.github/instructions/project.instructions.md` still has `<fill: ...>` placeholders.
-- Target-local `.github/instructions/**`, `memories/repo/**`, or `spec/**` scaffolds are missing during first substantial plugin use.
+- Target-local `.github/instructions/**`, runtime adapter (`CLAUDE.md` for Claude Code when applicable), `memories/repo/**`, or `spec/**` scaffolds are missing during first substantial plugin use.
 - The user says the agent should scan, learn, onboard, initialize, or understand the repository.
 - The current task depends on build, test, runtime, framework, or module facts that are not documented yet.
 
@@ -35,6 +35,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 - `.github/instructions/project.instructions.md`
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
+- `CLAUDE.md` when the active target runtime is Claude Code or the user requests Claude Code compatibility.
 - `memories/README.md`
 - `memories/repo/INDEX.md`
 - `memories/repo/current-workstreams.md`
@@ -52,13 +53,18 @@ If the project facts file is missing and the current runtime has file-write capa
 
 Instruction files that exist but are older short scaffolds are not sufficient. Before `next_task_ready: yes`, verify:
 
+- `.github/instructions/must.instructions.md` contains `## Request Flow` with the per-request timestamp rule, init normalization rule, and packet freeze rule.
 - `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`.
-- That same file contains the native closeout requirement, the latest-runtime native ask availability rule, continuation/free-text invalidation, executable closeout-reply handling, and answer-only follow-up non-exemption.
+- That same file contains the native closeout requirement, the latest-runtime native ask availability rule, the VS Code `vscode_askQuestions` exact-tool priority, continuation/free-text invalidation, executable closeout-reply handling, and answer-only follow-up non-exemption.
 - That same file says: when a closeout or continuation choice is needed, keep selectable options in the native structured prompt, not in a prose `1/2/3` list.
-- That same file says specialists must not ask the user directly and must return `NEEDS_USER_INPUT` to PM/coordinator when one exists, or `BLOCKED missing_top_level_question` otherwise.
+- That same file says specialists must not ask the user directly, must not call `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, or `askQuestions`, and must return `NEEDS_USER_INPUT` to PM/coordinator when one exists, or `BLOCKED missing_top_level_question` otherwise.
+- That same file contains `## Shared State Contracts` with `work_mode`, `task_type`, and `pm_action`.
 - That same file contains `## Search Precision` with fixed-string lookup before regex search.
+- That same file contains `## Command Output Budget` with the default `COMMAND 2>&1 | head -c 4000` pattern.
 - That same file contains the first-use scaffold gate naming `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
+- That same file contains the progressive-disclosure memory rule, mixed-language rule, `## Agents and Dispatch`, and `## Implementation and Verification`.
 - `.github/instructions/skills-index.instructions.md` contains bootstrap skill routing and the `## Claude Code Skill Names` note.
+- When Claude Code compatibility is required, `CLAUDE.md` exists and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
 
 If any of these content checks fail and file-write capability exists, run `target-instructions-bootstrap` as a repair step even when the files already exist. If repair is not possible, return `BLOCKED instruction_scaffold_incomplete` with the missing sections.
 
@@ -85,7 +91,7 @@ When this skill runs from an installed plugin, write persistent state into the t
 Do not copy this plugin repository's instruction files, memory files, specs, or active workflow state into the target repository. Target repositories get their own neutral local files from `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then later tasks fill those files with target-specific facts.
 
 - Target project facts: `.github/instructions/project.instructions.md`.
-- Target instructions: `.github/instructions/**` and optional `AGENTS.md`.
+- Target instructions: `.github/instructions/**`, optional `AGENTS.md`, and `CLAUDE.md` when Claude Code compatibility is required.
 - Target task memory: `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, and compact topic files.
 - Target specs: `spec/INDEX.md` and task-specific spec directories.
 - This plugin checkout does not keep active target-project `memories/` or `spec/` directories. Installed projects get durable scaffolds from `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
@@ -111,7 +117,7 @@ Do not copy this plugin repository's instruction files, memory files, specs, or 
    - Minimum `.github/instructions/project.instructions.md` sections: `Project Facts`, `Build and Test Commands`, `Runtime and Entry Points`, `Module Boundaries`, `Known Unknowns`, and `Verification Notes`.
    - Replace neutral scaffold markers with `Init source: official_init|manual_fallback|official_init_plus_manual_fallback` and a real verification timestamp or bounded-scan note.
 5. Initialize missing target-local scaffolds by loading and executing these skills in order:
-   - `target-instructions-bootstrap`: create missing `.github/instructions/**` and optional `AGENTS.md`.
+   - `target-instructions-bootstrap`: create missing `.github/instructions/**` and runtime adapters such as optional `AGENTS.md` and Claude Code `CLAUDE.md` when applicable.
    - `target-memory-bootstrap`: create missing `memories/repo/**` skeleton during first substantial plugin use, and later whenever persistent recovery is needed.
    - `target-spec-bootstrap`: create missing `spec/INDEX.md` and `spec/templates/**` during first substantial plugin use, and later before writing any spec.
 6. Re-check the `Required First-Use Artifacts` paths on disk. If any required file is still absent, stop with `BLOCKED`; do not downgrade this to `unknown` and do not proceed to dependency, framework, security, or application analysis.
@@ -124,8 +130,10 @@ Do not copy this plugin repository's instruction files, memory files, specs, or 
 10. Verify:
    - `.github/instructions/project.instructions.md` exists on disk in the target repository.
    - Any bootstrap-created files exist on disk in the target repository and did not overwrite existing project-specific content.
-   - `.github/instructions/must.instructions.md` contains the `Per-Request Hard Gates` section, the specialist ask boundary plus `NEEDS_USER_INPUT`/`BLOCKED` fallback rule, `Search Precision`, and first-use scaffold gate.
+   - `.github/instructions/must.instructions.md` contains `Request Flow`, `Per-Request Hard Gates`, `Shared State Contracts`, `Search Precision`, `Command Output Budget`, `Memory And Spec`, `Agents and Dispatch`, and `Implementation and Verification`.
+   - `.github/instructions/must.instructions.md` contains the specialist ask boundary plus `NEEDS_USER_INPUT`/`BLOCKED` fallback rule, `work_mode`, `task_type`, `pm_action`, fixed-string-before-regex search, VS Code `vscode_askQuestions` exact-tool priority, and the first-use scaffold gate.
    - `.github/instructions/skills-index.instructions.md` contains bootstrap routing and the `## Claude Code Skill Names` guidance.
+   - When Claude Code compatibility is required, `CLAUDE.md` imports or references the target `.github/instructions/**` files so Claude can load the shared project rules.
    - No `<fill:` placeholders remain for facts that were discoverable.
    - Any unknown facts are explicitly marked `unknown`, not guessed.
    - At least one real build/test/check command is documented, or the reason is recorded.
@@ -142,6 +150,7 @@ Return a short initialization report:
 - updated_files:
 - bootstrapped:
   - instructions: yes|no|skipped_existing
+  - claude_adapter: yes|no|not_applicable|skipped_existing
   - memory: yes|no|skipped_existing
   - spec: yes|no|skipped_existing
 - required_artifacts_verified: yes|no

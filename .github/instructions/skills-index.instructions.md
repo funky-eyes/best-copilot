@@ -11,10 +11,10 @@ This file is only for discovery and routing. Match the current task to the index
 ## Initialization and Orchestration
 
 - `repo-init-scan`: first use in a target repository, placeholder project facts, missing target-local scaffolds, or `/init` / `copilot init` output that still needs to be normalized into reusable repo facts.
-- `target-instructions-bootstrap`: create missing target-local `.github/instructions/**`, including the neutral project facts scaffold, and optional `AGENTS.md`.
+- `target-instructions-bootstrap`: create missing target-local `.github/instructions/**`, including the neutral project facts scaffold, plus runtime adapters such as `AGENTS.md` for Codex and `CLAUDE.md` for Claude Code when applicable.
 - `target-memory-bootstrap`: create missing target-local `memories/repo/**` skeleton for persistent task recovery.
 - `target-spec-bootstrap`: create missing target-local `spec/INDEX.md` and `spec/templates/**` before spec-driven work.
-- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, work modes, handoff packet shape, review/verification, memory/spec, and closeout rules.
+- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, work modes, dispatch packet shape, review/verification, memory/spec, and closeout rules.
 - Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
@@ -31,6 +31,7 @@ This file is only for discovery and routing. Match the current task to the index
 - `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, and per-task review.
 - `subagent-driven-development`: fresh-context specialist execution for approved plans, requiring implementation, spec-compliance review, code-quality review, and verification per task.
 - `dispatching-parallel-agents`: independent frozen subtasks with non-overlapping write sets.
+- `workspace-isolation`: before approved implementation or substantial feature/fix work when branch/worktree isolation, provenance, or baseline setup must be decided.
 
 ## Context, Implementation, and Debugging
 
@@ -47,6 +48,7 @@ This file is only for discovery and routing. Match the current task to the index
 
 - `change-verification`: minimal sufficient command, HTTP, browser, or static evidence after changes.
 - `verification-before-completion`: final check before claiming completion.
+- `development-branch-closeout`: final branch/worktree decision after verification evidence exists.
 - `structured-review`: evidence-first code, customization, targeted re-review, or medium/large design review when a compact scenario router is preferable.
 - `frontend-design-guardrails`: UI implementation guardrails for pages, components, forms, tables, and dashboards.
 - `web-experience-audit`: browser behavior, visual quality, console/network, responsive, or accessibility evidence.

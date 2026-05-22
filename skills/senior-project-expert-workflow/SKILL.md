@@ -23,7 +23,7 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 8. Every specialist packet must forbid direct user questions. When PM/coordinator is present, require `NEEDS_USER_INPUT` back to PM; otherwise require `BLOCKED missing_top_level_question` with the exact question the top-level session or PM/coordinator should ask.
 9. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
 10. Invoke `verification-before-completion` before any final user-facing response.
-11. If this role is about to end the turn and native ask UI exists, use it for continuation or closeout unless the latest user message already came from that gate and chose to end. Do not close on a prose-only summary.
+11. If this role is about to end the turn and native ask UI exists, use it for continuation or closeout unless the latest user message already came from that gate and chose to end. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; in Copilot CLI, use `Asking user` when available. Do not close on a prose-only summary.
 12. Close only after evidence is present or a blocker is explicitly stated.
 
 ## Dispatch Packet Contract

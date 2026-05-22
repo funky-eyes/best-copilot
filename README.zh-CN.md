@@ -6,7 +6,7 @@
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-33-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -21,7 +21,7 @@ Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claud
 
 - **一个资深入口**：由 Senior Project Expert 负责意图、范围、派发、fan-in、收口和可复用的工作流信号。
 - **八位专责 agent**：规划、架构、实现、前端、QA、安全、故障修复与规格工作各自分工。
-- **三十三项技能**：包含角色 workflow、引导、搜索、规划、TDD、设计评审、执行、Java/Python 编码规约、验证、前端审计与工作流演进等可安装技能。
+- **三十五项技能**：包含角色 workflow、引导、搜索、规划、工作区隔离、TDD、设计评审、执行、Java/Python 编码规约、验证、分支收口、前端审计与工作流演进等可安装技能。
 - **目标仓库本地的 memory 与 spec**：已安装的项目在目标仓库内保留事实、工作流、memory 与 spec，而非插件包内部。
 - **证据优先的收尾**：宣称“完成”必须有命令输出、静态检查、浏览器证据，或一个明确的阻塞说明。
 
@@ -197,10 +197,10 @@ User request
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-scan`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
-| Execution | `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Execution | `workspace-isolation`, `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
 | Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
 | Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
-| Verification | `change-verification`, `verification-before-completion`, `web-experience-audit`, `frontend-design-guardrails` |
+| Verification | `change-verification`, `verification-before-completion`, `development-branch-closeout`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
 
 ## 首次在目标仓库中使用
@@ -225,6 +225,7 @@ copilot init
 .github/instructions/project.instructions.md
 .github/instructions/must.instructions.md
 .github/instructions/skills-index.instructions.md
+CLAUDE.md  # 需要 Claude Code 兼容时
 memories/repo/INDEX.md
 memories/repo/current-workstreams.md
 spec/INDEX.md

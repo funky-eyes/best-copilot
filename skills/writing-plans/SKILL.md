@@ -37,7 +37,7 @@ Each task must include:
 ## Closeout Gate
 
 - Before ending the turn after presenting a plan, invoke `verification-before-completion`.
-- If the next step requires user choice between execution paths or whether to continue, use native structured ask UI when available instead of a prose-only summary or `1/2/3` reply request.
+- If the next step requires user choice between execution paths or whether to continue, use native structured ask UI when available instead of a prose-only summary or `1/2/3` reply request. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; in Copilot CLI, use `Asking user` when available.
 
 ## Output
 

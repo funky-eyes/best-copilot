@@ -42,6 +42,8 @@ Record each accepted evolution as a compact event:
 
 - Do not copy external prompts or code wholesale; extract local primitives only.
 - Do not evolve from a single weak signal unless the failure is severe and reproducible.
+- For skill changes, prefer trigger-focused descriptions that say when to load the skill, not a process summary that lets agents shortcut the skill body.
+- Keep frequently referenced skills short; move heavy references, examples, or tool details into separate files or existing focused skills.
 - Do not write secrets, PII, raw logs, or private URLs into memory.
 - Do not change tool permissions, safety boundaries, public contracts, or install surfaces without explicit review.
 - Do not store target repository evolution or task state in the installed plugin package or plugin cache.

@@ -39,7 +39,9 @@ Stage 1 and Stage 2 must not be performed by the same specialist who authored th
 ## Fan-In Rules
 
 - Accept only `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCKED`.
-- Results without verification evidence are incomplete.
+- Every delegated specialist result must preserve the `core-workflow-contract` handback fields: `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
+- When `status=NEEDS_CONTEXT`, the handback must also include `clarification_request` and `pm_action: "pm_clarify"`.
+- Completion-like results without verification evidence are incomplete.
 - `DONE_WITH_CONCERNS` must list the concern impact and whether it blocks later tasks.
 - Repeated `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or the same blocker twice triggers PM re-analysis instead of another blind dispatch.
 

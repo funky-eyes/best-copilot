@@ -1,6 +1,6 @@
 ---
 name: td-python-coding-guidelines
-description: Python coding and code review guideline skill based on Google Python Style Guide. Use when writing Python code, reviewing Python code, fixing lint/docstring/import/naming/exception/type annotation issues, unifying team Python style, or migrating existing code toward Google style. Applies to `.py` source files, tests, module imports, naming conventions, exception handling, and type annotations.
+description: "Use when writing or reviewing Python code, fixing lint/docstring/import/naming/exception/type annotation issues, unifying team style, or migrating `.py` files toward Google style."
 ---
 
 # Google Python Coding Guidelines (Google PyGuide)

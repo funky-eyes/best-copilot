@@ -38,6 +38,9 @@ Do not invert the two review stages. A task that fails spec compliance is not re
 - `verification_result`: `passed | failed | blocked`
 - `verification_coverage`: `complete | partial | blocked`
 - `ready_artifacts`: changed files, verification evidence, review outputs, blocked items, next resume action
+- Delegated specialist handbacks must preserve `core-workflow-contract` fields: `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
+- When delegated `status=NEEDS_CONTEXT`, the handback must also include `clarification_request` and `pm_action: "pm_clarify"`.
+- If checkpoint records use `task_status`, map it to the shared `status` field before PM fan-in.
 
 Never use a test result as the task status. Never claim `DONE` without real evidence.
 

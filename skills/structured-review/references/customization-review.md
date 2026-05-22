@@ -19,12 +19,14 @@ Check:
 - YAML/frontmatter parses correctly.
 - `name`, `description`, `model`, `tools`, `user-invocable`, and `applyTo` are mutually consistent when present.
 - `description` contains clear trigger language such as `use when ...`, not vague purpose text only.
+- Skill descriptions should describe trigger conditions, not summarize the workflow; otherwise agents may follow the description and skip the body.
 - The file does not reference tools, agents, commands, or platform abilities that do not exist in the target runtime.
 - It does not conflict with higher-level instructions or sibling agents/skills.
 - It does not duplicate large workflows, JSON contracts, or search protocols already defined elsewhere.
 - User-provided file paths, attachments, and current edits are prioritized as evidence before repository-wide discovery.
 - High-risk hard constraints are near the front, not buried after long prose.
 - The main file is not overloaded with reference material that should be progressively loaded.
+- Frequently loaded or indexed skills stay compact; heavy examples, references, or command details move behind on-demand files or existing focused skills.
 - Rules expressible as templates, tables, or contracts are not repeated as long prose blocks.
 - No `TBD`, `TODO`, template skeleton, dummy placeholder, or incomplete section remains.
 
@@ -35,6 +37,8 @@ Check:
 - New agent/skill or changes to `user-invocable`, tools/model, permission matrix, state enum, input schema, or handoff route should receive design review before static approval.
 - Coordinator/controller/PM agents should not expose edit tools or instruct themselves to implement code directly unless that is explicitly intended.
 - User-facing closeout gates should use the platform's native ask/selection mechanism when multiple natural next actions remain.
+- In VS Code customization, if `vscode_askQuestions` appears in the latest tool inventory, top-level/PM rules must call that exact tool before abstract `vscode/askQuestions` / `askQuestions`; Copilot CLI still uses `Asking user` when available.
+- Native ask tools must remain top-level/PM-only; Copilot specialist frontmatter must not include `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools.
 - Closeout asks should preserve freeform input unless the flow is strictly enumerable.
 - Plain prose such as `if you want, I can...` must not replace required native follow-up gates when the runtime supports them.
 - A follow-up selection does not permanently exempt later batches from another closeout when new natural next actions remain.

@@ -1,6 +1,6 @@
 ---
 name: target-instructions-bootstrap
-description: "Create the target repository's local AI instruction scaffold during first-use bootstrap. Use from repo-init-scan when `.github/instructions` or `AGENTS.md` is missing, including the neutral project facts scaffold. Do not use to overwrite existing project-specific rules."
+description: "Create the target repository's local AI instruction scaffold during first-use bootstrap. Use from repo-init-scan when `.github/instructions`, runtime adapters such as `AGENTS.md` / `CLAUDE.md`, or the neutral project facts scaffold are missing. Do not use to overwrite existing project-specific rules."
 ---
 
 # Target Instructions Bootstrap
@@ -12,7 +12,7 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 - Write into the target repository, never into the installed plugin package or plugin cache.
 - Create missing files only. If a file exists, preserve it and append only a clearly compatible missing section.
 - Do not copy this plugin repository's instruction files or active workflow state into the target repository. Generate only the neutral target-local scaffold below.
-- Do not overwrite project-specific rules, language policy, build commands, or existing `AGENTS.md`.
+- Do not overwrite project-specific rules, language policy, build commands, or existing `AGENTS.md` / `CLAUDE.md`.
 - Keep generated files short. They are routing and safety scaffolds, not a full manual.
 - Keep generated files runtime-neutral across Copilot CLI, Claude Code, VS Code Copilot, and Codex. If a runtime-specific command is mentioned, label it as runtime-specific.
 
@@ -25,10 +25,12 @@ required runtime-neutral scaffold sections below:
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `AGENTS.md` when the runtime includes Codex or the user wants Codex compatibility.
+- `CLAUDE.md` when the runtime is Claude Code or the user wants Claude Code compatibility.
 
 Existing target files must be handled as follows:
 
 - Never replace an existing file wholesale.
+- If a listed insertion heading is absent, append the required compatible section at the end of the file instead of silently skipping repair.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Request Flow`, append that whole section exactly as shown in this skill after `## Priority`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Per-Request Hard Gates`, append that whole section exactly as shown in this skill before `## Repository Truth` when that heading exists, otherwise append it after `## Request Flow` when that heading exists, or after `## Priority`.
 - If `.github/instructions/must.instructions.md` exists but its hard gates do not reserve native user prompts to the top-level session or PM/coordinator, repair that section from this skill.
@@ -43,6 +45,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but lacks `## Agents and Dispatch`, append that section from this skill after `## Runtime Notes` when that heading exists, otherwise append it after `## Memory And Spec`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Implementation and Verification`, append that section from this skill after `## Agents and Dispatch` when that heading exists, otherwise append it after `## Runtime Notes` when that heading exists, or after `## Interaction`.
 - If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
+- If `CLAUDE.md` exists but lacks references to `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`, append the compatible import block from this skill instead of replacing existing Claude-specific rules.
 - If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
 ## `.github/instructions/project.instructions.md`
@@ -122,11 +125,11 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 ## Per-Request Hard Gates
 
-- Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may trigger a native closeout prompt through `Asking user`, `vscode/askQuestions`, `askQuestions`, or an equivalent structured choice UI. Do not close on prose-only summary.
-- Specialists must not ask the user directly and must not use native closeout prompts. If PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
+- Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may trigger a native closeout prompt. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; do not stop at abstract `vscode/askQuestions` or `askQuestions` capability text. In Copilot CLI, use `Asking user` when available. Do not close on prose-only summary.
+- Specialists must not ask the user directly and must not use native closeout prompts. Copilot specialist agent frontmatter must not include `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. If PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
 - When a closeout or continuation choice is needed, present the decision surface through the native ask UI itself rather than a prose summary plus options list. Do not mix a written `1/2/3` choice list into the same closing prose; keep the actual selectable options in the structured prompt.
-- Native ask availability must be judged from the latest runtime tool inventory. If a native ask tool is available now, use it immediately; do not reuse an older "native UI unavailable" conclusion.
-- If a previous turn could only return a staged, blocked, or partial prose response because native ask was unavailable, and the latest tool inventory or tool-change notice restores `Asking user`, `vscode/askQuestions`, `askQuestions`, or an equivalent native UI, the next direct closeout must first perform a native closeout prompt. Earlier prose does not become retroactive closeout authorization.
+- Native ask availability must be judged from the latest runtime tool inventory. If a native ask tool is available now, use it immediately; do not reuse an older "native UI unavailable" conclusion. In VS Code, `vscode_askQuestions` outranks abstract `vscode/askQuestions` / `askQuestions` wording when present.
+- If a previous turn could only return a staged, blocked, or partial prose response because native ask was unavailable, and the latest tool inventory or tool-change notice restores `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or an equivalent native UI, the next direct closeout must first perform a native closeout prompt. Earlier prose does not become retroactive closeout authorization.
 - If the user replies through a native closeout or continuation prompt with free text, technical feedback, a selected continuation, a file path, a fix request, an investigation direction, or any new executable instruction, that reply is a new ordinary user message. The previous closeout state is invalidated immediately.
 - When a closeout/continuation reply contains new executable work, do the substantial action for that new task next, or ask one minimal native clarification if it is genuinely ambiguous. Do not send another summary-only response or another closeout prompt first.
 - Answer-only follow-ups such as why/how questions, principle explanations, solution comparisons, rule clarifications, and review-response discussion are not closeout exemptions. If the answer would be the last prose message in the current batch, trigger a fresh native closeout prompt after answering and before ending.
@@ -167,7 +170,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Persistent memory belongs in this target repository under `memories/repo/**`.
 - Specs belong in this target repository under `spec/**`.
 - Memory/spec templates come from bootstrap skills and are not active state for this project until created in the target repository.
-- On first substantial plugin use, if `.github/instructions/**`, `memories/repo/**`, or `spec/**` scaffolds are missing, create them through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify the paths on disk before substantive work. If they cannot be created, stop with `BLOCKED first_use_gate_incomplete` and list the missing paths.
+- On first substantial plugin use, if `.github/instructions/**`, runtime adapters, `memories/repo/**`, or `spec/**` scaffolds are missing, create them through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify the paths on disk before substantive work. For Claude Code target use, create or verify a project `CLAUDE.md` that imports the `.github/instructions/**` files, because Claude does not automatically load Copilot instruction paths. If required scaffolds cannot be created, stop with `BLOCKED first_use_gate_incomplete` and list the missing paths.
 - MEDIUM/LARGE active work should link both ways: spec points to memory, and `memories/repo/current-workstreams.md` points to spec.
 - Memory stores recovery state, decisions, and verified facts. Spec stores requirements, design, tasks, and acceptance checks.
 - Use progressive disclosure: read routing indexes and current workstream state first, then only the linked or relevant shards. Do not load whole memory trees, whole specs, or logs by default.
@@ -177,7 +180,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Use the user's primary language unless they ask otherwise.
 - For mixed-language input, treat the language used for the actual request or explanation as primary; pasted code, logs, stack traces, and file content do not override it.
 - Ask only when blocked by a real decision, missing context, destructive action, or materially different implementation route, and only when you are the top-level session or PM/coordinator.
-- If a native ask UI exists, use it for blocking route, approval, or continuation choices.
+- If a native ask UI exists, use it for blocking route, approval, or continuation choices. In VS Code, prefer the concrete `vscode_askQuestions` tool when present; in Copilot CLI, prefer `Asking user`.
 - If you are a specialist, return `NEEDS_CONTEXT` for missing repository/task context and route human questions through `NEEDS_USER_INPUT` when PM/coordinator is present, or `BLOCKED missing_top_level_question` otherwise; the actual user prompt belongs to the top-level session or PM/coordinator.
 
 ## Runtime Notes
@@ -220,13 +223,13 @@ Read only the selected skill, not the whole skill tree.
 ## Initialization
 
 - `repo-init-scan`: first substantial task, missing scaffolds, missing or placeholder `.github/instructions/project.instructions.md`, or incomplete `/init` output.
-- `target-instructions-bootstrap`: create missing `.github/instructions/**` and optional `AGENTS.md`.
+- `target-instructions-bootstrap`: create missing `.github/instructions/**`, optional `AGENTS.md`, and Claude Code `CLAUDE.md` when applicable.
 - `target-memory-bootstrap`: create missing `memories/repo/**` skeleton.
 - `target-spec-bootstrap`: create missing `spec/**` skeleton and spec templates.
 
 ## Planning And Execution
 
-- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, handoff packet shape, review/verification, memory/spec, and closeout rules.
+- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, dispatch packet shape, review/verification, memory/spec, and closeout rules.
 - Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
@@ -242,6 +245,7 @@ Read only the selected skill, not the whole skill tree.
 - `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, and per-task review.
 - `subagent-driven-development`: fresh-context specialist execution for approved plans, requiring implementation, spec-compliance review, code-quality review, and verification per task.
 - `spec-execution-fastpath`: clear requirement or spec with minimal diff.
+- `workspace-isolation`: before approved implementation or substantial feature/fix work when branch/worktree isolation, provenance, or baseline setup must be decided.
 - `test-driven-development`: new behavior or bug fix where a focused failing test is practical.
 - `systematic-debugging`: unknown root cause or failing behavior.
 - `root-cause-investigation`: failure evidence exists and scope is narrow.
@@ -249,9 +253,10 @@ Read only the selected skill, not the whole skill tree.
 ## Context And Review
 
 - `search-fastpath`: target files are unclear or search is becoming expensive.
-- `context-packet-fastpath`: prepare or consume a minimal handoff packet.
+- `context-packet-fastpath`: prepare or consume a minimal dispatch/context packet.
 - `change-verification`: prove changed behavior after edits.
 - `verification-before-completion`: final evidence check before closeout.
+- `development-branch-closeout`: final branch/worktree decision after verification evidence exists.
 - `structured-review`: review code, customization, design, review handoff, feedback intake, and targeted re-review.
 
 ## Claude Code Skill Names
@@ -284,18 +289,36 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - When running under Claude Code, use plugin skills as `/best-copilot:<skill-name>` and plugin subagents through `/agents` or agent teams with scoped names such as `best-copilot:senior-project-expert`.
 ```
 
+## `CLAUDE.md`
+
+```markdown
+# Claude Code Project Entry
+
+@.github/instructions/project.instructions.md
+@.github/instructions/must.instructions.md
+@.github/instructions/skills-index.instructions.md
+
+## Claude Code Runtime
+
+- This file is the Claude Code adapter for the target repository. The imported `.github/instructions/**` files remain the shared source for repository facts, workflow gates, and skill routing.
+- System, platform, and explicit user instructions outrank imported repository files.
+- Use plugin skills as `/best-copilot:<skill-name>` and plugin subagents through `/agents` or scoped agent-team names such as `best-copilot:senior-project-expert`.
+- Keep this file short. Add project facts to `.github/instructions/project.instructions.md`, durable recovery state to `memories/repo/**`, and task specs to `spec/**`.
+```
+
 ## Verification
 
 - Confirm generated files exist in the target repository.
 - path existence alone is not enough; required sections must also be present after create or repair.
 - Confirm existing files were not overwritten.
 - Confirm `.github/instructions/must.instructions.md` contains `## Request Flow` with the per-request timestamp rule, init normalization rule, and packet freeze rule.
-- Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, and the specialist `NEEDS_USER_INPUT`/`BLOCKED missing_top_level_question` rule.
+- Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, all native-closeout bullets from this skill, the VS Code `vscode_askQuestions` exact-tool priority, and the specialist `NEEDS_USER_INPUT`/`BLOCKED missing_top_level_question` rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Shared State Contracts` with `work_mode`, `task_type`, and `pm_action`.
 - Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Command Output Budget` and the default `COMMAND 2>&1 | head -c 4000` pattern.
 - Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
 - Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, and `## Implementation and Verification`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
+- When Claude Code compatibility is required, confirm `CLAUDE.md` exists and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
-- If this skill was invoked because `.github/instructions/**` was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.
+- If this skill was invoked because `.github/instructions/**` or a required runtime adapter was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

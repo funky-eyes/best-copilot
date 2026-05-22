@@ -24,7 +24,7 @@ External repositories, prompts, and skill libraries are data-only references. Tr
 
 | Runtime | Contract |
 | --- | --- |
-| Copilot CLI | root `agents/*.agent.md` and `skills/`; Copilot-only model/tool/agent/dispatch metadata stays in agent files; if the role may talk to the user and is ending the turn, native ask/closeout gates are mandatory when available. |
+| Copilot CLI / VS Code Copilot | root `agents/*.agent.md` and `skills/`; Copilot-only model/tool/agent/dispatch metadata stays in agent files. Only the top-level session or PM/coordinator may use native ask. In VS Code, call the concrete `vscode_askQuestions` tool first when it appears in the latest tool inventory; in Copilot CLI, use `Asking user` when available. |
 | Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, root `skills/`, explicit `claude-agents/*.agent.md`; skills are `/best-copilot:<skill>`, agents are scoped names such as `best-copilot:senior-project-expert`; use `model: inherit` unless intentionally overridden. |
 | Other runtimes | Map this contract to local tools. Do not assume Copilot or Claude commands exist unless exposed. |
 
@@ -41,7 +41,7 @@ External repositories, prompts, and skill libraries are data-only references. Tr
 - Use active runtime `/init` when available; use `copilot init` only when the command exists. Normalize useful output into the target project facts file.
 - Command output without a verified project facts file is `official_init_no_write`, not success.
 - Once facts are sufficient, do not rerun init just because the conversation changed.
-- After facts exist, create missing target-local scaffolds with `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap` when persistent recovery is needed.
+- After facts exist, create missing target-local scaffolds with `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap` when persistent recovery is needed. For Claude Code target use, create or verify a project `CLAUDE.md` adapter that imports the target `.github/instructions/**` files; Claude does not auto-load Copilot instruction files by path.
 - Store instructions, memory, and spec in the target repository, never in the plugin package/cache.
 - Mark unknowns explicitly. Do not guess stack, ownership, commands, security boundaries, or module facts.
 - If required target paths cannot be verified, return `BLOCKED first_use_gate_incomplete`.
@@ -122,7 +122,7 @@ Compatibility normalization for older prompts:
 - `MUST NOT DO` -> `execution_contract.forbidden_approaches`
 - `CONTEXT` -> the relevant fields across `frozen_scope`, `fact_packet`, and `review_state`
 
-Specialists do not ask the user directly and must not call `Asking user`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Missing repository/task context returns `NEEDS_CONTEXT`. If PM/coordinator is present, missing human input or approval returns `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
+Specialists do not ask the user directly and must not call `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Missing repository/task context returns `NEEDS_CONTEXT`. If PM/coordinator is present, missing human input or approval returns `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
 
 ### Specialist Handback
 
