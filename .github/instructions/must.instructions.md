@@ -47,7 +47,7 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 - This gate must be enforceable from instruction text alone. Do not rely on plugin hooks, local scripts, or runtime-specific interpreters as the default closeout backstop.
 
 - Any question that blocks execution, changes direction, requests approval, chooses between follow-up paths, or asks whether to continue must use a native ask tool when available, but only from the top-level session or PM/coordinator.
-- Native ask tools are runtime-specific. VS Code Copilot Chat priority is the concrete `vscode_askQuestions` tool when it appears in the latest tool inventory; only fall back to `vscode/askQuestions`, `askQuestions`, or equivalent structured UI when that concrete tool is absent. Copilot CLI priority is `Asking user` when available. Use choices for 2-4 options; closeout prompts must also allow free-form follow-up unless the answer must be strictly enumerated.
+- Native ask tools are runtime-specific. VS Code Copilot Chat priority is the concrete `vscode_askQuestions` tool when it appears in the latest tool inventory; only fall back to `vscode/askQuestions`, `askQuestions`, or equivalent structured UI when that concrete tool is absent. Copilot CLI priority is `Asking user` when available. Use choices for 2-4 options, and every ask/closeout prompt must allow a custom free-form answer. If the UI only supports fixed choices, include `Custom answer` and follow that selection with a native/free-form prompt before deciding.
 - Only the top-level session or PM/coordinator may call native ask tools. Copilot specialist agent frontmatter must not include `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Specialists must not call them directly; if PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
 - A prose-only question such as "Should I continue?", "Do you want me to create a worktree?", or "Reply A/B/C" does not satisfy planning, approval, continuation, or closeout gates. Do not send such a question and then end the turn.
 
@@ -71,6 +71,11 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 - Delegated specialists must return structured handbacks. Missing repository or task context returns `NEEDS_CONTEXT`. Missing human choice returns `NEEDS_USER_INPUT` to PM/coordinator when one exists, otherwise `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
 - Shared packet and handback field names are owner-controlled vocabulary. Runtime adapters and role workflows may reference them, but they must not redefine the field meanings or create parallel aliases.
 - When consuming older dispatch prompts that still use `TASK`, `EXPECTED OUTCOME`, `REQUIRED TOOLS`, `MUST DO`, `MUST NOT DO`, or `CONTEXT`, normalize them into the six-block packet before further delegation. Treat them as compatibility aliases, not as the new canonical vocabulary.
+
+### Fan-In Arbitration
+
+- PM/coordinator adjudicates fan-in before marking tasks complete or continuing fan-out. Priority order: blocker or invalid handback, security/privacy/data-loss/auth/dependency/release risk, failed or missing verification, spec/acceptance mismatch, overlapping write sets, code-quality or UX/test-sufficiency concerns, then non-blocking follow-up notes.
+- If reviewers disagree, PM records `decision_provenance` with deciding evidence, blocking status, next stage, and residual risk. Do not close from an unadjudicated conflict.
 
 ## 5. Target Markdown Memory System
 
@@ -125,6 +130,8 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - Delegated specialist handbacks must preserve shared field names such as `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`, and when blocked on missing context, `clarification_request` plus `pm_action: "pm_clarify"`.
 - Delegated specialists must consume frozen paths, already-read context, and authoritative repo facts before reopening search.
 - Customization surfaces such as `.github/**`, `AGENTS.md`, `.github/instructions/project.instructions.md`, and target repository `memories/repo/**` are handled inline by the top-level assistant to avoid recursive rule drift.
+- For large ambiguous work, PM delegates SDD design brainstorming to Technical Architect first. Technical Architect self-reviews and repairs the design before PM asks Developer and Quality Assurance Expert for second-pass review; add Frontend Designer review for frontend/user-visible surfaces. Only a blocker-free reviewed design proceeds to implementation.
+- Cross-review implementation lanes: Developer-authored code -> Technical Architect review; Technical Architect-authored code -> Developer review; frontend code by Developer/Technical Architect -> Frontend Designer review; Frontend Designer-authored code -> Technical Architect review.
 
 ## 9. Implementation and Verification
 
@@ -133,6 +140,8 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - Public APIs, message formats, schema, auth boundaries, CI/CD, and dependency upgrades are high-risk; assess blast radius first.
 - MEDIUM/LARGE implementation must not begin until the Spec Bundle or approved plan has passed a pre-implementation readiness review. Design review concerns must be adjudicated by `finding_kind`; only `implementation_todo` and `risk_note` may proceed without spec revision.
 - Multi-step implementation must execute from an approved plan revision. Each task needs evidence, Stage 1 spec-compliance review, Stage 2 code-quality/release-risk review, and verification before PM marks it complete.
+- Spec/tasks must be parallel-ready when possible: include owner lane, reviewer lane, dependencies, write set, parallel group, acceptance checks, TDD or minimal reproducible check, verification command, and stop conditions.
+- Code changes follow SDD then TDD: reviewed design/task boundary first, then failing test or reproducible check before implementation when practical.
 - Evidence over claims: "done", "passed", and "verified" require command output, static evidence, browser evidence, or a stated blocker.
 - Static customization changes may be verified with scoped diff, frontmatter/schema checks, trigger/route checks, and state-contract checks.
 

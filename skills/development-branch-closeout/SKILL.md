@@ -24,7 +24,7 @@ Use this after required reviews and verification have evidence. It turns branch 
 
 ## Decision Surface
 
-Use native ask UI when available. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool before abstract `vscode/askQuestions` or `askQuestions`; in Copilot CLI, use `Asking user` when available. Present only applicable options:
+Use native ask UI when available. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool before abstract `vscode/askQuestions` or `askQuestions`; in Copilot CLI, use `Asking user` when available. Include a custom free-form answer path; if the UI only supports fixed choices, include `Custom answer` and follow it with a native/free-form prompt before deciding. Present only applicable options:
 
 - `merge_local`: merge to the selected base branch after verification on the merge result.
 - `open_pr`: push the branch and create a pull request; preserve the worktree for review follow-up.

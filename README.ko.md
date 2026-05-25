@@ -6,7 +6,7 @@
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -162,11 +162,11 @@ best-copilot
 User request
   -> init or repo fact check
   -> Senior Project Expert freezes scope
-  -> brainstorming or direct planning
-  -> requirements / design / tasks when risk is non-trivial
-  -> design review before implementation
-  -> specialist implementation
-  -> cross review
+  -> Technical Architect SDD brainstorming for large ambiguous work
+  -> Developer + QA design review, plus Frontend Designer when UI is involved
+  -> parallel-ready requirements / design / tasks when risk is non-trivial
+  -> SDD-reviewed, TDD-oriented specialist implementation
+  -> cross-author review
   -> QA / security / frontend verification
   -> closeout with evidence and resume point
 ```
@@ -179,10 +179,10 @@ User request
 | --- | --- | --- |
 | Senior Project Expert | 의도, 범위, 오케스트레이션, dispatch, fan-in, 수렴, 진화 신호 | 직접 프로덕션 코드 작성 |
 | Specification Writer | 증거 수집, requirements/design/tasks, ADR, 진행 기록, memory/spec 복구 | 프로덕션 구현 |
-| Technical Architect | 백엔드/풀스택 설계, API/데이터/서비스 경계, 주 구현 및 아키텍처 리뷰 | 프론트엔드 세부사항 |
+| Technical Architect | 풀스택 설계, SDD brainstorming, API/데이터/서비스 경계, 주 구현, 병렬 분해, Developer/Frontend Designer 작업 리뷰 | 최종 프론트엔드 polish, 작업 오케스트레이션 |
 | Developer | 고정된 구현 슬라이스, 구현 가능성 리뷰, 아키텍처 책임 코드 리뷰 | 아키텍처 변경/범위 확장 |
-| Frontend Designer | 페이지, 컴포넌트, 상호작용, 반응형, 브라우저 증거 | 백엔드 메인라인 |
-| Quality Assurance Expert | 기능 검증, 회귀 위험, 코드 리뷰, 병합 준비 | 보안 전용 검토 |
+| Frontend Designer | 페이지, 컴포넌트, 상호작용, 반응형, 브라우저 증거, 프론트엔드 리뷰 | 백엔드 메인라인 |
+| Quality Assurance Expert | 기능 검증, 회귀 위험, 코드 리뷰, peer lane 이후 병합 준비 | 보안 전용 검토 |
 | Security Reviewer | 권한, 민감 데이터 흐름, 의존성 및 릴리스 표면 보안 | 일반 기능 QA |
 | Root Cause Fixer | 실패 분류, 최소 패치, 회귀 검증 | 근거 없는 리팩터링 |
 

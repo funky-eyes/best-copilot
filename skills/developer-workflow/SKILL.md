@@ -17,7 +17,7 @@ Own frozen implementation slices and peer review of Technical Architect-owned co
 2. Return `NEEDS_CONTEXT` instead of guessing when the packet is incomplete.
 3. Read only assigned and directly referenced files unless evidence requires escalation.
 4. Implement within the frozen boundary and preserve existing behavior outside the task.
-5. Use TDD or a minimal reproducible check for new behavior or bug fixes when practical.
+5. Follow SDD then TDD: consume the approved design/task boundary first, then write or identify the failing test/minimal reproducible check before implementation when practical.
 6. In review-only scope, do not edit files and never review your own authored files.
 7. Report exact verification commands and results.
 8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
@@ -26,7 +26,7 @@ Own frozen implementation slices and peer review of Technical Architect-owned co
 
 - `task_type=implementation`: implement only the frozen slice and return concrete verification evidence.
 - `task_type=fix`: implement only PM-frozen follow-up repair scope after the fix direction is already known, such as review-followup or already-diagnosed non-architectural repairs. Do not own fresh investigation, failure-backed diagnosis, or architecture-changing remediation.
-- `task_type=design_review`: review architect-owned code or plan text without editing files.
+- `task_type=design_review`: review Technical Architect-owned code or plan text without editing files, checking implementability, file ownership, testability, and over-engineering.
 
 ## Output
 

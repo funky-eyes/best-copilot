@@ -21,14 +21,14 @@ This file is only for discovery and routing. Match the current task to the index
 - Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
-  - `technical-architect-workflow`: architecture, service boundaries, data/API contracts, blast radius, and mainline implementation strategy.
+  - `technical-architect-workflow`: full-stack architecture, SDD design brainstorming, service boundaries, data/API contracts, blast radius, mainline implementation, parallel decomposition, and cross-review.
   - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT` / `NEEDS_USER_INPUT`, and verification evidence.
   - `frontend-designer-workflow`: UI implementation/review, design-system reuse, responsive/browser evidence, and visual quality.
   - `quality-assurance-workflow`: functional verification, regression risk, test sufficiency, and merge-readiness review.
   - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
   - `root-cause-fixer-workflow`: concrete failure evidence, minimal root-cause patching, and regression proof.
 - `evolution-loop`: closeout, repeated failure, review loop, stale trigger, or user-requested agent/skill improvement; produces auditable and reversible evolution proposals.
-- `brainstorming`: top-level or PM planning gate where route-changing ambiguity must be locked through explicit direction confirmation before spec or code.
+- `brainstorming`: top-level or PM planning gate where route-changing ambiguity must be locked through explicit direction confirmation before spec or code; PM-led large technical design routes deep brainstorming through Technical Architect.
 - `writing-plans`: MEDIUM/LARGE tasks that need executable slices with files and verification.
 - `spec-review-gauntlet`: pre-implementation readiness and multi-lane design review for Spec Bundles, execution plans, cross-module changes, and high-risk customization workflow changes.
 - `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, and per-task review.

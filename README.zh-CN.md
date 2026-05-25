@@ -6,7 +6,7 @@
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -166,11 +166,11 @@ best-copilot
 User request
   -> init or repo fact check
   -> Senior Project Expert freezes scope
-  -> brainstorming or direct planning
-  -> requirements / design / tasks when risk is non-trivial
-  -> design review before implementation
-  -> specialist implementation
-  -> cross review
+  -> Technical Architect 针对大任务做 SDD brainstorming
+  -> Developer + QA 设计复审，有 UI 时加入 Frontend Designer
+  -> 风险不低时形成可并行的 requirements / design / tasks
+  -> 通过 SDD 评审后按 TDD 导向派发实现
+  -> 跨作者 review
   -> QA / security / frontend verification
   -> closeout with evidence and resume point
 ```
@@ -183,10 +183,10 @@ User request
 | --- | --- | --- |
 | Senior Project Expert | 意图、范围、编排、派发、fan-in、收口、演进信号 | 直接编写生产代码 |
 | Specification Writer | 发现证据、requirements、design、tasks、ADR、memory/spec 恢复 | 生产实现 |
-| Technical Architect | 后端/全栈设计、API/数据/服务边界、主线实现、架构评审 | 前端细节 |
+| Technical Architect | 全栈设计、SDD brainstorming、API/数据/服务边界、主线实现、并行拆解、Developer/Frontend Designer 代码评审 | 最终前端打磨、任务编排 |
 | Developer | 冻结的实现切片、实现可行性评审、对架构师负责代码的实现评审 | 架构变更或范围扩展 |
-| Frontend Designer | 页面、组件、交互、响应式、浏览器证据 | 后端主线 |
-| Quality Assurance Expert | 功能验证、回归风险、代码审查、合并准备 | 安全专项 |
+| Frontend Designer | 页面、组件、交互、响应式、浏览器证据、前端专项 review | 后端主线 |
+| Quality Assurance Expert | 功能验证、回归风险、代码审查、peer lanes 后的合并准备 | 安全专项 |
 | Security Reviewer | 权限、敏感数据流、依赖、发布面安全 | 普通功能 QA |
 | Root Cause Fixer | 失败诊断、最小补丁、回归验证 | 无证据的重构 |
 

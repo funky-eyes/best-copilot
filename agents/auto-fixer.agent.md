@@ -2,7 +2,7 @@
 name: Root Cause Fixer
 description: "Use when there is a failing test, error log, CI failure, review finding, production symptom, or other concrete failure evidence that needs root-cause analysis, minimal patching, and regression verification. DO NOT USE FOR: speculation-driven refactors, general QA, or task orchestration."
 model: Claude Sonnet 4.6 (copilot)
-tools: [read, search, edit, execute, web, todo, vscode/askQuestions, askQuestions]
+tools: [read, search, edit, execute, web, todo]
 user-invocable: true
 ---
 

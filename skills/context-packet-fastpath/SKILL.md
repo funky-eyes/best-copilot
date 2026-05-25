@@ -18,6 +18,10 @@ description: "Use to prepare a minimal context packet for a delegated subtask or
 - `priority_files`
 - `already_read_files`
 - `dependencies`
+- `owner_lane`
+- `reviewer_lanes`
+- `write_set`
+- `parallel_group`
 - `reference_files`
 - `constraints`
 - `forbidden_approaches`
@@ -39,6 +43,7 @@ description: "Use to prepare a minimal context packet for a delegated subtask or
 - `memory_refs`
 - `spec_refs`
 - `dispatch_reason`
+- `retrieval_provenance`
 
 ## Rules
 
@@ -46,6 +51,7 @@ description: "Use to prepare a minimal context packet for a delegated subtask or
 - Full packet: needed only for cross-module or high-risk work.
 - Prefer `micro` or `standard` packets when the file set and acceptance checks are already clear.
 - Do not include whole logs, whole specs, or unrelated memory.
+- Include only the retrieval provenance needed to justify selected files: explicit paths, index hits, fixed-string searches, external source URLs, and why any regex/broad search was necessary.
 - If a delegate needs new files, return to PM to widen scope.
 - A delegate must consume `task_type`, `user_intent_summary`, `review_followup_scope`, `previously_verified_items`, `ready_artifacts`, `required_artifacts`, and `recommended_next_stage` before reopening search.
 - A delegate should stop at `context_budget` and return `NEEDS_CONTEXT` instead of broad-scanning.

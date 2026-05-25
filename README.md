@@ -6,7 +6,7 @@ English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japa
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -21,7 +21,7 @@ Large AI coding tasks fail when they jump straight from a vague request to a pat
 
 - **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable workflow signals.
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
-- **Thirty-five skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, and workflow evolution are installable skills.
+- **Thirty-eight skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, and workflow evolution are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
 - **Evidence-first closure**: “done” requires command output, static checks, browser evidence, or an explicit blocker.
 
@@ -166,11 +166,11 @@ best-copilot
 User request
   -> init or repo fact check
   -> Senior Project Expert freezes scope
-  -> brainstorming or direct planning
-  -> requirements / design / tasks when risk is non-trivial
-  -> design review before implementation
-  -> specialist implementation
-  -> cross review
+  -> Technical Architect SDD brainstorming for large ambiguous work
+  -> Developer + QA design review, plus Frontend Designer when UI is involved
+  -> parallel-ready requirements / design / tasks when risk is non-trivial
+  -> SDD-reviewed, TDD-oriented specialist implementation
+  -> cross-author review
   -> QA / security / frontend verification
   -> closeout with evidence and resume point
 ```
@@ -183,10 +183,10 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 | --- | --- | --- |
 | Senior Project Expert | Intent, scope, orchestration, dispatch, fan-in, closeout, evolution signals | Direct production implementation |
 | Specification Writer | Discovery evidence, requirements, design, tasks, ADRs, memory/spec recovery | Production implementation |
-| Technical Architect | Backend/full-stack design, API/data/service boundaries, mainline implementation, architecture review | Frontend polish, small parallel slices |
+| Technical Architect | Full-stack design, SDD brainstorming, API/data/service boundaries, mainline implementation, parallel decomposition, review of Developer/Frontend Designer work | Final frontend polish, task orchestration |
 | Developer | Frozen implementation slices, implementation-feasibility review, peer review of architect-owned code | Architecture changes, scope expansion |
-| Frontend Designer | Pages, components, interaction, responsive behavior, browser evidence | Backend mainline work |
-| Quality Assurance Expert | Functional verification, regression risk, code review, merge readiness | Security review and fixes |
+| Frontend Designer | Pages, components, interaction, responsive behavior, browser evidence, frontend review | Backend mainline work |
+| Quality Assurance Expert | Functional verification, regression risk, code review, merge readiness after peer lanes | Security review and fixes |
 | Security Reviewer | Auth, permissions, sensitive data flow, dependencies, release-surface security | General functional QA |
 | Root Cause Fixer | Failure triage, minimal patching, regression proof | Speculation-driven refactors |
 

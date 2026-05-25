@@ -9,6 +9,8 @@ description: "Use when target files are unknown, repeated search is becoming exp
 
 Find the right files quickly without turning every task into an unbounded repository scan.
 
+This skill is the retrieval lane. It should produce a compact evidence map that a coding or review lane can consume without repeating broad search.
+
 ## Precision First
 
 - Prefer exact paths, file names, symbols, routes, config keys, and copied error strings over regex.
@@ -25,6 +27,8 @@ Find the right files quickly without turning every task into an unbounded reposi
 5. Scoped semantic search with 2-3 literal terms in the smallest likely directory when exact names are unknown.
 6. Regex search only after the earlier steps fail or the task needs a structural pattern.
 7. External sources only when repo evidence cannot answer the question and current instructions allow web use.
+
+For code-generation tasks, stop search when you have: the target files, the local pattern to follow, the relevant test/check surface, and any public contract or frontend state affected by the change.
 
 ## External Fetch Ladder
 
@@ -55,5 +59,6 @@ When a task needs web or repository evidence, use a source-aware ladder inspired
 - selected_files:
 - literal_attempts:
 - regex_used: yes|no, reason
+- retrieval_provenance:
 - gaps:
 ```
