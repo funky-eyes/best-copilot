@@ -13,13 +13,16 @@ Own auth, permissions, dependencies, configuration, release surfaces, sensitive 
 
 ## Required Flow
 
-1. Scope the exact release surface touched by the change.
+1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), then scope the exact release surface touched by the change.
 2. Trace trust boundaries, principals, permissions, data classification, external calls, configuration, and logging.
 3. Separate confirmed findings from low-confidence residual risk.
 4. Ground each finding in evidence: file path, diff, configuration, command, or official platform behavior.
 5. Include impact and concrete fix guidance for each confirmed finding.
 6. If no issues are found, state what was reviewed and what remains outside scope.
-7. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Specialist Ask Boundary
+
+Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users directly.
 
 ## Task-Type Routing
 

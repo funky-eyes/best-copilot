@@ -28,7 +28,7 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 4. Before editing, freeze a minimal packet. The canonical serialized form is the shared six-block PM dispatch packet from `core-workflow-contract`, and it must cover at least: `goal`, `scope`, `constraints`, `expected_outcome`, `user_intent_summary`, `non_goals`, `files_involved`, `changed_files`, `search_hints`, `reference_files`, `acceptance_checks`, `verification_budget`, `work_mode`, `task_type`, `context_budget`, and `stop_conditions`. Add `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, `source_provenance_refs`, `review_followup_scope`, `previously_verified_items`, `required_artifacts`, `recommended_next_stage`, `dependencies`, `review_lanes`, and `ready_artifacts` when they materially constrain the task.
 5. Search at most three rounds; stop after two rounds with no new signal. Prefer explicit paths, repo indexes, exact filename/glob lookup, and fixed-string `rg -F` before regex. Use regex only when the target is genuinely vague, exact literals are unknown, or earlier precise searches failed.
 6. Before completion, provide real verification or clearly state why verification is blocked.
-7. If preparing to end the current turn, and the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may use a native ask tool. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; do not stop at abstract `vscode/askQuestions` or `askQuestions` capability text. In Copilot CLI, use `Asking user` when available. Specialists must not ask the user directly. A prose-only summary never counts as closeout authorization.
+7. If preparing to end the current turn, and the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may use a native ask tool. Use the native ask mechanism declared in the current runtime's adapter, as defined in `core-workflow-contract` Runtime Adapters table. Specialists must not ask the user directly. A prose-only summary never counts as closeout authorization.
 8. When a closeout or continuation choice is needed, present the decision surface through the native ask UI itself rather than a prose summary plus options list. Do not mix a written `1/2/3` choice list into the same closing prose; keep the actual selectable options in the structured prompt.
 9. If a previous turn lacked a native ask tool and only a prose status update was possible, then any later turn where a native ask tool is available again must use that native closeout flow before ending. Earlier prose does not become retroactive authorization.
 10. Any user reply from a native closeout prompt, including free text, selections, or continuation choices, becomes a new user instruction immediately. After handling that instruction, the assistant must ask again before ending; prior closeout evidence cannot be reused.
@@ -36,6 +36,8 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 12. If the new user message is only a why/how follow-up, principle explanation, solution comparison, rule clarification, review-response discussion, or any other answer-only question, answering it is not a closeout exemption. If that answer would be the last prose message of the current batch, the assistant must still trigger a fresh native closeout prompt before ending; do not send `final` or an equivalent ending message directly.
 
 ## 3. Native Ask and Continuation Gates
+
+Follow the **Native Ask Contract** and **Specialist Ask Boundary** in `core-workflow-contract`. The canonical definitions live there; this section adds only the high-level closeout gate.
 
 ### No Silent Closeout
 
@@ -45,37 +47,33 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 - If native ask is unavailable and the latest user message was not an explicit closeout confirmation, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact question, options, safe default when one exists, and resume state. Do not improvise a prose closeout.
 - If the native ask reply contains free text or a new instruction, treat it as a new ordinary user request and continue from there.
 - This gate must be enforceable from instruction text alone. Do not rely on plugin hooks, local scripts, or runtime-specific interpreters as the default closeout backstop.
+- A prose-only question such as "Should I continue?", "Do you want me to create a worktree?", or "Reply A/B/C" does not satisfy planning, approval, continuation, or closeout gates.
 
-- Any question that blocks execution, changes direction, requests approval, chooses between follow-up paths, or asks whether to continue must use a native ask tool when available, but only from the top-level session or PM/coordinator.
-- Native ask tools are runtime-specific. VS Code Copilot Chat priority is the concrete `vscode_askQuestions` tool when it appears in the latest tool inventory; only fall back to `vscode/askQuestions`, `askQuestions`, or equivalent structured UI when that concrete tool is absent. Copilot CLI priority is `Asking user` when available. Use choices for 2-4 options, and every ask/closeout prompt must allow a custom free-form answer. If the UI only supports fixed choices, include `Custom answer` and follow that selection with a native/free-form prompt before deciding.
-- Only the top-level session or PM/coordinator may call native ask tools. Copilot specialist agent frontmatter must not include `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. Specialists must not call them directly; if PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
-- A prose-only question such as "Should I continue?", "Do you want me to create a worktree?", or "Reply A/B/C" does not satisfy planning, approval, continuation, or closeout gates. Do not send such a question and then end the turn.
+### Continuation Rules
 
-### PM Native Ask Trigger Gate
-
-- Do not treat brainstorming as the only native-ask trigger. Blocking questions, route choices, execution approvals, specialist `NEEDS_USER_INPUT` handbacks, continuation choices, and closeout choices use the same native ask path no matter which skill or workflow produced them.
-- If a PM/coordinator adapter frontmatter declares `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, or `askQuestions`, treat that declaration as an availability signal and attempt the concrete native ask before any prose fallback. A "native ask unavailable" statement is valid only after checking the latest tool inventory and confirming the concrete tool is absent or impossible in the current runtime.
-
-- Re-check native ask availability from the current tool inventory each turn. Do not reuse an older "native UI unavailable" conclusion after tools change.
-- If native ask UI is unavailable, only these fallback paths are allowed: continue with a single safe interpretation that is already authorized by the user, use a documented PM-controlled `agent_vote_fallback` when the current owner permits it, or return `BLOCKED` / `DONE_WITH_CONCERNS` with `missing_native_ask_ui` and the exact question that must be asked later.
-- Default non-destructive preparation does not need a user stop. If the user has already asked to start development and the repository workflow recommends an isolated worktree or initialization step, do it directly when safe and tool permissions allow it. Ask only when the action is destructive, affects an explicit user-owned path, has multiple materially different locations/branches, or conflicts with current dirty state; that ask must be native.
+- If the native ask reply contains a new executable task, fix request, or investigation direction, closeout state is invalidated immediately. Begin that work directly, or ask one minimal native clarification if ambiguity remains.
+- If the new user message is only a why/how follow-up, principle explanation, or rule clarification, answering it is not a closeout exemption. If that answer would be the last prose message, the assistant must still trigger a fresh native closeout prompt before ending.
 - After fan-in, review, verification, or planning produces multiple natural next paths, use a native continuation choice and continue the selected path in the same conversation. Do not present prose options as a final response.
 
+### Fallback Paths
+
+- If native ask UI is unavailable, only these paths are allowed: continue with a single safe interpretation already authorized by the user, use a documented PM-controlled `agent_vote_fallback`, or return `BLOCKED` / `DONE_WITH_CONCERNS` with `missing_native_ask_ui`.
+- Default non-destructive preparation does not need a user stop. Ask only when the action is destructive, affects an explicit user-owned path, has multiple materially different locations, or conflicts with current dirty state.
+
 ## 4. Shared State Contracts
+
+Follow the canonical definitions in `core-workflow-contract` for specialist handback schema, fan-in arbitration, and specialist ask boundary. This section adds only the state fields owned by this file.
 
 - `work_mode` is the scope and orchestration field. Allowed values: `micro | standard | full`.
 - `task_type` is the execution-mode field. Allowed values: `implementation | design_review | verification | fix | spec`.
 - Do not overload `work_mode` with task semantics or `task_type` with scope semantics.
 - `planning_state`, `execution_confirmed`, and `decision_provenance` are owned only by the top-level session or PM/coordinator.
 - `pm_action` is a delegated handback control field used only with `status=NEEDS_CONTEXT`. The current allowed value is `pm_clarify`, which tells PM/coordinator to repair the packet or clarify missing context before redispatch.
-- Delegated specialists must return structured handbacks. Missing repository or task context returns `NEEDS_CONTEXT`. Missing human choice returns `NEEDS_USER_INPUT` to PM/coordinator when one exists, otherwise `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
-- Shared packet and handback field names are owner-controlled vocabulary. Runtime adapters and role workflows may reference them, but they must not redefine the field meanings or create parallel aliases.
 - When consuming older dispatch prompts that still use `TASK`, `EXPECTED OUTCOME`, `REQUIRED TOOLS`, `MUST DO`, `MUST NOT DO`, or `CONTEXT`, normalize them into the six-block packet before further delegation. Treat them as compatibility aliases, not as the new canonical vocabulary.
 
 ### Fan-In Arbitration
 
-- PM/coordinator adjudicates fan-in before marking tasks complete or continuing fan-out. Priority order: blocker or invalid handback, security/privacy/data-loss/auth/dependency/release risk, failed or missing verification, spec/acceptance mismatch, overlapping write sets, code-quality or UX/test-sufficiency concerns, then non-blocking follow-up notes.
-- If reviewers disagree, PM records `decision_provenance` with deciding evidence, blocking status, next stage, and residual risk. Do not close from an unadjudicated conflict.
+Follow the canonical Fan-In Arbitration in `core-workflow-contract`. This file does not restate the priority order; reference the contract.
 
 ## 5. Target Markdown Memory System
 
@@ -123,15 +121,14 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 
 ## 8. Agents and Dispatch
 
+Follow the canonical definitions in `core-workflow-contract` for specialist ask boundary, handback schema, fan-in arbitration, and cross-review lanes. This section adds only PM/coordinator-level dispatch rules.
+
 - The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code.
 - Parallel subtasks are allowed only when file write sets do not overlap.
 - Dispatch packets should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`. Those blocks include fields such as `user_provided_paths`, `priority_files`, `reference_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
-- Delegated specialists do not ask users directly. If repository/task context is missing, return structured `NEEDS_CONTEXT`; if human input or approval is required, return structured `NEEDS_USER_INPUT` for PM/coordinator to ask.
-- Delegated specialist handbacks must preserve shared field names such as `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`, and when blocked on missing context, `clarification_request` plus `pm_action: "pm_clarify"`.
 - Delegated specialists must consume frozen paths, already-read context, and authoritative repo facts before reopening search.
 - Customization surfaces such as `.github/**`, `AGENTS.md`, `.github/instructions/project.instructions.md`, and target repository `memories/repo/**` are handled inline by the top-level assistant to avoid recursive rule drift.
 - For large ambiguous work, PM delegates SDD design brainstorming to Technical Architect first. Technical Architect self-reviews and repairs the design before PM asks Developer and Quality Assurance Expert for second-pass review; add Frontend Designer review for frontend/user-visible surfaces. Only a blocker-free reviewed design proceeds to implementation.
-- Cross-review implementation lanes: Developer-authored code -> Technical Architect review; Technical Architect-authored code -> Developer review; frontend code by Developer/Technical Architect -> Frontend Designer review; Frontend Designer-authored code -> Technical Architect review.
 
 ## 9. Implementation and Verification
 

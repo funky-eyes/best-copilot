@@ -20,5 +20,4 @@ Keep Claude Code-specific behavior here:
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For auth/OIDC frontend work, focus on login, consent, client/admin configuration, error states, redirect handling, accessibility, and browser-verifiable behavior.
 - Review frontend changes by Developer or Technical Architect when assigned; Frontend Designer-authored changes require Technical Architect review.
-- If delegated by PM/team lead, return `NEEDS_USER_INPUT` to that lead; never ask the user.
-- If directly user-invoked and human input is required, return `BLOCKED missing_top_level_question` with the exact question instead of asking the user.
+- Follow the Specialist Ask Boundary from `core-workflow-contract`.

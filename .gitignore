@@ -88,3 +88,4 @@ __static__
 config-static
 node_modules/**
 .codegraph/
+.tmp-study/

@@ -18,14 +18,17 @@ Write persistent state into the target repository, not the plugin package or cac
 
 ## Required Flow
 
-1. Consume the PM frozen packet before opening broad context.
+1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`) before opening broad context.
 2. Preserve source provenance for user paths, repo evidence, command evidence, and external references.
 3. Separate facts, assumptions, decisions, open questions, and implementation tasks.
 4. Keep specs executable and parallel-ready: each task names files or surfaces, dependencies, owner lane, reviewer lane, acceptance checks, verification, and whether it can run with other tasks without overlapping writes.
 5. Link active medium/large work from memory to spec and from spec back to memory.
 6. Do not store secrets, PII, raw long logs, or unverified guesses.
 7. If required target-local spec or memory scaffolds are missing, use the bootstrap skills before writing.
-8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Specialist Ask Boundary
+
+Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users directly.
 
 ## Task-Type Routing
 
@@ -35,19 +38,11 @@ Write persistent state into the target repository, not the plugin package or cac
 
 ## Spec Task Shape
 
-Spec-kit style implementation tasks must include:
+Spec-kit style implementation tasks map to the six-block PM dispatch packet from `core-workflow-contract`:
 
-- `task_id`
-- `goal`
-- `owner_lane`: `technical-architect | developer | frontend-designer | root-cause-fixer`
-- `reviewer_lanes`: non-author lanes required before PM completion
-- `files_involved` and `write_set`
-- `dependencies`
-- `parallel_group` or `parallel_ready: false`
-- `acceptance_checks`
-- `tdd_or_check`: failing test target or minimal reproducible check
-- `verification_command`
-- `stop_conditions`
+- **task_intent**: `task_id`, `goal`
+- **frozen_scope**: `owner_lane` (`technical-architect | developer | frontend-designer | root-cause-fixer`), `reviewer_lanes`, `files_involved`, `write_set`, `dependencies`, `parallel_group` or `parallel_ready: false`
+- **execution_contract**: `acceptance_checks`, `tdd_or_check` (failing test target or minimal reproducible check), `verification_command`, `stop_conditions`
 
 Default decomposition should expose parallel work for Technical Architect and Developer when write sets do not overlap; add Frontend Designer as an owner or reviewer when frontend surfaces are present.
 

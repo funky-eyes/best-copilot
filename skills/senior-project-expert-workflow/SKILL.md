@@ -26,14 +26,14 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 11. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
 12. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
 13. Invoke `verification-before-completion` before any final user-facing response.
-14. If this role is about to end the turn and native ask UI exists, use it for continuation or closeout unless the latest user message already came from that gate and chose to end. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; in Copilot CLI, use `Asking user` when available. Do not close on a prose-only summary.
+14. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names. Do not close on a prose-only summary.
 15. Close only after evidence is present or a blocker is explicitly stated.
 
 ## Observable Harness Contract
 
 When Senior Project Expert is invoked directly, the user must be able to see the workflow, not just the final essay.
 
-- For any `standard` or `full` task, do not produce a final answer until the transcript has an explicit stage trail: `CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION -> REVIEW_OR_DISPATCH -> FAN_IN_ARBITRATION -> NEXT_GATE`. For `full`, ambiguous, high-risk, public-contract, auth/security, dependency, schema, frontend-experience, or `design_review` work, `REVIEW_OR_DISPATCH` must include `ARCHITECT_SDD`; otherwise record `ARCHITECT_SDD=SKIP_WITH_REASON` so standard tasks stay efficient.
+- For any `standard` or `full` task, do not produce a final answer until the transcript has an explicit stage trail: `CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION -> [ARCHITECT_SDD if full/ambiguous/high-risk] -> REVIEW_OR_DISPATCH -> FAN_IN_ARBITRATION -> NEXT_GATE`. For `full`, ambiguous, high-risk, public-contract, auth/security, dependency, schema, frontend-experience, or `design_review` work, `REVIEW_OR_DISPATCH` must include `ARCHITECT_SDD`. For standard tasks, skip `ARCHITECT_SDD` and record `ARCHITECT_SDD=SKIP_WITH_REASON` to keep efficiency — do not force architecture SDD on bounded, non-ambiguous standard work.
 - Generic exploration workers may collect file evidence, but they do not count as architecture, implementation, QA, security, or frontend review lanes. Named role lanes must be used for those responsibilities.
 - For large technical design questions, including "how should this OAuth2 project become OIDC + OAuth2", classify as `full` + `design_review`, dispatch Technical Architect first for SDD design brainstorming and self-review, then dispatch Developer and Quality Assurance Expert for second-pass review. Add Security Reviewer for auth, token, key, secret, permission, or external-service surfaces. Add Frontend Designer only if user-facing login/consent/admin UI changes are in scope.
 - If Claude Code cannot dispatch named plugin agents such as `best-copilot:technical-architect`, return `HARNESS_DEGRADED named_agent_dispatch_unavailable` and run only the minimal local checklist. Do not present that fallback as equivalent to the full multi-agent workflow.
@@ -41,26 +41,13 @@ When Senior Project Expert is invoked directly, the user must be able to see the
 
 ## PM Native Ask Trigger Gate
 
-- Use native ask for every PM-owned blocking clarification, route selection, execution approval, specialist `NEEDS_USER_INPUT` handback, fan-in continuation, and closeout. This applies whether the need came from brainstorming, review, verification, workspace isolation, branch closeout, or any other skill.
-- Do not treat brainstorming as the only native-ask trigger. If the user says a popup is required, a prose question is not an acceptable substitute when a native ask tool exists.
-- When the Copilot PM adapter frontmatter lists `Asking user` or `vscode_askQuestions`, treat that as an availability signal and attempt the concrete native ask before saying it is unavailable.
-- Every native ask must allow a custom free-form answer. If the UI cannot mix choices and text, include a `Custom answer` choice and follow it with a native/free-form prompt before deciding.
-- If the latest tool inventory truly lacks native ask support and a human choice still matters, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact question, options, safe default when one exists, and resume state. Do not close the turn as a normal summary.
+Follow the **Native Ask Contract** and **PM Trigger Guidance** from `core-workflow-contract`. PM/coordinator owns every native ask trigger: blocking clarification, route selection, execution approval, specialist handback, continuation, and closeout.
 
 ## Dispatch Packet Contract
 
-Every specialist dispatch preserves the shared six-block packet from `core-workflow-contract`:
+Every specialist dispatch preserves the shared six-block packet from `core-workflow-contract` (`task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, `output_contract`).
 
-1. `task_intent`
-2. `frozen_scope`
-3. `fact_packet`
-4. `execution_contract`
-5. `review_state`
-6. `output_contract`
-
-PM/coordinator owns packet assembly, packet repair, the PM-only shared state fields from `must.instructions.md` (`planning_state`, `execution_confirmed`, `decision_provenance`), and final continuation/closeout routing.
-
-If a specialist returns an incomplete structured handback, do not continue fan-out or closeout. Repair the packet or clarify the blocker first.
+PM/coordinator owns packet assembly, packet repair, the PM-only shared state fields (`planning_state`, `execution_confirmed`, `decision_provenance`), and final continuation/closeout routing. If a specialist returns an incomplete structured handback, do not continue fan-out or closeout. Repair the packet or clarify the blocker first.
 
 ## Required Skill Clause
 

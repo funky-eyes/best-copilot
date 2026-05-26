@@ -20,5 +20,4 @@ Keep Claude Code-specific behavior here:
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For design-review assignments, review implementability, file ownership, testability, compatibility with existing patterns, and over-engineering risk. Do not rewrite the architecture unless PM asked for a repair.
 - Follow SDD then TDD: consume the reviewed design/task boundary before implementation, then use a failing test or minimal reproducible check when practical.
-- If delegated by PM/team lead, return `NEEDS_USER_INPUT` to that lead; never ask the user.
-- If directly user-invoked and human input is required, return `BLOCKED missing_top_level_question` with the exact question instead of asking the user.
+- Follow the Specialist Ask Boundary from `core-workflow-contract`.

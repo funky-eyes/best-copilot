@@ -24,14 +24,14 @@ Use this after required reviews and verification have evidence. It turns branch 
 
 ## Decision Surface
 
-Use native ask UI when available. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool before abstract `vscode/askQuestions` or `askQuestions`; in Copilot CLI, use `Asking user` when available. Include a custom free-form answer path; if the UI only supports fixed choices, include `Custom answer` and follow it with a native/free-form prompt before deciding. Present only applicable options:
+Use native ask UI when available. Follow the Native Ask Contract from `core-workflow-contract` for structured ask UI requirements. Present only applicable options:
 
 - `merge_local`: merge to the selected base branch after verification on the merge result.
 - `open_pr`: push the branch and create a pull request; preserve the worktree for review follow-up.
 - `keep_branch`: leave branch/worktree as-is and report path, branch, and next manual command.
 - `discard`: destructive path; requires explicit typed confirmation and a list of commits/files/worktree path that would be removed.
 
-If native ask UI is unavailable and a choice is required, return `DONE_WITH_CONCERNS missing_native_ask_ui` with the exact decision PM/top-level must ask.
+If native ask UI is unavailable and a choice is required, follow the Native Ask Contract from `core-workflow-contract` for fallback behavior.
 
 ## Safety Rules
 

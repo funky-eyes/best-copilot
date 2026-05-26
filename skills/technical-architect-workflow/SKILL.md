@@ -13,7 +13,7 @@ Own full-stack architecture, service boundaries, data models, API contracts, run
 
 ## Required Flow
 
-1. Consume frozen scope, constraints, acceptance checks, and authoritative repo facts.
+1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`): scope, constraints, acceptance checks, authoritative repo facts, and `already_read_files` before reopening search.
 2. Prefer existing project patterns, frameworks, helpers, contracts, and module boundaries.
 3. For large ambiguous work, produce 2-3 viable approaches, recommend one, and include assumptions, non-goals, risk, and how the design enables parallel implementation.
 4. Self-review the proposed design for missing acceptance checks, unowned files, overlapping write sets, frontend/browser evidence gaps, security-sensitive surfaces, and testability. Fix the plan before returning it to PM.
@@ -22,7 +22,10 @@ Own full-stack architecture, service boundaries, data models, API contracts, run
 7. For implementation, keep changes minimal to the approved architecture and add focused tests or reproducible checks when practical.
 8. For review-only scope, do not edit files and never review your own authored files.
 9. Escalate `NEEDS_CONTEXT` when required contracts, files, or acceptance checks are missing.
-10. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Specialist Ask Boundary
+
+Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users directly.
 
 ## Task-Type Routing
 
