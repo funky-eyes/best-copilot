@@ -5,45 +5,33 @@ description: "Use to prepare a minimal context packet for a delegated subtask or
 
 # Context Packet Fastpath
 
-## Packet Fields
+Uses the six-block PM dispatch packet from `core-workflow-contract`. This skill lists all fields grouped by block for quick reference.
 
-- `goal`
-- `user_provided_paths`
-- `user_intent_summary`
-- `expected_outcome`
-- `scope`
-- `non_goals`
-- `files_involved`
-- `changed_files`
-- `priority_files`
-- `already_read_files`
-- `dependencies`
-- `owner_lane`
-- `reviewer_lanes`
-- `write_set`
-- `parallel_group`
-- `reference_files`
-- `constraints`
-- `forbidden_approaches`
-- `acceptance_checks`
-- `verification_budget`
-- `work_mode`: `micro | standard | full`
-- `task_type`: `implementation | design_review | verification | fix | spec`
-- `search_hints`
-- `context_budget`: max files or shards to open before returning for scope widening
-- `stop_conditions`: when to stop searching, coding, or reviewing
-- `authoritative_repo_facts`
-- `source_provenance_refs`
-- `review_followup_scope`
-- `previously_verified_items`
-- `review_lanes`
-- `ready_artifacts`: files, commands, screenshots, review outputs, or status records already produced
-- `required_artifacts`
-- `recommended_next_stage`
-- `memory_refs`
-- `spec_refs`
-- `dispatch_reason`
-- `retrieval_provenance`
+## Packet Fields (by block)
+
+### 1. task_intent
+
+`goal`, `user_provided_paths`, `user_intent_summary`, `expected_outcome`, `task_type` (`implementation | design_review | verification | fix | spec`), `work_mode` (`micro | standard | full`)
+
+### 2. frozen_scope
+
+`scope`, `non_goals`, `files_involved`, `changed_files`, `priority_files`, `already_read_files`, `dependencies`, `owner_lane`, `reviewer_lanes`, `write_set`, `parallel_group`
+
+### 3. fact_packet
+
+`authoritative_repo_facts`, `source_provenance_refs`, `reference_files`
+
+### 4. execution_contract
+
+`constraints`, `acceptance_checks`, `verification_budget`, `search_hints`, `context_budget` (max files/shards before returning for scope widening), `stop_conditions`, `forbidden_approaches`
+
+### 5. review_state
+
+`review_followup_scope`, `previously_verified_items`, `review_lanes`, `ready_artifacts` (files, commands, screenshots, review outputs already produced)
+
+### 6. output_contract
+
+`required_artifacts`, `recommended_next_stage`, `dispatch_reason`, `retrieval_provenance`, `memory_refs`, `spec_refs`
 
 ## Rules
 
@@ -51,9 +39,9 @@ description: "Use to prepare a minimal context packet for a delegated subtask or
 - Full packet: needed only for cross-module or high-risk work.
 - Prefer `micro` or `standard` packets when the file set and acceptance checks are already clear.
 - Do not include whole logs, whole specs, or unrelated memory.
-- Include only the retrieval provenance needed to justify selected files: explicit paths, index hits, fixed-string searches, external source URLs, and why any regex/broad search was necessary.
+- Include only the retrieval provenance needed to justify selected files.
 - If a delegate needs new files, return to PM to widen scope.
 - A delegate must consume `task_type`, `user_intent_summary`, `review_followup_scope`, `previously_verified_items`, `ready_artifacts`, `required_artifacts`, and `recommended_next_stage` before reopening search.
 - A delegate should stop at `context_budget` and return `NEEDS_CONTEXT` instead of broad-scanning.
-- A delegate should treat `authoritative_repo_facts` and `source_provenance_refs` as fixed context unless the packet itself says they are provisional.
-- Specialists must not ask the user directly. If PM/coordinator is present and human input or approval is required, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question.
+- A delegate should treat `authoritative_repo_facts` and `source_provenance_refs` as fixed context unless the packet says they are provisional.
+- Follow the Specialist Ask Boundary from `core-workflow-contract`.

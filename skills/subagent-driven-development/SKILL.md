@@ -27,15 +27,7 @@ For every ready task:
 6. Send confirmed findings to a fix loop using `structured-review` feedback-intake and targeted re-review modes.
 7. Only after the task passes the required reviews and verification may PM mark it complete.
 
-Stage 1 and Stage 2 must not be performed by the same specialist who authored the implementation under review.
-
-Default reviewer lanes:
-
-- Developer-authored implementation -> Technical Architect.
-- Technical Architect-authored implementation -> Developer.
-- Frontend changes authored by Developer or Technical Architect -> Frontend Designer review before QA.
-- Frontend Designer-authored implementation -> Technical Architect.
-- Quality Assurance Expert performs final behavior/regression/test-sufficiency review after required peer lanes.
+Stage 1 and Stage 2 must not be performed by the same specialist who authored the implementation under review. Default reviewer lanes follow the Cross-Review Lanes from `core-workflow-contract`.
 
 ## Fresh Context Rules
 
@@ -47,8 +39,7 @@ Default reviewer lanes:
 ## Fan-In Rules
 
 - Accept only `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCKED`.
-- Every delegated specialist result must preserve the `core-workflow-contract` handback fields: `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
-- When `status=NEEDS_CONTEXT`, the handback must also include `clarification_request` and `pm_action: "pm_clarify"`.
+- Follow the Specialist Handback Schema from `core-workflow-contract`.
 - Completion-like results without verification evidence are incomplete.
 - `DONE_WITH_CONCERNS` must list the concern impact and whether it blocks later tasks.
 - Repeated `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or the same blocker twice triggers PM re-analysis instead of another blind dispatch.

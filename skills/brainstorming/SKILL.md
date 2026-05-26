@@ -30,10 +30,10 @@ Do not use when:
 1. Ask one question at a time. Do not stack multiple branching questions in one turn.
 2. Prefer 2-4 options. Each option should fit on one line and include the core trade-off.
 3. Use this order for each question: re-ground the current task, simplify the decision point, then give a recommendation.
-4. If a native ask UI exists, use it for route-changing decisions. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool before abstract `vscode/askQuestions` or `askQuestions`; in Copilot CLI, use `Asking user` when available. Include a custom free-form answer path; if the UI only supports fixed choices, include `Custom answer` and follow it with a native/free-form prompt before deciding. Do not ask the user to type plain `A/B/C` in free text when structured choice is available.
+4. If a native ask UI exists, use it for route-changing decisions. Follow the Native Ask Contract from `core-workflow-contract` for structured ask UI requirements. Do not ask the user to type plain `A/B/C` in free text when structured choice is available.
 5. If 3 or more route-changing options exist, native structured selection is the default path. Do not first run a long prose comparison and defer the real choice to a later round.
 6. After the user chooses, lock that direction and move forward. Do not ask a duplicate confirmation round for the same decision.
-7. Never end the turn with a prose-only blocking question. If the decision blocks planning or execution and native ask UI is unavailable, return a candidate set for PM fallback or mark `BLOCKED: missing_native_ask_ui`.
+7. Follow the Native Ask Contract from `core-workflow-contract`. Never end the turn with a prose-only blocking question.
 
 ## Confirmation Semantics
 

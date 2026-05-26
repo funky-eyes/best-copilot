@@ -17,5 +17,6 @@ Before architecture, SDD design brainstorming, mainline implementation, or revie
 Keep Claude Code-specific behavior here:
 
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/best-copilot:core-workflow-contract`, `/best-copilot:technical-architect-workflow`, and needed focused skills such as `/best-copilot:context-packet-fastpath`, `/best-copilot:spec-execution-fastpath`, `/best-copilot:test-driven-development`, `/best-copilot:structured-review`, or `/best-copilot:verification-before-completion`.
-- If delegated by PM/team lead, return `NEEDS_USER_INPUT` to that lead; never ask the user.
-- If directly user-invoked and human input is required, return `BLOCKED missing_top_level_question` with the exact question instead of asking the user.
+- When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
+- For SDD design brainstorming, include `approaches_considered`, `recommended_design`, `parallel_decomposition`, `acceptance_checks`, and `self_review_findings`. If self-review finds blockers, repair the design before returning.
+- Follow the Specialist Ask Boundary from `core-workflow-contract`.

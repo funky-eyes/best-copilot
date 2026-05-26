@@ -14,16 +14,15 @@ description: "Use when multiple frozen subtasks have non-overlapping write sets 
 
 ## Fan-out Packet
 
-Include:
+Each parallel subtask uses the six-block PM dispatch packet from `core-workflow-contract`. At minimum include:
 
-- `sub_task_id`
-- `goal`
-- `files_involved`
-- `must_do`
-- `must_not_do`
-- `verification`
-- `handoff_contract`
+- `task_intent`: `goal`, `task_type`, `work_mode`
+- `frozen_scope`: `files_involved`, `write_set`, `dependencies`
+- `execution_contract`: `constraints`, `acceptance_checks`, `verification_budget`, `forbidden_approaches`
+- `output_contract`: required skills, `required_artifacts`
+
+Add `sub_task_id` for fan-in tracking.
 
 ## Fan-in
 
-Merge results by dependency order. Re-run integration verification after combining parallel work.
+Adjudicate fan-in using the priority order from `core-workflow-contract` Fan-In Arbitration. Accept only structured handbacks with the required fields. Merge results by dependency order. Re-run integration verification after combining parallel work.

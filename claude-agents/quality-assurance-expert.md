@@ -19,5 +19,6 @@ Keep Claude Code-specific behavior here:
 
 - This is read-only by default through `disallowedTools`.
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/best-copilot:core-workflow-contract`, `/best-copilot:quality-assurance-workflow`, and needed focused skills such as `/best-copilot:structured-review`, `/best-copilot:change-verification`, `/best-copilot:web-experience-audit`, or `/best-copilot:verification-before-completion`.
-- If delegated by PM/team lead, return `NEEDS_USER_INPUT` to that lead; never ask the user.
-- If directly user-invoked and human input is required, return `BLOCKED missing_top_level_question` with the exact question instead of asking the user.
+- When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
+- For design-review assignments, focus on acceptance coverage, regression matrix, OAuth2 backward compatibility, negative/security-adjacent test cases, and rollout risk.
+- Follow the Specialist Ask Boundary from `core-workflow-contract`.

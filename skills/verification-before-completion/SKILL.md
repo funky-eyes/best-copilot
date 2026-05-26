@@ -16,16 +16,13 @@ description: "Use before claiming work is done, fixed, passing, or ready. Requir
 - If the current role is delegated, the handback includes `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - If a delegated handback uses `status=NEEDS_CONTEXT`, it also includes `clarification_request` and `pm_action: "pm_clarify"`.
 - If the current role is the top-level session or PM/coordinator and is about to end the turn, native closeout or continuation evidence exists unless the latest user message already came from that native gate and chose to end.
-- Specialists must not ask the user directly. If PM/coordinator is present, return `NEEDS_USER_INPUT` when human input is required. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
+- Follow the Specialist Ask Boundary and Native Ask Contract from `core-workflow-contract`.
 - If the task exposed a reusable workflow weakness, include an `evolution_signal` instead of silently moving on.
 
 ## Native Closeout UI Hard Gate
 
 - A final prose response is allowed only after verification evidence is ready and closeout/continuation state is valid.
-- If the current role is the top-level session or PM/coordinator and needs to ask whether to continue, choose a follow-up path, approve a next step, or end the turn, it must use native structured UI when available. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; in Copilot CLI, use `Asking user` when available. Include a custom free-form answer path; if the UI only supports fixed choices, include `Custom answer` and follow it with a native/free-form prompt before deciding.
-- Do not treat brainstorming as the only native-ask trigger. Review fan-in, verification results, `NEEDS_USER_INPUT` handbacks, branch/worktree choices, answer-only follow-ups, and closeout all use the same native ask requirement when a human choice or end-of-turn authorization is needed.
-- If a PM/coordinator adapter declares ask tools in frontmatter, attempt the concrete native ask before saying native UI is unavailable.
-- Specialists are not allowed to use native ask tools directly, including `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. If PM/coordinator is present, they report `NEEDS_USER_INPUT` with the question and blocking reason for PM/coordinator. Otherwise they report `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
+- Follow the **Native Ask Contract**, **PM Trigger Guidance**, and **Specialist Ask Boundary** from `core-workflow-contract`. All trigger types — review fan-in, verification results, `NEEDS_USER_INPUT` handbacks, branch/worktree choices, and closeout — use the same native ask path.
 - Ordinary prose questions, "reply A/B/C" instructions, and summary-plus-question endings are not valid closeout evidence.
 - If native ask UI is unavailable and a human choice is still required, report `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_native_ask_ui`; do not claim normal completion.
 

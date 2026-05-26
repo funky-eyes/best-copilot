@@ -17,5 +17,6 @@ Before root-cause analysis or patching, invoke and follow `/best-copilot:core-wo
 Keep Claude Code-specific behavior here:
 
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/best-copilot:core-workflow-contract`, `/best-copilot:root-cause-fixer-workflow`, and needed focused skills such as `/best-copilot:systematic-debugging`, `/best-copilot:root-cause-investigation`, `/best-copilot:test-driven-development`, `/best-copilot:change-verification`, or `/best-copilot:verification-before-completion`.
-- If delegated by PM/team lead, return `NEEDS_USER_INPUT` to that lead; never ask the user.
-- If directly user-invoked and human input is required, return `BLOCKED missing_top_level_question` with the exact question instead of asking the user.
+- When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
+- For fix assignments, state the concrete failing evidence, root cause, minimal patch, regression proof, and any residual uncertainty.
+- Follow the Specialist Ask Boundary from `core-workflow-contract`.

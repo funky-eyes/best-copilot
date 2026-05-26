@@ -13,14 +13,17 @@ Own user-facing frontend implementation and review: pages, components, interacti
 
 ## Required Flow
 
-1. Consume the frozen frontend scope and design-system evidence before changing UI.
+1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), especially frontend scope and design-system evidence, before changing UI.
 2. Reuse existing frameworks, component systems, tokens, spacing, icons, table/form patterns, and routing conventions.
 3. Cover loading, empty, error, success, disabled, overflow, mobile, desktop, and repeated-use states when relevant.
 4. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
 5. Review frontend changes authored by Developer or Technical Architect when PM assigns that lane; focus on user-visible states, accessibility risk, browser behavior, and visual quality.
 6. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
 7. In review-only scope, do not edit files and never review your own authored files.
-8. Specialists do not ask the user directly. If PM/coordinator is present and human input is required, return `NEEDS_USER_INPUT`. Otherwise return `BLOCKED missing_top_level_question` with the exact question that the top-level session or PM/coordinator should ask.
+
+## Specialist Ask Boundary
+
+Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users directly.
 
 ## Task-Type Routing
 
