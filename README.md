@@ -264,8 +264,11 @@ ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uni
 find agents -maxdepth 1 -name '*.agent.md' | sort
 find claude-agents -maxdepth 1 -name '*.md' | sort
 find skills -maxdepth 3 -name SKILL.md | sort
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details best-copilot
 git diff --check
 ```
+
+The Claude inventory should include `Agents (8)` with `senior-project-expert`, `technical-architect`, `developer`, `frontend-designer`, `quality-assurance-expert`, `security-reviewer`, `root-cause-fixer`, and `specification-writer`.
 
 ## Evolution Rules
 

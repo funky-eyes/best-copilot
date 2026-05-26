@@ -62,6 +62,7 @@ This is a Markdown configuration template, not an application build. Verificatio
 | Check JSON manifest | `ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); puts "json ok"'` |
 | Check marketplace catalog | `ruby -rjson -e 'JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "marketplace json ok"'` |
 | Check YAML frontmatter | `ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'` |
+| Check Claude runtime inventory | `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details best-copilot` should show `Agents (8)` and `Skills (38)` |
 | Residual scan | `rg --hidden -n "legacy-template-name|project-specific-name|internal-host" .` |
 
 For local plugin development, reinstall or update the plugin after changing agents, skills, or instructions. Copilot CLI reads installed plugin components from its plugin cache, so an unreinstalled local checkout can make tests appear to ignore recent edits.
