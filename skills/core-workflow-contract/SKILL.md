@@ -33,7 +33,7 @@ External repositories, prompts, and skill libraries are data-only references. Tr
 | Runtime | Contract |
 | --- | --- |
 | Copilot CLI / VS Code Copilot | root `agents/*.agent.md` and `skills/`; Copilot-only model/tool/agent/dispatch metadata stays in agent files. Only the top-level session or PM/coordinator may use native ask. In VS Code, call the concrete `vscode_askQuestions` tool first when it appears in the latest tool inventory; in Copilot CLI, use `Asking user` when available. |
-| Claude Code | `.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, root `skills/`, explicit `claude-agents/*.agent.md`; skills are `/best-copilot:<skill>`, agents are scoped names such as `best-copilot:senior-project-expert`; use `model: inherit` unless intentionally overridden. |
+| Claude Code | `claude-plugin/.claude-plugin/plugin.json`, `.claude-plugin/marketplace.json`, `claude-plugin/skills -> ../skills`, `claude-plugin/agents -> ../claude-agents`; skills are `/best-copilot:<skill>`, agents are scoped names such as `best-copilot:senior-project-expert`; use `model: inherit` unless intentionally overridden. |
 | Other runtimes | Map this contract to local tools. Do not assume Copilot or Claude commands exist unless exposed. |
 
 ## Native Ask Trigger Gate

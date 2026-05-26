@@ -13,12 +13,12 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - Project name: `best-copilot`
 - Purpose: installable Copilot CLI and Claude Code agent-team plugin plus reusable repository workflow customization templates.
 - Primary Copilot install surfaces: root `plugin.json` for direct repository install, and root `marketplace.json` for `copilot plugin marketplace add`.
-- Primary Claude Code install surfaces: `.claude-plugin/marketplace.json` for `/plugin marketplace add`, plus `.claude-plugin/plugin.json` for local `claude --plugin-dir /path/to/best-copilot` development.
+- Primary Claude Code install surfaces: `.claude-plugin/marketplace.json` for `/plugin marketplace add`, plus `claude-plugin/.claude-plugin/plugin.json` for local `claude --plugin-dir /path/to/best-copilot/claude-plugin` development.
 - Copilot discovery source: root `agents/` and `skills/`, declared by `plugin.json`.
-- Claude Code discovery source: root `skills/` plus explicit root `claude-agents/*.agent.md` files declared by `.claude-plugin/plugin.json`.
+- Claude Code discovery source: `claude-plugin/skills` and `claude-plugin/agents`, which are symlinks to root `skills/` and `claude-agents/` so Claude Code can use its standard plugin layout without duplicating rules.
 - Repository instruction source: `.github/instructions/**`; target repositories that need Claude Code compatibility should also get a root `CLAUDE.md` adapter that imports those shared instruction files.
 - Current compatibility targets: Copilot CLI plugin installation and Claude Code plugin loading. Codex compatibility is not a release target for this layout.
-- Runtime adapter architecture: shared cross-role behavior lives in `skills/core-workflow-contract/SKILL.md`; role-specific workflow behavior lives in matching `skills/*-workflow/SKILL.md` files; Copilot-only model/tool/handoff metadata lives in `agents/*.agent.md`; Claude-only scoped subagent, model inheritance, and agent-team limitations live in matching `claude-agents/*.agent.md` files.
+- Runtime adapter architecture: shared cross-role behavior lives in `skills/core-workflow-contract/SKILL.md`; role-specific workflow behavior lives in matching `skills/*-workflow/SKILL.md` files; Copilot-only model/tool/handoff metadata lives in `agents/*.agent.md`; Claude-only scoped subagent, model inheritance, and agent-team limitations live in runtime-named `claude-agents/*.md` files.
 - Claude Code adapters preload only `core-workflow-contract` and their matching role workflow skill in frontmatter. Focused skills stay on-demand in the agent body to avoid unnecessary startup context.
 
 ## First Repository Initialization
@@ -27,7 +27,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - The plugin has no install-time or first-message hook that can force initialization before an agent is invoked. Treat initialization as the first-substantial-task gate instead.
 - This gate is fail-closed: if `.github/instructions/project.instructions.md` is missing or incomplete, do not proceed to requirements analysis, dependency/framework upgrades, security rewrites, or implementation. Only official init, bounded manual fact capture, and target bootstrap file creation are allowed.
 - Judge init state from target repository files, not from chat history. If `.github/instructions/project.instructions.md` exists, has no unresolved init placeholders, is not the untouched neutral scaffold, and records build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown` gaps, do not rerun init just because a new conversation started.
-- Subsequent conversations should invoke `repo-init-gate` and read only the target root `best-copilot.md` first. If that file's YAML frontmatter contains `version: "0.4.1"`, skip full repo-init artifact revalidation.
+- Subsequent conversations should invoke `repo-init-gate` and read only the target root `best-copilot.md` first. If that file's YAML frontmatter contains `version: "0.5.0"`, skip full repo-init artifact revalidation.
 - Missing target-local instruction/memory/spec scaffolds are not a reason to rerun official init. If facts are current but scaffolds are absent, run only `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
 - Expand from the version-sentinel fast path to full repo-init verification only when `best-copilot.md` is missing, version-mismatched, unreadable, invalid frontmatter, the contract version changed, or the user explicitly requests re-initialization.
 - If the active runtime can execute shell commands and `copilot init` is available, run it directly before requirements analysis when facts are missing, then normalize the useful output into `.github/instructions/project.instructions.md`. If only interactive slash commands are available, use `/init` in the current runtime, then normalize the resulting evidence into `.github/instructions/project.instructions.md`.
@@ -58,14 +58,14 @@ This is a Markdown configuration template, not an application build. Verificatio
 | --- | --- |
 | List plugin skills | `find skills -maxdepth 3 -name SKILL.md | sort` |
 | List plugin agents | `find agents -maxdepth 1 -name "*.agent.md" | sort` |
-| List Claude Code agent adapters | `find claude-agents -maxdepth 1 -name "*.agent.md" | sort` |
-| Check JSON manifest | `ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); puts "json ok"'` |
+| List Claude Code agent adapters | `find claude-agents -maxdepth 1 -name "*.md" | sort` |
+| Check JSON manifest | `ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); puts "json ok"'` |
 | Check marketplace catalog | `ruby -rjson -e 'JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "marketplace json ok"'` |
 | Check YAML frontmatter | `ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'` |
 | Residual scan | `rg --hidden -n "legacy-template-name|project-specific-name|internal-host" .` |
 
 For local plugin development, reinstall or update the plugin after changing agents, skills, or instructions. Copilot CLI reads installed plugin components from its plugin cache, so an unreinstalled local checkout can make tests appear to ignore recent edits.
-For Claude Code distribution, users should add the marketplace with `/plugin marketplace add funky-eyes/best-copilot`, install with `/plugin install best-copilot@best-copilot`, and run `/reload-plugins` after installation or updates. For local plugin development, start with `claude --plugin-dir /absolute/path/to/best-copilot` or run `/reload-plugins` after edits. Claude Code plugin agents use lowercase-hyphen frontmatter names from explicit `claude-agents/*.agent.md` files declared in `.claude-plugin/plugin.json`; filenames mirror root `agents/*.agent.md` for maintainability, while Copilot display names in `agents/*.agent.md` are not valid Claude Code agent identifiers.
+For Claude Code distribution, users should add the marketplace with `/plugin marketplace add funky-eyes/best-copilot`, install with `/plugin install best-copilot@best-copilot`, and run `/reload-plugins` after installation or updates. For local plugin development, start with `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin` or run `/reload-plugins` after edits. Claude Code plugin agents use runtime-scoped lowercase-hyphen filenames in `claude-agents/*.md`, exposed through `claude-plugin/agents` for standard Claude discovery; Copilot display names and Copilot-specific metadata stay in `agents/*.agent.md`.
 
 ## Implementation Conventions
 

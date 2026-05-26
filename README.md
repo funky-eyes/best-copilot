@@ -2,9 +2,9 @@
 
 English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.4.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.5.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
 [![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
@@ -13,7 +13,7 @@ English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japa
 
 `best-copilot` is an installable agent team for serious engineering work in Copilot CLI and Claude Code. It gives a repository a senior delivery flow: initialize facts, freeze scope, design before building, implement through specialist roles, review independently, verify with evidence, and preserve a resume point for the next session.
 
-Copilot CLI uses root `agents/` and `skills/` through `plugin.json`. Claude Code uses `.claude-plugin/plugin.json`, root `skills/`, and lowercase-hyphen adapters in `claude-agents/`. Repository-level rules live in `.github/instructions/**`.
+Copilot CLI uses root `agents/` and `skills/` through `plugin.json`. Claude Code uses the `claude-plugin/` package: `claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/skills -> ../skills`, and `claude-plugin/agents -> ../claude-agents`. Repository-level rules live in `.github/instructions/**`.
 
 ## Why It Exists
 
@@ -69,19 +69,19 @@ Claude Code uses its own marketplace system. Add this repository as a Claude Cod
 For local development or direct use from this checkout, load the plugin directory:
 
 ```bash
-claude --plugin-dir /absolute/path/to/best-copilot
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
 For multi-agent teams, enable Claude Code agent teams before launch. Agent teams are experimental in Claude Code and require Claude Code v2.1.32 or later:
 
 ```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
 Claude Code discovers:
 
 - marketplace metadata from [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
-- plugin metadata from [.claude-plugin/plugin.json](.claude-plugin/plugin.json)
+- plugin metadata from [claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
 - shared skills from [skills/](skills/) as `/best-copilot:<skill-name>`
 - Claude-compatible subagents from [claude-agents/](claude-agents/)
 - default main agent from [settings.json](settings.json), currently `best-copilot:senior-project-expert`
@@ -94,7 +94,7 @@ Start requirement orchestration with the coordinator agent in [agents/pm-coordin
 
 - **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
-- **Claude Code**: start with `claude --plugin-dir /absolute/path/to/best-copilot`; the plugin default agent is `best-copilot:senior-project-expert`. Use `/agents` to inspect plugin agents and `/best-copilot:<skill-name>` to invoke a skill directly.
+- **Claude Code**: start with `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`; the plugin default agent is `best-copilot:senior-project-expert`. Use `/agents` to inspect plugin agents and `/best-copilot:<skill-name>` to invoke a skill directly.
 
 Claude Code multi-agent prompt example:
 
@@ -133,8 +133,13 @@ Expected package shape:
 best-copilot
 ├── plugin.json
 ├── .claude-plugin/
-│   ├── plugin.json
 │   └── marketplace.json
+├── claude-plugin/
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── .mcp.json
+│   ├── agents/ -> runtime-named symlinks to ../claude-agents
+│   └── skills -> ../skills
 ├── marketplace.json
 ├── agents/
 │   ├── pm-coordinator.agent.md
@@ -146,14 +151,14 @@ best-copilot
 │   ├── auto-fixer.agent.md
 │   └── spec-writer.agent.md
 ├── claude-agents/
-│   ├── pm-coordinator.agent.md
-│   ├── tech-architect.agent.md
-│   ├── developer.agent.md
-│   ├── frontend-designer.agent.md
-│   ├── risk-qa.agent.md
-│   ├── security-agent.agent.md
-│   ├── auto-fixer.agent.md
-│   └── spec-writer.agent.md
+│   ├── senior-project-expert.md
+│   ├── technical-architect.md
+│   ├── developer.md
+│   ├── frontend-designer.md
+│   ├── quality-assurance-expert.md
+│   ├── security-reviewer.md
+│   ├── root-cause-fixer.md
+│   └── specification-writer.md
 ├── skills/
 └── .github/
     ├── instructions/
@@ -249,15 +254,15 @@ The roles are not renamed copies of one generic assistant. Each agent declares a
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.agent.md` preserve role separation and use `model: inherit` so the active Claude Code session controls the actual model.
+Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.md` preserve role separation and use `model: inherit` so the active Claude Code session controls the actual model.
 
 ## Verify This Package
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
-find claude-agents -maxdepth 1 -name '*.agent.md' | sort
+find claude-agents -maxdepth 1 -name '*.md' | sort
 find skills -maxdepth 3 -name SKILL.md | sort
 git diff --check
 ```
