@@ -8,7 +8,7 @@ This file is the local repository entry for this checkout. The plugin package su
 2. `.github/instructions/skills-index.instructions.md`: lightweight repo skill index.
 3. `.github/instructions/project.instructions.md`: repository facts, build/test commands, and high-frequency conventions.
 4. `skills/target-*-bootstrap/SKILL.md`: installable templates used to create target-local instructions, memory, and spec scaffolds after repo init.
-5. `.claude-plugin/plugin.json` and `claude-agents/*.agent.md`: Claude Code plugin manifest and lowercase-hyphen subagent adapters.
+5. `claude-plugin/.claude-plugin/plugin.json` and `claude-agents/*.md`: Claude Code plugin manifest and lowercase-hyphen subagent adapters.
 
 ## Local Conventions
 

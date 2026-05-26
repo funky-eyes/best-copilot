@@ -20,7 +20,7 @@ Use this skill when a MEDIUM/LARGE plan is ready for implementation and fresh co
 For every ready task:
 
 1. Build a fresh context packet with `context-packet-fastpath`.
-2. Dispatch implementation to the right specialist: Technical Architect for mainline architecture, Developer for scoped slices, Frontend Designer for UI, or Root Cause Fixer for confirmed failures.
+2. Dispatch implementation to the right specialist: Technical Architect for full-stack architecture/mainline slices, Developer for scoped slices, Frontend Designer for UI-owned slices, or Root Cause Fixer for confirmed failures.
 3. Require implementation evidence: changed files, tests/checks run, key output, risk, and next-step notes.
 4. Run Stage 1 review: spec/task compliance. The reviewer checks whether requirements, non-goals, file boundaries, and acceptance checks were honored.
 5. Run Stage 2 review: code quality and release risk. The reviewer checks maintainability, coupling, security/performance risk, dead code, and test adequacy.
@@ -28,6 +28,14 @@ For every ready task:
 7. Only after the task passes the required reviews and verification may PM mark it complete.
 
 Stage 1 and Stage 2 must not be performed by the same specialist who authored the implementation under review.
+
+Default reviewer lanes:
+
+- Developer-authored implementation -> Technical Architect.
+- Technical Architect-authored implementation -> Developer.
+- Frontend changes authored by Developer or Technical Architect -> Frontend Designer review before QA.
+- Frontend Designer-authored implementation -> Technical Architect.
+- Quality Assurance Expert performs final behavior/regression/test-sufficiency review after required peer lanes.
 
 ## Fresh Context Rules
 

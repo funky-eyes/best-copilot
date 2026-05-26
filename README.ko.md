@@ -2,18 +2,18 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | 한국어 | [日本語](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.4.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.5.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
 
 `best-copilot`은(는) Copilot CLI와 Claude Code에서 사용할 수 있는 설치형 에이전트 팀 템플릿입니다. 이 프로젝트는 저장소에 다음과 같은 시니어급 전달 흐름을 제공합니다: 사실 초기화, 범위 고정, 설계 후 구현, 전문 역할을 통한 구현, 독립적 검토, 증거 기반 검증, 그리고 다음 세션을 위한 복구 지점 보존.
 
-Copilot CLI는 `plugin.json`을 통해 루트 `agents/`와 `skills/`를 사용합니다. Claude Code는 `.claude-plugin/plugin.json`, 루트 `skills/`, 그리고 `claude-agents/`의 lowercase-hyphen 어댑터를 사용합니다. 저장소 수준 규칙은 `.github/instructions/**`에 보관됩니다.
+Copilot CLI는 `plugin.json`을 통해 루트 `agents/`와 `skills/`를 사용합니다. Claude Code는 `claude-plugin/` 패키지를 사용합니다: `claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/skills -> ../skills`, `claude-plugin/agents -> ../claude-agents`. 저장소 수준 규칙은 `.github/instructions/**`에 보관됩니다.
 
 ## 존재 이유
 
@@ -65,19 +65,19 @@ Claude Code는 자체 marketplace 시스템을 사용합니다. 이 저장소를
 로컬 개발 또는 현재 checkout에서 직접 사용할 때는 플러그인 디렉터리를 로드할 수 있습니다:
 
 ```bash
-claude --plugin-dir /absolute/path/to/best-copilot
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
 Claude Code agent team을 사용하려면 시작 전에 agent teams를 활성화하세요. Agent teams는 Claude Code의 실험 기능이며 Claude Code v2.1.32 이상이 필요합니다:
 
 ```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
 Claude Code는 다음을 발견합니다:
 
 - marketplace 메타데이터: [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
-- 플러그인 메타데이터: [.claude-plugin/plugin.json](.claude-plugin/plugin.json)
+- 플러그인 메타데이터: [claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
 - 공유 스킬: [skills/](skills/), 호출 형식은 `/best-copilot:<skill-name>`
 - Claude 호환 subagent: [claude-agents/](claude-agents/)
 - 기본 메인 agent: [settings.json](settings.json)의 `best-copilot:senior-project-expert`
@@ -90,7 +90,7 @@ Claude Code는 다음을 발견합니다:
 
 - **Copilot CLI**: `/agent`를 실행하고 **Senior Project Expert**를 선택한 뒤 작업을 설명합니다.
 - **VS Code 확장**: 채팅 에이전트를 **Senior Project Expert**로 수동 전환한 뒤 작업을 시작합니다.
-- **Claude Code**: `claude --plugin-dir /absolute/path/to/best-copilot`으로 시작합니다. 플러그인의 기본 agent는 `best-copilot:senior-project-expert`입니다. `/agents`로 플러그인 agent를 확인하고 `/best-copilot:<skill-name>`로 스킬을 직접 호출할 수 있습니다.
+- **Claude Code**: `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`으로 시작합니다. 플러그인의 기본 agent는 `best-copilot:senior-project-expert`입니다. `/agents`로 플러그인 agent를 확인하고 `/best-copilot:<skill-name>`로 스킬을 직접 호출할 수 있습니다.
 
 Claude Code multi-agent 프롬프트 예시:
 
@@ -129,8 +129,13 @@ Copilot handoff는 fail-closed입니다. 각 PM handoff prompt는 `core-workflow
 best-copilot
 ├── plugin.json
 ├── .claude-plugin/
-│   ├── plugin.json
 │   └── marketplace.json
+├── claude-plugin/
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── .mcp.json
+│   ├── agents/ -> runtime-named symlinks to ../claude-agents
+│   └── skills -> ../skills
 ├── marketplace.json
 ├── agents/
 │   ├── pm-coordinator.agent.md
@@ -142,14 +147,14 @@ best-copilot
 │   ├── auto-fixer.agent.md
 │   └── spec-writer.agent.md
 ├── claude-agents/
-│   ├── pm-coordinator.agent.md
-│   ├── tech-architect.agent.md
-│   ├── developer.agent.md
-│   ├── frontend-designer.agent.md
-│   ├── risk-qa.agent.md
-│   ├── security-agent.agent.md
-│   ├── auto-fixer.agent.md
-│   └── spec-writer.agent.md
+│   ├── senior-project-expert.md
+│   ├── technical-architect.md
+│   ├── developer.md
+│   ├── frontend-designer.md
+│   ├── quality-assurance-expert.md
+│   ├── security-reviewer.md
+│   ├── root-cause-fixer.md
+│   └── specification-writer.md
 ├── skills/
 └── .github/
     ├── instructions/
@@ -162,11 +167,11 @@ best-copilot
 User request
   -> init or repo fact check
   -> Senior Project Expert freezes scope
-  -> brainstorming or direct planning
-  -> requirements / design / tasks when risk is non-trivial
-  -> design review before implementation
-  -> specialist implementation
-  -> cross review
+  -> Technical Architect SDD brainstorming for large ambiguous work
+  -> Developer + QA design review, plus Frontend Designer when UI is involved
+  -> parallel-ready requirements / design / tasks when risk is non-trivial
+  -> SDD-reviewed, TDD-oriented specialist implementation
+  -> cross-author review
   -> QA / security / frontend verification
   -> closeout with evidence and resume point
 ```
@@ -179,10 +184,10 @@ User request
 | --- | --- | --- |
 | Senior Project Expert | 의도, 범위, 오케스트레이션, dispatch, fan-in, 수렴, 진화 신호 | 직접 프로덕션 코드 작성 |
 | Specification Writer | 증거 수집, requirements/design/tasks, ADR, 진행 기록, memory/spec 복구 | 프로덕션 구현 |
-| Technical Architect | 백엔드/풀스택 설계, API/데이터/서비스 경계, 주 구현 및 아키텍처 리뷰 | 프론트엔드 세부사항 |
+| Technical Architect | 풀스택 설계, SDD brainstorming, API/데이터/서비스 경계, 주 구현, 병렬 분해, Developer/Frontend Designer 작업 리뷰 | 최종 프론트엔드 polish, 작업 오케스트레이션 |
 | Developer | 고정된 구현 슬라이스, 구현 가능성 리뷰, 아키텍처 책임 코드 리뷰 | 아키텍처 변경/범위 확장 |
-| Frontend Designer | 페이지, 컴포넌트, 상호작용, 반응형, 브라우저 증거 | 백엔드 메인라인 |
-| Quality Assurance Expert | 기능 검증, 회귀 위험, 코드 리뷰, 병합 준비 | 보안 전용 검토 |
+| Frontend Designer | 페이지, 컴포넌트, 상호작용, 반응형, 브라우저 증거, 프론트엔드 리뷰 | 백엔드 메인라인 |
+| Quality Assurance Expert | 기능 검증, 회귀 위험, 코드 리뷰, peer lane 이후 병합 준비 | 보안 전용 검토 |
 | Security Reviewer | 권한, 민감 데이터 흐름, 의존성 및 릴리스 표면 보안 | 일반 기능 QA |
 | Root Cause Fixer | 실패 분류, 최소 패치, 회귀 검증 | 근거 없는 리팩터링 |
 
@@ -232,15 +237,15 @@ Claude Code 호환이 필요한 대상 저장소에는 공유 `.github/instructi
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code는 Claude 모델만 실행합니다. `claude-agents/*.agent.md`의 Claude 어댑터는 역할 분리를 유지하고 `model: inherit`을 사용하므로 실제 모델은 현재 Claude Code 세션이 제어합니다.
+Claude Code는 Claude 모델만 실행합니다. `claude-agents/*.md`의 Claude 어댑터는 역할 분리를 유지하고 `model: inherit`을 사용하므로 실제 모델은 현재 Claude Code 세션이 제어합니다.
 
 ## 검증 명령 예시
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
-find claude-agents -maxdepth 1 -name '*.agent.md' | sort
+find claude-agents -maxdepth 1 -name '*.md' | sort
 find skills -maxdepth 3 -name SKILL.md | sort
 git diff --check
 ```

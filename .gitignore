@@ -87,3 +87,4 @@ __cdn__
 __static__
 config-static
 node_modules/**
+.codegraph/

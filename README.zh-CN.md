@@ -2,18 +2,18 @@
 
 [English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.4.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.5.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
-[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](.claude-plugin/plugin.json)
+[![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-35-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
 
 `best-copilot` 是一套面向 Copilot CLI 和 Claude Code 的可安装 agent 团队，服务严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
 
-Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claude Code 通过 `.claude-plugin/plugin.json` 使用根目录 `skills/` 和 `claude-agents/` 中的 lowercase-hyphen 适配器。仓库级规则保存在 `.github/instructions/**`。
+Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claude Code 通过 `claude-plugin/` 包加载：`claude-plugin/.claude-plugin/plugin.json`、`claude-plugin/skills -> ../skills` 和 `claude-plugin/agents -> ../claude-agents`。仓库级规则保存在 `.github/instructions/**`。
 
 ## 为什么存在
 
@@ -69,19 +69,19 @@ Claude Code 使用自己的 marketplace 系统。先把本仓库添加为 Claude
 本地开发或直接从当前 checkout 使用时，也可以直接加载插件目录：
 
 ```bash
-claude --plugin-dir /absolute/path/to/best-copilot
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
 如果要使用 Claude Code agent team，多 agent 会话启动前先启用 agent teams。Agent teams 在 Claude Code 中仍是实验能力，并要求 Claude Code v2.1.32 或更高版本：
 
 ```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
 Claude Code 会发现：
 
 - marketplace 元数据：[.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
-- 插件元数据：[.claude-plugin/plugin.json](.claude-plugin/plugin.json)
+- 插件元数据：[claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
 - 共享技能：[skills/](skills/)，调用名形如 `/best-copilot:<skill-name>`
 - Claude 兼容 subagents：[claude-agents/](claude-agents/)
 - 默认主 agent：[settings.json](settings.json) 中的 `best-copilot:senior-project-expert`
@@ -94,7 +94,7 @@ Claude Code 会发现：
 
 - **Copilot CLI**：运行 `/agent`，选择 **Senior Project Expert**，然后描述要做的工作。
 - **VS Code 插件**：在聊天中手动切换到 **Senior Project Expert** 这个 agent，然后开始任务。
-- **Claude Code**：运行 `claude --plugin-dir /absolute/path/to/best-copilot`；插件默认主 agent 是 `best-copilot:senior-project-expert`。用 `/agents` 检查插件 agent，用 `/best-copilot:<skill-name>` 直接调用技能。
+- **Claude Code**：运行 `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`；插件默认主 agent 是 `best-copilot:senior-project-expert`。用 `/agents` 检查插件 agent，用 `/best-copilot:<skill-name>` 直接调用技能。
 
 Claude Code multi-agent 提示示例：
 
@@ -133,8 +133,13 @@ Copilot handoff 是 fail-closed：每个 PM handoff prompt 都要求 `core-workf
 best-copilot
 ├── plugin.json
 ├── .claude-plugin/
-│   ├── plugin.json
 │   └── marketplace.json
+├── claude-plugin/
+│   ├── .claude-plugin/
+│   │   └── plugin.json
+│   ├── .mcp.json
+│   ├── agents/ -> runtime-named symlinks to ../claude-agents
+│   └── skills -> ../skills
 ├── marketplace.json
 ├── agents/
 │   ├── pm-coordinator.agent.md
@@ -146,14 +151,14 @@ best-copilot
 │   ├── auto-fixer.agent.md
 │   └── spec-writer.agent.md
 ├── claude-agents/
-│   ├── pm-coordinator.agent.md
-│   ├── tech-architect.agent.md
-│   ├── developer.agent.md
-│   ├── frontend-designer.agent.md
-│   ├── risk-qa.agent.md
-│   ├── security-agent.agent.md
-│   ├── auto-fixer.agent.md
-│   └── spec-writer.agent.md
+│   ├── senior-project-expert.md
+│   ├── technical-architect.md
+│   ├── developer.md
+│   ├── frontend-designer.md
+│   ├── quality-assurance-expert.md
+│   ├── security-reviewer.md
+│   ├── root-cause-fixer.md
+│   └── specification-writer.md
 ├── skills/
 └── .github/
     ├── instructions/
@@ -166,11 +171,11 @@ best-copilot
 User request
   -> init or repo fact check
   -> Senior Project Expert freezes scope
-  -> brainstorming or direct planning
-  -> requirements / design / tasks when risk is non-trivial
-  -> design review before implementation
-  -> specialist implementation
-  -> cross review
+  -> Technical Architect 针对大任务做 SDD brainstorming
+  -> Developer + QA 设计复审，有 UI 时加入 Frontend Designer
+  -> 风险不低时形成可并行的 requirements / design / tasks
+  -> 通过 SDD 评审后按 TDD 导向派发实现
+  -> 跨作者 review
   -> QA / security / frontend verification
   -> closeout with evidence and resume point
 ```
@@ -183,10 +188,10 @@ User request
 | --- | --- | --- |
 | Senior Project Expert | 意图、范围、编排、派发、fan-in、收口、演进信号 | 直接编写生产代码 |
 | Specification Writer | 发现证据、requirements、design、tasks、ADR、memory/spec 恢复 | 生产实现 |
-| Technical Architect | 后端/全栈设计、API/数据/服务边界、主线实现、架构评审 | 前端细节 |
+| Technical Architect | 全栈设计、SDD brainstorming、API/数据/服务边界、主线实现、并行拆解、Developer/Frontend Designer 代码评审 | 最终前端打磨、任务编排 |
 | Developer | 冻结的实现切片、实现可行性评审、对架构师负责代码的实现评审 | 架构变更或范围扩展 |
-| Frontend Designer | 页面、组件、交互、响应式、浏览器证据 | 后端主线 |
-| Quality Assurance Expert | 功能验证、回归风险、代码审查、合并准备 | 安全专项 |
+| Frontend Designer | 页面、组件、交互、响应式、浏览器证据、前端专项 review | 后端主线 |
+| Quality Assurance Expert | 功能验证、回归风险、代码审查、peer lanes 后的合并准备 | 安全专项 |
 | Security Reviewer | 权限、敏感数据流、依赖、发布面安全 | 普通功能 QA |
 | Root Cause Fixer | 失败诊断、最小补丁、回归验证 | 无证据的重构 |
 
@@ -249,15 +254,15 @@ spec/templates/
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code 只能运行 Claude 模型。`claude-agents/*.agent.md` 中的 Claude 适配器保留角色分工，并使用 `model: inherit`，实际模型由当前 Claude Code 会话控制。
+Claude Code 只能运行 Claude 模型。`claude-agents/*.md` 中的 Claude 适配器保留角色分工，并使用 `model: inherit`，实际模型由当前 Claude Code 会话控制。
 
 ## 验证此包
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
-find claude-agents -maxdepth 1 -name '*.agent.md' | sort
+find claude-agents -maxdepth 1 -name '*.md' | sort
 find skills -maxdepth 3 -name SKILL.md | sort
 git diff --check
 ```

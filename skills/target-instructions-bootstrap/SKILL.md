@@ -24,7 +24,7 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 
 ```md
 ---
-version: "0.4.1"
+version: "0.5.0"
 ---
 ```
 
@@ -50,6 +50,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but `### No Silent Closeout` relies on plugin hooks, local scripts, Python, Node, shell, or other interpreter-based enforcement, repair that subsection to the instruction-only wording from this skill.
 - If `.github/instructions/must.instructions.md` exists but lacks `### PM Native Ask Trigger Gate`, append that subsection from this skill under `## Per-Request Hard Gates`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Shared State Contracts`, append that section from this skill after `## Repository Truth` when that heading exists, otherwise append it after `## Per-Request Hard Gates`.
+- If `.github/instructions/must.instructions.md` exists but lacks `### Fan-In Arbitration`, append that subsection from this skill under `## Shared State Contracts`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Memory And Spec`, append that section from this skill after `## Command Output Budget` when that heading exists, otherwise append it after `## Shared State Contracts`.
 - If `.github/instructions/must.instructions.md` exists but lacks the first-use scaffold gate under `## Memory And Spec`, append the missing bullet from this skill into that section.
 - If `.github/instructions/must.instructions.md` exists but lacks the progressive-disclosure memory rule under `## Memory And Spec`, append that bullet from this skill into that section.
@@ -117,7 +118,7 @@ applyTo: "**"
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.4.1
+- Bootstrap contract version: 0.5.0
 - Last full verification: unknown
 - Reentry rule: best-copilot-version-sentinel-first
 ```
@@ -160,6 +161,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Before sending final prose directly to the user, if the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may trigger a native closeout prompt. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool first; do not stop at abstract `vscode/askQuestions` or `askQuestions` capability text. In Copilot CLI, use `Asking user` when available. Do not close on prose-only summary.
 - Specialists must not ask the user directly and must not use native closeout prompts. Copilot specialist agent frontmatter must not include `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or equivalent user-facing ask tools. If PM/coordinator is present, return `NEEDS_USER_INPUT` with `question`, `why_blocking`, `options` when applicable, `safe_default` when one exists, and `resume_prompt_for_pm`. Otherwise return `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question that the top-level session or PM/coordinator should ask.
 - When a closeout or continuation choice is needed, present the decision surface through the native ask UI itself rather than a prose summary plus options list. Do not mix a written `1/2/3` choice list into the same closing prose; keep the actual selectable options in the structured prompt.
+- Native ask prompts must include a custom free-form answer path. If the UI only supports fixed choices, include `Custom answer` and follow that selection with a native/free-form prompt before deciding.
 - Native ask availability must be judged from the latest runtime tool inventory. If a native ask tool is available now, use it immediately; do not reuse an older "native UI unavailable" conclusion. In VS Code, `vscode_askQuestions` outranks abstract `vscode/askQuestions` / `askQuestions` wording when present.
 - If a previous turn could only return a staged, blocked, or partial prose response because native ask was unavailable, and the latest tool inventory or tool-change notice restores `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or an equivalent native UI, the next direct closeout must first perform a native closeout prompt. Earlier prose does not become retroactive closeout authorization.
 - If the user replies through a native closeout or continuation prompt with free text, technical feedback, a selected continuation, a file path, a fix request, an investigation direction, or any new executable instruction, that reply is a new ordinary user message. The previous closeout state is invalidated immediately.
@@ -190,6 +192,11 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - `pm_action` is a delegated handback control field used only with `status=NEEDS_CONTEXT`. The current allowed value is `pm_clarify`, which tells PM/coordinator to repair the packet or clarify missing context before redispatch.
 - Delegated specialists return structured handbacks. Missing repository/task context returns `NEEDS_CONTEXT`. Missing human choice returns `NEEDS_USER_INPUT` to PM/coordinator when one exists, otherwise `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question`.
 - When consuming older dispatch prompts that still use `TASK`, `EXPECTED OUTCOME`, `REQUIRED TOOLS`, `MUST DO`, `MUST NOT DO`, or `CONTEXT`, normalize them into the current packet before further delegation.
+
+### Fan-In Arbitration
+
+- PM/coordinator adjudicates fan-in before marking tasks complete or continuing fan-out. Priority order: blocker or invalid handback, security/privacy/data-loss/auth/dependency/release risk, failed or missing verification, spec/acceptance mismatch, overlapping write sets, code-quality or UX/test-sufficiency concerns, then non-blocking follow-up notes.
+- If reviewers disagree, PM records `decision_provenance` with deciding evidence, blocking status, next stage, and residual risk. Do not close from an unadjudicated conflict.
 
 ## Search Precision
 
@@ -236,12 +243,16 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Multi-agent dispatch should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`.
 - Delegated specialists do not ask users directly. If repository or task context is missing, return `NEEDS_CONTEXT`; if human input or approval is required, return `NEEDS_USER_INPUT` for PM/coordinator to ask.
 - Delegated handbacks must preserve shared field names such as `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`, and when blocked on missing context, `clarification_request` plus `pm_action: "pm_clarify"`.
+- For large ambiguous work, PM delegates SDD design brainstorming to Technical Architect first. Technical Architect self-reviews and repairs the design before PM asks Developer and Quality Assurance Expert for second-pass review; add Frontend Designer review for frontend/user-visible surfaces. Only a blocker-free reviewed design proceeds to implementation.
+- Cross-review implementation lanes: Developer-authored code -> Technical Architect review; Technical Architect-authored code -> Developer review; frontend code by Developer/Technical Architect -> Frontend Designer review; Frontend Designer-authored code -> Technical Architect review.
 
 ## Implementation and Verification
 
 - Prefer existing code, tools, components, and patterns.
 - Public APIs, message formats, schema, auth boundaries, CI/CD, and dependency upgrades are high-risk; assess blast radius first.
 - Medium or large implementation should run from an approved plan or reviewed execution packet, with evidence, peer review, and verification before closure.
+- Spec/tasks should be parallel-ready when possible: include owner lane, reviewer lane, dependencies, write set, parallel group, acceptance checks, TDD or minimal reproducible check, verification command, and stop conditions.
+- Code changes follow SDD then TDD: reviewed design/task boundary first, then failing test or reproducible check before implementation when practical.
 - Before claiming work is done, run the smallest useful verification available or state exactly why it could not run.
 - Record important verification evidence in the task closeout and update memory/spec for larger work.
 - Do not store secrets, tokens, private logs, or PII in durable memory, specs, or instructions.
@@ -276,13 +287,13 @@ Read only the selected skill, not the whole skill tree.
 - Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
-  - `technical-architect-workflow`: architecture, service boundaries, data/API contracts, blast radius, and mainline implementation strategy.
+  - `technical-architect-workflow`: full-stack architecture, SDD design brainstorming, service boundaries, data/API contracts, blast radius, mainline implementation, parallel decomposition, and cross-review.
   - `developer-workflow`: frozen implementation slices, scoped peer review, `NEEDS_CONTEXT` / `NEEDS_USER_INPUT`, and verification evidence.
   - `frontend-designer-workflow`: UI implementation/review, design-system reuse, responsive/browser evidence, and visual quality.
   - `quality-assurance-workflow`: functional verification, regression risk, test sufficiency, and merge-readiness review.
   - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
   - `root-cause-fixer-workflow`: concrete failure evidence, minimal root-cause patching, and regression proof.
-- `brainstorming`: ambiguous MEDIUM/LARGE direction before spec or code.
+- `brainstorming`: ambiguous MEDIUM/LARGE direction before spec or code; in PM-led large technical work, route deep design brainstorming through Technical Architect.
 - `writing-plans`: confirmed MEDIUM/LARGE direction into executable tasks.
 - `spec-review-gauntlet`: pre-implementation readiness and multi-lane design review for Spec Bundles and execution plans.
 - `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, and per-task review.
@@ -356,12 +367,13 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm existing files were not overwritten.
 - Confirm `.github/instructions/must.instructions.md` contains `## Request Flow` with the per-request timestamp rule, init normalization rule, and packet freeze rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Per-Request Hard Gates`, `### No Silent Closeout`, all native-closeout bullets from this skill, the instruction-only closeout-backstop rule, the VS Code `vscode_askQuestions` exact-tool priority, and the specialist `NEEDS_USER_INPUT`/`BLOCKED missing_top_level_question` rule.
-- Confirm `.github/instructions/must.instructions.md` contains `### PM Native Ask Trigger Gate`, including the rule that brainstorming is not the only native ask trigger and the rule that PM/coordinator frontmatter ask tools are an availability signal.
+- Confirm `.github/instructions/must.instructions.md` contains `### PM Native Ask Trigger Gate`, including the rule that brainstorming is not the only native ask trigger, the rule that PM/coordinator frontmatter ask tools are an availability signal, and the custom free-form native ask path.
 - Confirm `.github/instructions/must.instructions.md` contains `## Shared State Contracts` with `work_mode`, `task_type`, and `pm_action`.
+- Confirm `.github/instructions/must.instructions.md` contains `### Fan-In Arbitration`.
 - Confirm `.github/instructions/must.instructions.md` contains `## Search Precision` and the fixed-string-before-regex rule.
 - Confirm `.github/instructions/must.instructions.md` contains `## Command Output Budget` and the default `COMMAND 2>&1 | head -c 4000` pattern.
 - Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
-- Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, and `## Implementation and Verification`.
+- Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, cross-review lanes, Technical Architect-led SDD design review, and `## Implementation and Verification`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - When Claude Code compatibility is required, confirm `CLAUDE.md` exists and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.

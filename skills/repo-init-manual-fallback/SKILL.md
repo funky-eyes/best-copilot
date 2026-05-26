@@ -34,7 +34,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 - `spec/templates/design-template.md`
 - `spec/templates/tasks-template.md`
 
-`best-copilot.md` is not a neutral scaffold. It is the verified-init sentinel for contract version `0.4.1` and must be written only after the other required artifacts and content checks pass.
+`best-copilot.md` is not a neutral scaffold. It is the verified-init sentinel for contract version `0.5.0` and must be written only after the other required artifacts and content checks pass.
 
 ## Required Content Checks
 
@@ -57,7 +57,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 5. Ensure `## Init Status` contains:
    - `Init ready: yes|no`
    - `Required artifacts verified: yes|no`
-   - `Bootstrap contract version: 0.4.1`
+   - `Bootstrap contract version: 0.5.0`
    - `Last full verification: <timestamp-or-bounded-scan-note>`
    - `Reentry rule: best-copilot-version-sentinel-first`
 6. Initialize missing target-local scaffolds in this order:
@@ -70,13 +70,13 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 
 ```md
 ---
-version: "0.4.1"
+version: "0.5.0"
 ---
 ```
 
 10. Verify:
    - `.github/instructions/project.instructions.md` exists and is not placeholder-heavy.
-   - The `## Init Status` block contains `Bootstrap contract version: 0.4.1`.
+   - The `## Init Status` block contains `Bootstrap contract version: 0.5.0`.
    - The target root `best-copilot.md` exists and exactly matches the expected frontmatter sentinel.
    - Any bootstrap-created files exist on disk and did not overwrite project-specific content.
 

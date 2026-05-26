@@ -1,7 +1,7 @@
 {
   "name": "best-copilot",
   "description": "A senior multi-agent engineering workflow plugin for Claude Code and GitHub Copilot CLI.",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "author": {
     "name": "best-copilot maintainers"
   },
@@ -16,15 +16,5 @@
     "spec",
     "memory",
     "verification"
-  ],
-  "agents": [
-    "./claude-agents/pm-coordinator.agent.md",
-    "./claude-agents/spec-writer.agent.md",
-    "./claude-agents/tech-architect.agent.md",
-    "./claude-agents/developer.agent.md",
-    "./claude-agents/frontend-designer.agent.md",
-    "./claude-agents/risk-qa.agent.md",
-    "./claude-agents/security-agent.agent.md",
-    "./claude-agents/auto-fixer.agent.md"
   ]
 }
