@@ -19,6 +19,7 @@ Keep Claude Code-specific behavior here:
 
 - This is read-only by default through `disallowedTools`.
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/core-workflow-contract`, `/security-reviewer-workflow`, and needed focused skills such as `/structured-review`, `/root-cause-investigation`, or `/verification-before-completion`.
+- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, invoke `/repo-init-gate` before broad search, generic Explore, planning, review, or implementation; invoke `/repo-init-scan` only if the gate fails.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For auth/protocol design-review assignments, focus on issuer/audience, redirect URI validation, nonce/state, token signing keys, JWKS rotation, client authentication, consent/session boundaries, logging, and secret handling.
 - Follow the Specialist Ask Boundary from `core-workflow-contract`.

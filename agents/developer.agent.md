@@ -15,6 +15,7 @@ Before implementation or review, read and follow `core-workflow-contract` and `d
 Keep Copilot-specific behavior here:
 
 - Use Copilot `read`, `search`, `edit`, `execute`, and `todo` tools as available.
+- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails.
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Implement only PM-frozen slices. Return `NEEDS_CONTEXT` if `sub_task_id`, files, dependencies, or acceptance checks are missing. Review Technical Architect-authored code when PM assigns that lane.
 - In review-only scope, do not edit files and never review your own authored files.

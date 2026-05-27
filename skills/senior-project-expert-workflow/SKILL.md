@@ -21,13 +21,14 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 6. PM then dispatches Developer and Quality Assurance Expert for second-pass design review; include Frontend Designer when the plan affects user-visible frontend behavior. Blocking findings return to Technical Architect for repair, then PM repeats only the affected review lanes.
 7. Require reviewed spec/design readiness before implementation.
 8. Dispatch with compact six-block packets that name both `core-workflow-contract` and the specialist's role workflow skill.
-9. For Claude Code agent-team teammates and any runtime without proven skill preloading, include a minimal role checklist in the spawn/handoff prompt and require `NEEDS_CONTEXT missing_required_skill` if the teammate cannot load or follow it.
-10. Every specialist packet must forbid direct user questions. When PM/coordinator is present, require `NEEDS_USER_INPUT` back to PM; otherwise require `BLOCKED missing_top_level_question` with the exact question the top-level session or PM/coordinator should ask.
-11. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
-12. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
-13. Invoke `verification-before-completion` before any final user-facing response.
-14. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names. Do not close on a prose-only summary.
-15. Close only after evidence is present or a blocker is explicitly stated.
+9. Include current `INIT_GATE` / `INIT_SCAN` evidence in every specialist packet. If that evidence is absent, run `repo-init-gate` before dispatch and `repo-init-scan` only if the gate fails.
+10. For Claude Code agent-team teammates and any runtime without proven skill preloading, include a minimal role checklist in the spawn/handoff prompt and require `NEEDS_CONTEXT missing_required_skill` if the teammate cannot load or follow it.
+11. Every specialist packet must forbid direct user questions. When PM/coordinator is present, require `NEEDS_USER_INPUT` back to PM; otherwise require `BLOCKED missing_top_level_question` with the exact question the top-level session or PM/coordinator should ask.
+12. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
+13. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
+14. Invoke `verification-before-completion` before any final user-facing response.
+15. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names. Do not close on a prose-only summary.
+16. Close only after evidence is present or a blocker is explicitly stated.
 
 ## Observable Harness Contract
 

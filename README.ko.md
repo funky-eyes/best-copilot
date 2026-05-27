@@ -68,10 +68,22 @@ Claude Code는 자체 marketplace 시스템을 사용합니다. 이 저장소를
 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
+Claude Code에서 Senior Project Expert를 안정적인 진입점으로 쓰려면 해당 agent가 전체 세션을 담당하게 시작하세요:
+
+```bash
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
+```
+
+플러그인을 설치한 뒤에는 보통 다음처럼 줄일 수 있습니다:
+
+```bash
+claude --agent senior-project-expert
+```
+
 Claude Code agent team을 사용하려면 시작 전에 agent teams를 활성화하세요. Agent teams는 Claude Code의 실험 기능이며 Claude Code v2.1.32 이상이 필요합니다:
 
 ```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
 ```
 
 Claude Code는 다음을 발견합니다:
@@ -80,7 +92,7 @@ Claude Code는 다음을 발견합니다:
 - 플러그인 메타데이터: [claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
 - 공유 스킬: [skills/](skills/). Claude Code에서는 `/repo-init-gate` 같은 prefix 없는 slash command로 호출하며, 명령 선택기의 설명 열에 `(best-copilot)`이 표시됩니다.
 - Claude 호환 subagent: [claude-agents/](claude-agents/)
-- 기본 메인 agent: [settings.json](settings.json)의 `best-copilot:senior-project-expert`
+- 세션 agent는 `--agent senior-project-expert` 또는 Claude Code의 프로젝트/사용자 `agent` 설정으로 선택합니다. `/agents`에 표시되는 `best-copilot:` prefix 없는 이름을 사용하세요.
 
 로컬 수정 또는 플러그인 업데이트 후에는 Claude Code 안에서 `/reload-plugins`를 실행하거나 세션을 재시작하세요.
 
@@ -90,14 +102,17 @@ Claude Code는 다음을 발견합니다:
 
 - **Copilot CLI**: `/agent`를 실행하고 **Senior Project Expert**를 선택한 뒤 작업을 설명합니다.
 - **VS Code 확장**: 채팅 에이전트를 **Senior Project Expert**로 수동 전환한 뒤 작업을 시작합니다.
-- **Claude Code**: `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`으로 시작합니다. 플러그인의 기본 agent 설정은 `best-copilot:senior-project-expert`이지만 CLI는 보통 prefix 없는 agent / skill 이름을 표시합니다. `/agents`로 플러그인 agent를 확인하고 `/repo-init-gate` 같은 prefix 없는 slash command로 skill을 호출할 수 있습니다.
+- **Claude Code**: 안정적인 진입점은 `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`이며, 설치 후에는 보통 `claude --agent senior-project-expert`입니다. `/agents`로 plugin agents를 확인하고 `/repo-init-gate` 같은 prefix 없는 slash command로 skills를 호출하세요. Claude Code는 plugin source를 설명/소스 열에 표시하고 command 이름에는 넣지 않습니다.
 
-Claude Code가 Senior Project Expert 요청을 subagent가 아니라 `Skill(senior-project-expert)`로 해석하면, 같은 이름의 호환 skill이 동일한 repo-init preflight를 먼저 실행한 뒤 분석, 계획, 디스패치, 구현을 허용합니다. 전체 Senior Project Expert 경로에는 `/agents` 또는 agent teams를 우선 사용하세요.
+Claude Code가 `@best-copilot:senior-project-expert`를 subagent mention으로 받아들이면 이것으로도 호출할 수 있습니다. UI가 이를 일반 텍스트로 처리하면 `--agent senior-project-expert` 또는 Claude의 `agent` 설정으로 폴백하세요. Senior Project Expert 요청이 `Skill(senior-project-expert)`로 해석되면 호환 skill이 동일한 repo-init preflight를 실행합니다.
 
 Claude Code multi-agent 프롬프트 예시:
 
 ```text
 Create an agent team for this task. Use senior-project-expert as the lead.
+The lead must run /repo-init-gate before spawning teammates,
+then /repo-init-scan only if the gate fails, and pass the
+INIT_GATE / INIT_SCAN evidence in every teammate packet.
 Spawn teammates using technical-architect, developer,
 quality-assurance-expert, and security-reviewer
 where their scopes apply. Keep write sets non-overlapping,
@@ -221,7 +236,7 @@ Copilot CLI에서는 shell 명령도 사용할 수 있습니다:
 copilot init
 ```
 
-그 다음 Claude Code에서는 **Senior Project Expert** / `senior-project-expert`로부터 실질 작업을 시작하세요. 이 역할은 저장소 사실을 표준화하고 누락된 로컬 스캐폴드를 생성하며, 계속 진행하기 전에 해당 파일들이 존재하는지 검증합니다.
+그 다음 Claude Code에서는 `--agent senior-project-expert` 또는 프로젝트/사용자 `agent` 설정을 `senior-project-expert`로 두고 실질 작업을 시작하세요. 이 역할은 저장소 사실을 표준화하고 누락된 로컬 스캐폴드를 생성하며, 계속 진행하기 전에 해당 파일들이 존재하는지 검증합니다.
 
 Claude Code 호환이 필요한 대상 저장소에는 공유 `.github/instructions/**` 규칙을 가져오는 `CLAUDE.md` 어댑터도 생성합니다.
 
@@ -245,7 +260,7 @@ Claude Code는 Claude 모델만 실행합니다. `claude-agents/*.md`의 Claude 
 ## 검증 명령 예시
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read(".claude/settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
 find claude-agents -maxdepth 1 -name '*.md' | sort
