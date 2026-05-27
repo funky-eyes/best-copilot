@@ -38,6 +38,7 @@ required runtime-neutral scaffold sections below:
 - `.github/instructions/skills-index.instructions.md`
 - `AGENTS.md` when the runtime includes Codex or the user wants Codex compatibility.
 - `CLAUDE.md` when the runtime is Claude Code or the user wants Claude Code compatibility.
+- `.claude/settings.json` when the runtime is Claude Code and the user wants a stable Senior Project Expert session entry.
 
 Existing target files must be handled as follows:
 
@@ -62,6 +63,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but lacks `## Implementation and Verification`, append that section from this skill after `## Agents and Dispatch` when that heading exists, otherwise append it after `## Runtime Notes` when that heading exists, or after `## Interaction`.
 - If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
 - If `CLAUDE.md` exists but lacks references to `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`, append the compatible import block from this skill instead of replacing existing Claude-specific rules.
+- If `.claude/settings.json` exists but lacks a top-level `agent` key and adding JSON safely is possible, add `"agent": "senior-project-expert"` while preserving existing keys. If it already has a different `agent`, do not overwrite it silently; stop with `BLOCKED target_instructions_bootstrap_conflict` unless the user explicitly asked to change the Claude default agent. If safe JSON repair is not possible, stop with `BLOCKED target_instructions_bootstrap_conflict` and list `.claude/settings.json`.
 - If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
 ## `.github/instructions/project.instructions.md`
@@ -233,7 +235,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ## Runtime Notes
 
 - In Copilot CLI, plugin agents normally appear through `/agent`, and plugin skills appear through the runtime's skills interface.
-- In Claude Code, plugin skills are invoked as bare slash commands such as `/repo-init-gate`; the command picker shows the plugin source such as `(best-copilot)` in the description. Plugin subagents appear in `/agents`; use the agent names shown there, such as `technical-architect`.
+- In Claude Code, plugin skills are invoked as bare slash commands such as `/repo-init-gate`; the command picker shows the plugin source such as `(best-copilot)` in the description. Plugin subagents appear in `/agents`; use the agent names shown there, such as `technical-architect`. For a Senior-owned session, start with `--agent senior-project-expert` or set Claude's `agent` setting to `senior-project-expert`; do not use `best-copilot:` as part of the Claude Code agent or skill command name.
 - If Claude Code resolves the Senior Project Expert request through the skill path instead of the subagent path, the compatibility skill must run the same `repo-init-gate` / `repo-init-scan` preflight before substantive work.
 - When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed slash-command skill or include the needed checklist in the spawn prompt.
 
@@ -317,7 +319,7 @@ Read only the selected skill, not the whole skill tree.
 
 ## Claude Code Skill Names
 
-After installing this plugin in Claude Code, invoke plugin skills as bare slash commands, for example `/repo-init-gate`, `/repo-init-scan`, `/structured-review`, and `/verification-before-completion`. The command picker shows `(best-copilot)` in the description column to identify the plugin source. Invoke plugin subagents through `/agents` using the displayed names, such as `senior-project-expert`. If the Senior Project Expert request is resolved as `Skill(senior-project-expert)`, use that compatibility skill only as a PM entrypoint; it must run the same init preflight before analysis, planning, dispatch, or implementation.
+After installing this plugin in Claude Code, invoke plugin skills as bare slash commands, for example `/repo-init-gate`, `/repo-init-scan`, `/structured-review`, and `/verification-before-completion`. The command picker shows `(best-copilot)` in the description column to identify the plugin source. For a Senior-owned session, start Claude Code with `--agent senior-project-expert` or set `.claude/settings.json` / user settings with `"agent": "senior-project-expert"`. Invoke plugin subagents through `/agents` using the displayed names, such as `senior-project-expert`. Do not rely on prompt text like `@agent-best-copilot:senior-project-expert` as a first-use gate; if Claude Code does not accept it as a subagent mention, plugin skills will not load before generic exploration. If the Senior Project Expert request is resolved as `Skill(senior-project-expert)`, use that compatibility skill only as a PM entrypoint; it must run the same init preflight before analysis, planning, dispatch, or implementation.
 ```
 
 ## `AGENTS.md`
@@ -342,7 +344,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - When resuming multi-step work, read `memories/repo/INDEX.md`, then `current-workstreams.md`, then only linked spec or memory shards.
 - Do not treat plugin package state as active project state.
 - Detect the user's primary language and answer in that language unless the user asks otherwise.
-- When running under Claude Code, use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent teams with the displayed names such as `senior-project-expert`; if the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
+- When running under Claude Code, use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent teams with the displayed names such as `senior-project-expert`; for a Senior-owned session, use `--agent senior-project-expert` or the Claude `agent` setting. Do not rely on prompt text like `@agent-best-copilot:senior-project-expert` as a first-use gate. If the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
 ```
 
 ## `CLAUDE.md`
@@ -358,8 +360,19 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 
 - This file is the Claude Code adapter for the target repository. The imported `.github/instructions/**` files remain the shared source for repository facts, workflow gates, and skill routing.
 - System, platform, and explicit user instructions outrank imported repository files.
-- Use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent-team names shown by Claude Code, such as `senior-project-expert`; if the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
+- Stable Senior Project Expert session entry is `claude --agent senior-project-expert`, or `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert` for local plugin development.
+- Use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent-team names shown by Claude Code, such as `senior-project-expert`; do not rely on prompt text like `@agent-best-copilot:senior-project-expert` as a first-use gate. If the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
 - Keep this file short. Add project facts to `.github/instructions/project.instructions.md`, durable recovery state to `memories/repo/**`, and task specs to `spec/**`.
+```
+
+## `.claude/settings.json`
+
+Create this file only for Claude Code target compatibility when it is absent. If the file already exists, preserve existing settings and add only the missing top-level `agent` key when safe.
+
+```json
+{
+  "agent": "senior-project-expert"
+}
 ```
 
 ## Verification
@@ -378,5 +391,6 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, cross-review lanes, Technical Architect-led SDD design review, and `## Implementation and Verification`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - When Claude Code compatibility is required, confirm `CLAUDE.md` exists and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
+- When a stable Claude Code PM entry is required, confirm `.claude/settings.json` exists, is valid JSON, and contains `"agent": "senior-project-expert"`.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
 - If this skill was invoked because `.github/instructions/**` or a required runtime adapter was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

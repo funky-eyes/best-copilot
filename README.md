@@ -72,10 +72,22 @@ For local development or direct use from this checkout, load the plugin director
 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
 ```
 
+For the reliable Senior Project Expert entrypoint in Claude Code, make that agent own the whole session:
+
+```bash
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
+```
+
+After installing the plugin, the same session entry can usually be shortened to:
+
+```bash
+claude --agent senior-project-expert
+```
+
 For multi-agent teams, enable Claude Code agent teams before launch. Agent teams are experimental in Claude Code and require Claude Code v2.1.32 or later:
 
 ```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin
+CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
 ```
 
 Claude Code discovers:
@@ -84,7 +96,7 @@ Claude Code discovers:
 - plugin metadata from [claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
 - shared skills from [skills/](skills/) as bare slash commands such as `/repo-init-gate`; the picker shows `(best-copilot)` in the description
 - Claude-compatible subagents from [claude-agents/](claude-agents/)
-- default main agent from [settings.json](settings.json), currently `best-copilot:senior-project-expert`
+- session agent selection through `--agent senior-project-expert` or Claude Code's project/user `agent` setting; use the names shown by `/agents`, without the `best-copilot:` prefix
 
 After local edits or plugin updates, run `/reload-plugins` inside Claude Code or restart the session.
 
@@ -94,9 +106,9 @@ Start requirement orchestration with the coordinator agent in [agents/pm-coordin
 
 - **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
-- **Claude Code**: start with `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`; the plugin default agent setting is `best-copilot:senior-project-expert`, while the CLI normally displays agent and skill names without that prefix. Use `/agents` to inspect plugin agents and bare slash commands such as `/repo-init-gate` to invoke skills.
+- **Claude Code**: the stable entry is `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`, or `claude --agent senior-project-expert` after installation. Use `/agents` to inspect plugin agents and bare slash commands such as `/repo-init-gate` to invoke skills; Claude Code displays plugin names in the description/source column, not in the command name.
 
-If Claude Code resolves the Senior Project Expert request as `Skill(senior-project-expert)` instead of a subagent, the compatibility skill now runs the same repo-init preflight before analysis, planning, dispatch, or implementation. Prefer `/agents` or agent teams for the full Senior Project Expert subagent path.
+Do not rely on typing `@agent-best-copilot:senior-project-expert` as the first request. If Claude Code does not accept that text as a subagent mention, it is just prompt text; the base session may launch built-in Explore workers before any plugin skill or agent loads. If Claude Code resolves the Senior Project Expert request as `Skill(senior-project-expert)` instead of a subagent, the compatibility skill runs the same repo-init preflight before analysis, planning, dispatch, or implementation.
 
 Claude Code multi-agent prompt example:
 
@@ -225,7 +237,7 @@ In Copilot CLI, the shell command is also available:
 copilot init
 ```
 
-Then start substantial work with **Senior Project Expert** / `senior-project-expert` in Claude Code. It should normalize useful facts into the target repository, create missing local scaffolds, and verify those files before substantive planning or implementation.
+Then start substantial work in Claude Code with `--agent senior-project-expert` or a project/user `agent` setting of `senior-project-expert`. It should normalize useful facts into the target repository, create missing local scaffolds, and verify those files before substantive planning or implementation.
 
 Target-local state belongs to the target repository:
 
@@ -262,7 +274,7 @@ Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.md`
 ## Verify This Package
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read(".claude/settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
 find claude-agents -maxdepth 1 -name '*.md' | sort

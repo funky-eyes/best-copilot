@@ -12,6 +12,7 @@ Shared contract for all `best-copilot` runtime adapters. Runtime files keep inco
 - PM/coordinator: load this + `senior-project-expert-workflow`.
 - Specialists: load this + matching role workflow skill before work.
 - Claude Code: invoke plugin skills with bare slash commands such as `/core-workflow-contract`; the command picker shows the plugin source, for example `(best-copilot)`, in the description. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
+- Claude Code session ownership: for reliable first-use gates, start the session with `--agent senior-project-expert` or set Claude Code's project/user `agent` setting to `senior-project-expert`. A plain-text `@agent-best-copilot:senior-project-expert` mention is not a boot guarantee; if the UI does not accept it as a subagent mention, this contract will not load and generic Explore can run before repo init gates.
 - Compatibility alias: if a runtime loads `/senior-project-expert` as a skill instead of the Senior Project Expert agent, treat that skill as a PM/coordinator entrypoint and run the mandatory init preflight before any substantive target-repository work.
 
 ## Source Priority
@@ -43,7 +44,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 | Runtime | Contract | Native Ask Mechanism |
 | --- | --- | --- |
 | Copilot CLI / VS Code Copilot | `agents/*.agent.md` + `skills/`; Copilot-only metadata in agent files. | VS Code: `vscode_askQuestions` (preferred), fallback `vscode/askQuestions`, `askQuestions`. CLI: `Asking user`. PM frontmatter declares these as availability signals. |
-| Claude Code | `claude-plugin/` manifest; skills as bare slash commands like `/<skill>` with `(best-copilot)` shown as the source; agents selected by the names shown in `/agents`; `model: inherit` by default. | Built-in `AskUserQuestion`. No declaration needed. |
+| Claude Code | `claude-plugin/` manifest; skills as bare slash commands like `/<skill>` with `(best-copilot)` shown as the source; agents selected by the names shown in `/agents`; use `--agent senior-project-expert` or the Claude `agent` setting for a Senior-owned session; `model: inherit` by default. | Built-in `AskUserQuestion`. No declaration needed. |
 | Other runtimes | Map contract to local tools. | Check runtime tool inventory. |
 
 ## Skill Loading Guarantees

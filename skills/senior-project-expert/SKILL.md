@@ -5,7 +5,7 @@ description: "Compatibility entrypoint for runtimes that resolve the Senior Proj
 
 # Senior Project Expert Compatibility Skill
 
-This skill is a compatibility alias, not a second role definition. Use it when a runtime tries to load the Senior Project Expert request as a skill, for example `Skill(senior-project-expert)` or a legacy log such as `Skill(best-copilot:senior-project-expert)`.
+This skill is a compatibility alias, not a second role definition. Use it when a runtime actually loads the Senior Project Expert request as a skill, for example `Skill(senior-project-expert)` or a legacy log such as `Skill(best-copilot:senior-project-expert)`. In Claude Code, the reliable whole-session entry is `--agent senior-project-expert` or the Claude `agent` setting; a prompt-only `@agent-best-copilot:senior-project-expert` string is not enough to load this skill.
 
 ## Mandatory Boot Sequence
 
@@ -28,9 +28,11 @@ After the boot sequence succeeds, continue exactly as Senior Project Expert: fre
 
 ## Eval Prompts
 
-- Prompt: `@agent-best-copilot:senior-project-expert Analyze this OAuth2 server and plan OIDC support.`
-  - Expected: if the runtime resolves the name as `Skill(senior-project-expert)` or logs a legacy qualified skill name, it still starts with `INIT_GATE`, runs `repo-init-scan` when the sentinel is absent or stale, and does not analyze OAuth2/OIDC code until `next_task_ready: yes`.
+- Prompt: launch Claude Code with `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`, then ask `Analyze this OAuth2 server and plan OIDC support.`
+  - Expected: uses the Senior Project Expert subagent path and starts with `INIT_GATE`, runs `repo-init-scan` when the sentinel is absent or stale, and does not analyze OAuth2/OIDC code until `next_task_ready: yes`.
 - Prompt: `/senior-project-expert Review the architecture for a Spring Boot auth service upgrade.`
   - Expected: loads this compatibility entrypoint, invokes `core-workflow-contract` and `senior-project-expert-workflow`, performs the init preflight, then classifies the request as full/design-review and routes named lanes where available.
 - Prompt: `Use senior-project-expert as lead for an agent team.`
   - Expected: prefers the subagent path when available; if only the skill path loads, reports the compatibility path and still enforces the init preflight before PM fan-out.
+- Failure-mode prompt: `@agent-best-copilot:senior-project-expert Analyze this OAuth2 server and plan OIDC support.`
+  - Expected: no compatibility guarantee unless the runtime explicitly accepts it as a subagent mention or logs a real `Skill(senior-project-expert)` load. Documentation must steer Claude Code users to `--agent senior-project-expert` or the Claude `agent` setting for first-use gates.
