@@ -9,7 +9,7 @@
 [![skills](https://img.shields.io/badge/skills-39-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
-![best-copilot hero](assets/best-copilot-hero.png)
+![best-copilot hero](assets/best-copilot-hero-cn.png)
 
 `best-copilot` 是一套面向 Copilot CLI 和 Claude Code 的可安装 agent 团队，服务严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
 
