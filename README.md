@@ -23,7 +23,7 @@ Large AI coding tasks fail when they jump straight from a vague request to a pat
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
 - **Thirty-nine skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, workflow evolution, and a Senior Project Expert compatibility entrypoint are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
-- **Evidence-first closure**: “done” requires command output, static checks, browser evidence, or an explicit blocker.
+- **Evidence-first closure**: "done" requires command output, static checks, browser evidence, or an explicit blocker.
 
 ## Install
 
@@ -84,7 +84,7 @@ After installing the plugin, the same session entry can usually be shortened to:
 claude --agent senior-project-expert
 ```
 
-For multi-agent teams, enable Claude Code agent teams before launch. Agent teams are experimental in Claude Code and require Claude Code v2.1.32 or later:
+The default multi-agent flow uses the PM main session plus Agent tool subagents; it does not require experimental Agent Teams. Enable Agent Teams only when you explicitly want Claude Code's experimental shared team runtime:
 
 ```bash
 CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
@@ -94,46 +94,109 @@ Claude Code discovers:
 
 - marketplace metadata from [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
 - plugin metadata from [claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
-- shared skills from [skills/](skills/) as bare slash commands such as `/repo-init-gate`; the picker shows `(best-copilot)` in the description
+- shared skills from [skills/](skills/) as namespaced slash commands such as `/best-copilot:repo-init-gate`; if the picker inserts another displayed plugin form, use that exact value
 - Claude-compatible subagents from [claude-agents/](claude-agents/)
-- session agent selection through `--agent senior-project-expert` or Claude Code's project/user `agent` setting; use the names shown by `/agents`, without the `best-copilot:` prefix
+- session PM selection through `--agent senior-project-expert` or Claude Code's project/user `agent` setting; `/agents` and `@` typeahead show plugin subagents under scoped names such as `best-copilot:senior-project-expert`, which should be used for manual `@` mentions or explicit Agent-tool dispatch
 
 After local edits or plugin updates, run `/reload-plugins` inside Claude Code or restart the session.
 
 ## Usage
 
-Start requirement orchestration with the coordinator agent in [agents/pm-coordinator.agent.md](agents/pm-coordinator.agent.md). This agent appears as **Senior Project Expert** and owns intent, scope, planning, dispatch, review fan-in, and closeout.
+Start requirement orchestration with the **Senior Project Expert** PM coordinator. It owns intent, scope, planning, dispatch, review fan-in, and closeout.
 
-- **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work.
+- **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work. Copilot uses `handoffs:` declarations for specialist routing.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
-- **Claude Code**: the stable entry is `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`, or `claude --agent senior-project-expert` after installation. Use `/agents` to inspect plugin agents and bare slash commands such as `/repo-init-gate` to invoke skills; Claude Code displays plugin names in the description/source column, not in the command name.
+- **Claude Code**: the PM is the main session, dispatching to specialists via the **Agent tool**.
 
-You can also invoke via `@best-copilot:senior-project-expert` when Claude Code accepts it as a subagent mention. If the UI treats it as plain text instead, fall back to `--agent senior-project-expert` or the Claude `agent` setting for reliable first-use gates. If Claude Code resolves the Senior Project Expert request as `Skill(senior-project-expert)` instead of a subagent, the compatibility skill runs the same repo-init preflight before analysis, planning, dispatch, or implementation.
+### Claude Code Entry Points
 
-Claude Code multi-agent prompt example:
+```bash
+# Recommended: explicit PM agent
+claude --agent senior-project-expert
+# If Claude reports an agent-name collision, use:
+# claude --agent best-copilot:senior-project-expert
 
-```text
-Create an agent team for this task. Use senior-project-expert as the lead.
-The lead must run /repo-init-gate before spawning teammates,
-then /repo-init-scan only if the gate fails, and pass the
-INIT_GATE / INIT_SCAN evidence in every teammate packet.
-Spawn teammates using technical-architect, developer,
-quality-assurance-expert, and security-reviewer
-where their scopes apply. Keep write sets non-overlapping,
-prevent self-review, and report command evidence before closeout.
-For each teammate, invoke /core-workflow-contract plus its
-matching role workflow skill, or include the minimal role checklist fallback.
+# Method 2: set default agent via .claude/settings.json (no need to specify each time)
+# Add to target repo's .claude/settings.json:
+# { "agent": "senior-project-expert", "worktree": { "baseRef": "head" } }
+
+# Local plugin development
+claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
 ```
 
-Claude Code can match the Copilot-style multi-agent workflow through plugin agents, skills, and agent teams. It does not reproduce Copilot's cross-provider model routing: Claude adapters use `model: inherit`, so choose the Claude model for the session with `/model`, `--model`, or your normal Claude Code settings.
+### How Claude Code Multi-Agent Works
+
+The PM (`senior-project-expert`) as the main session receives user requirements and then:
+
+1. Runs `/best-copilot:repo-init-gate` for initialization preflight
+2. Analyzes intent, classifies work mode (micro/standard/full), freezes the dispatch packet
+3. Spawns specialist subagents via the **Agent tool** using the scoped names shown by `/agents` (e.g., `best-copilot:technical-architect`, `best-copilot:developer`)
+4. Chooses background execution only for independent research/read-only review when permissions are already granted
+5. Runs implementation, fixes, spec/memory writes, and permission-gated verification foreground by default
+6. Uses `isolation: "worktree"` for implementation tasks that might conflict, then collects the worktree path, branch, changed files, and verification evidence
+7. Performs `/best-copilot:development-branch-closeout` or an equivalent keep / merge / PR / discard decision before claiming isolated worktree changes have landed
+8. Collects results from all subagents, performs fan-in arbitration
+9. Calls `/best-copilot:verification-before-completion` before final delivery
+
+Available plugin subagents appear scoped in Claude Code: `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, `best-copilot:root-cause-fixer`.
+
+Claude adapters use `model: inherit`, so the actual model is controlled by the current Claude Code session's `/model`, `--model`, or user configuration. It does not reproduce Copilot's cross-provider model routing.
 
 ## Runtime Adapter Architecture
 
-Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, `model: inherit`, read-only restrictions, and the agent-team rule that `skills` frontmatter is not applied to teammates.
+### Three-Layer Isolation Principle
+
+```
+                    ┌─────────────────────────────────┐
+                    │   Shared Contract Layer          │
+                    │   core-workflow-contract         │
+                    │   + role-*-workflow per role      │
+                    └──────────────┬──────────────────┘
+                                   │
+                  ┌────────────────┴────────────────┐
+                  │                                  │
+        ┌─────────▼──────────┐          ┌────────────▼─────────┐
+        │  Copilot CLI Adapter│          │  Claude Code Adapter  │
+        │                    │          │                       │
+        │  agents/*.agent.md │          │  claude-agents/*.md   │
+        │  model: GPT-5.4 etc│          │  model: inherit       │
+        │  handoffs: declares│          │  Agent tool dispatch  │
+        │  vscode_askQ...    │          │  AskUserQuestion      │
+        │                    │          │                       │
+        │  reads skills/     │          │  claude-plugin/       │
+        │  directly          │          │    agents -> symlink  │
+        │                    │          │    skills -> symlink  │
+        └────────────────────┘          └───────────────────────┘
+```
+
+Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, `model: inherit`, read-only restrictions, `isolation: worktree`, and PM-owned foreground/background dispatch policy.
 
 This keeps shared behavior, role-specific behavior, and incompatible runtime metadata isolated while requiring every agent to load both the shared contract and its role workflow.
 
+### Skill Loading Rules
+
+| Scenario | Behavior |
+|----------|----------|
+| Claude PM main session | PM's `skills:` frontmatter declarative preloading |
+| Claude subagent (PM spawn) | Subagent loads from its own `skills:` frontmatter; PM must include task context and required skills in spawn prompt |
+| Claude base session | Agent's `skills:` not activated, must call manually |
+| Copilot CLI | Body reference is not mechanical preload, packet must include minimal checklist |
+
 Claude agent frontmatter normally preloads only `core-workflow-contract` and the matching role workflow skill. Senior Project Expert also preloads `repo-init-gate` and `repo-init-scan` because the init preflight is a mandatory boot gate. Other focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
+
+### Dual-Runtime Comparison
+
+| Dimension | Copilot CLI | Claude Code |
+|-----------|-------------|-------------|
+| Entry agent | `agents/pm-coordinator.agent.md` | `claude-agents/senior-project-expert.md` (via `--agent` or `.claude/settings.json`) |
+| Model specification | Concrete names like `GPT-5.4 (copilot)` | `model: inherit` (user-configured) |
+| Specialist dispatch | `handoffs:` declarations + `agent` tool | PM main session spawns via **Agent tool** |
+| Parallel execution | Handoff declarations handle automatically | PM chooses background only for safe independent research/review |
+| File isolation | Copilot built-in | `isolation: "worktree"` plus PM closeout |
+| User interaction | `vscode_askQuestions` / `Asking user` | Built-in `AskUserQuestion` |
+| Skill discovery | Directly reads root `skills/` | `claude-plugin/skills -> ../skills` symlink |
+| Agent discovery | Directly reads root `agents/` | `claude-plugin/agents -> ../claude-agents` symlink |
+| Cross-model routing | Supported (GPT / Gemini / Claude mixed) | Claude models only |
 
 Copilot handoffs are fail-closed: each PM handoff prompt requires `core-workflow-contract` plus the target role workflow skill. If the runtime cannot load those skills, the handoff includes a minimal role checklist fallback; without either, the specialist returns `NEEDS_CONTEXT missing_required_skill`.
 
@@ -182,22 +245,150 @@ best-copilot
     └── plugin/
 ```
 
-## Workflow
+## Core Workflow
 
-```text
-User request
-  -> init or repo fact check
-  -> Senior Project Expert freezes scope
-  -> Technical Architect SDD brainstorming for large ambiguous work
-  -> Developer + QA design review, plus Frontend Designer when UI is involved
-  -> parallel-ready requirements / design / tasks when risk is non-trivial
-  -> SDD-reviewed, TDD-oriented specialist implementation
-  -> cross-author review
-  -> QA / security / frontend verification
-  -> closeout with evidence and resume point
+Every task passes through an observable stage chain visible in the transcript:
+
+```
+INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELECTION
+  → [ARCHITECT_SDD if full/ambiguous/high-risk] → REVIEW_OR_DISPATCH
+  → FAN_IN_ARBITRATION → NEXT_GATE
 ```
 
-For small scoped edits, the flow stays light. For cross-module work, public contracts, dependencies, auth, release surfaces, frontend experience, or ambiguous product direction, the heavier gates are intentional.
+### Stage 1: Init Gate (Mandatory Preflight)
+
+Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.5.0"`.
+
+```
+repo-init-gate
+  │
+  ├── version matches → ready → skip, continue to next stage
+  │
+  └── missing/mismatch/invalid → needs_init
+                           │
+                           ▼
+                    repo-init-scan
+                      │
+                      ├── Stage 1: repo-init-official
+                      │     Attempts /init or copilot init
+                      │     Output → project.instructions.md
+                      │
+                      └── Stage 2: repo-init-manual-fallback
+                            Manual scan → create scaffolds
+                            target-instructions-bootstrap
+                            target-memory-bootstrap
+                            target-spec-bootstrap
+                            │
+                            └── Write best-copilot.md sentinel
+```
+
+This is a **Fail-Closed** design: until init is complete, planning, implementation, or review is not permitted. The system returns `BLOCKED` rather than continuing from guesses. Only when `repo-init-scan` reports `next_task_ready: yes` is entry into subsequent stages permitted.
+
+### Stage 2: Task Classification
+
+The system classifies each task into three levels:
+
+| Level | Applicable Scenarios | Process Weight |
+|-------|---------------------|----------------|
+| `micro` | Tiny edits/checks, no public contract, security, or cross-module risk | Direct execution |
+| `standard` | Bounded file set, single owner surface | Lean packet, focused review |
+| `full` | Ambiguous, cross-module, public API/schema/auth/dependencies/CI/frontend experience | Full planning, SDD design review, fan-in gates |
+
+`task_type` tracks behavior independently of size: `implementation` (write/update), `design_review` (evaluate without implementing), `verification` (review risk/merge readiness), `fix` (bounded fix), `spec` (requirements/design/tasks, no production code).
+
+### Stage 3: Freeze Context (Six-Block Dispatch Packet)
+
+The PM freezes intent into a standard **six-block dispatch packet** (PM Dispatch Packet), the unified cross-role communication protocol:
+
+```markdown
+1. task_intent     — Goal, user path, intent summary, expected outcome, task_type, work_mode
+2. frozen_scope    — Scope, non-goals, files involved, files changed, priority/read files, dependencies
+3. fact_packet     — Authoritative repo facts, source references, reference files
+4. execution_contract — Constraints, acceptance checks, verification budget, context budget, stop conditions, forbidden methods
+5. review_state    — Subsequent scope, verified items, review lanes, ready artifacts
+6. output_contract — Required skills, role checklist fallback, required artifacts, next stage
+```
+
+**Why use packets?** Because each specialist receives a frozen, bounded context rather than the full conversation history. This prevents "one agent's guess becoming another agent's fact" while ensuring every dispatch is traceable and auditable.
+
+### Stage 4: SDD Design Gate
+
+For `full`, ambiguous, high-risk, public contract, auth/security, dependency, schema, or frontend experience tasks, implementation must first pass through a **Technical Architect-led SDD (Spec-Driven Design) brainstorming**:
+
+1. PM dispatches the design task to Technical Architect
+2. Technical Architect conducts SDD design brainstorming and self-reviews/fixes
+3. PM dispatches Developer + QA for a second-round design review
+4. When frontend UI is involved, Frontend Designer joins
+5. Blocking findings are sent back to Technical Architect for fixes; PM only re-runs affected review lanes
+6. Only designs that pass review are allowed to proceed to implementation
+
+For `standard` tasks, ARCHITECT_SDD is skipped with the reason recorded for efficiency — bounded, non-ambiguous standard work is not forced through architecture SDD.
+
+### Stage 5: Parallel Dispatch and Execution
+
+After passing design review, PM breaks work into parallelizable tasks via `writing-plans`, each with:
+
+- Independent file ownership and write sets (non-overlapping)
+- Clear dependency relationships and acceptance checks
+- Designated owner lanes and review lanes
+
+Dispatch execution proceeds through `subagent-driven-development` or `executing-plans`:
+
+```
+For each ready task:
+  1. Build fresh context packet (context-packet-fastpath)
+  2. Dispatch implementation to corresponding specialist
+     - Technical Architect: full-stack architecture/mainline slices
+     - Developer: bounded slices
+     - Frontend Designer: UI-owned slices
+     - Root Cause Fixer: confirmed failures
+  3. Request implementation evidence: files changed, tests/checks run, key output, risks
+  4. Stage 1 review: spec/task compliance (requirements, non-goals, file boundaries, acceptance checks)
+  5. Stage 2 review: code quality and release risk (maintainability, coupling, security/performance risk, dead code, test sufficiency)
+  6. Confirm findings enter fix cycle
+  7. PM may only mark task complete after passing all required reviews and verification
+```
+
+**Key rule: Stage 1 and Stage 2 reviewers cannot be the implementer.** Review lanes follow cross-review rules (see below).
+
+### Stage 6: Fan-In Arbitration
+
+PM adjudicates all specialist results by priority:
+
+1. **Blockers**: `BLOCKED`, `NEEDS_USER_INPUT`, invalid handback, repeated `NEEDS_CONTEXT`
+2. **Security**: security, privacy, data loss, auth, dependencies, release, destructive operation risks
+3. **Verification**: failed/missing verification, unproven completion claims
+4. **Scope**: spec mismatch, scope creep, write set overlap
+5. **Quality**: code quality, maintainability, performance, UX, accessibility, test sufficiency
+6. **Non-blocking**: follow-up notes
+
+When reviewers disagree, PM records `decision_provenance` (evidence, blocking status, next stage, residual risk). Unresolved conflicts do not allow fan-out or closeout.
+
+### Cross-Review Rules
+
+| Code Under Review | Reviewer |
+|-------------------|----------|
+| Developer code | Technical Architect |
+| Technical Architect code | Developer |
+| Developer/Technical Architect frontend code | Frontend Designer |
+| Frontend Designer code | Technical Architect |
+| All code (final) | QA (merge readiness) |
+| Security-sensitive surfaces | Security Reviewer (mandatory) |
+
+### Stage 7: Verification and Closeout
+
+Before closing, the system runs `verification-before-completion` final checks:
+
+- Requirements/user requests have been satisfied
+- Changes are bounded within task scope
+- No placeholders, dead references, stale names, or broken links
+- Tests/build/browser checks/static verification have been run (or explicitly reported as skipped)
+- Residual risks and next steps are clearly stated
+- Use Native Ask UI for final confirmation/continue (not a plain text summary)
+
+### Lean Path for Small Tasks
+
+For `micro` level tasks, the above flow stays lean — direct execution, skipping SDD design, parallel dispatch, and multi-round review. But even the smallest changes still require `verification-before-completion` checks before being marked done.
 
 ## Agent Team
 
@@ -211,6 +402,106 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 | Quality Assurance Expert | Functional verification, regression risk, code review, merge readiness after peer lanes | Security review and fixes |
 | Security Reviewer | Auth, permissions, sensitive data flow, dependencies, release-surface security | General functional QA |
 | Root Cause Fixer | Failure triage, minimal patching, regression proof | Speculation-driven refactors |
+
+## Specialist Communication Protocol
+
+### Specialist Ask Boundary
+
+All specialists (non-PM roles) **cannot directly ask the user questions**. This is a hard constraint:
+
+```
+Specialist needs information
+  │
+  ├── Missing context → return NEEDS_CONTEXT to PM
+  │                      Includes clarification_request + pm_action: "pm_clarify"
+  │
+  └── Needs user input → return NEEDS_USER_INPUT to PM
+                           Includes question, why_blocking, options,
+                           safe_default, resume_prompt_for_pm
+```
+
+Only the PM/Coordinator may use the Native Ask mechanism (Copilot: `vscode_askQuestions` / `Asking user`; Claude: `AskUserQuestion`) to question the user.
+
+### Native Ask Contract
+
+- Only top-level sessions or PM/Coordinators may use native asking
+- Each question must allow a free-form answer (fixed-choice UI must include "Custom answer")
+- Turns must not end with plain text summaries (when Native Ask UI is available)
+- If UI is unavailable and user selection is needed → report `BLOCKED missing_native_ask_ui`
+
+### Structured Specialist Handback
+
+Each specialist returns a standardized structured result:
+
+```markdown
+- task_id:                Task identifier
+- current_stage:          Current stage
+- status:                 DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT |
+                          NEEDS_USER_INPUT | BLOCKED
+- summary:                Completion summary
+- artifacts:              Artifacts (files, tests, evidence)
+- risks:                  Risks
+- uncovered_items:        Uncovered items
+- recommended_next_stage: Recommended next stage
+```
+
+## Memory and Spec System
+
+### Dual-Track Persistence
+
+`best-copilot` maintains two persistence systems in the target repository:
+
+```
+Target Repository
+├── spec/                          ← Spec: authoritative source for requirements/design/tasks
+│   ├── INDEX.md                   ← Spec routing table
+│   └── templates/                 ← Reusable templates
+│
+├── memories/repo/                 ← Memory: resume index
+│   ├── INDEX.md                   ← Memory routing table
+│   ├── current-workstreams.md     ← Currently active work
+│   ├── project-state.md           ← Project state snapshot
+│   ├── decisions.md               ← Decision records
+│   └── workflow-rules.md          ← Memory/spec coordination rules
+│
+├── .github/instructions/          ← Repository-level rules
+│   ├── project.instructions.md    ← Project facts (build/test/framework/entry)
+│   ├── must.instructions.md       ← Core rules
+│   └── skills-index.instructions.md ← Skill routing
+│
+└── best-copilot.md               ← Init sentinel (version: "0.5.0")
+```
+
+### Spec vs Memory Division
+
+| Dimension | Spec | Memory |
+|-----------|------|--------|
+| Authority | **Authoritative source** for requirements/design/tasks | **Resume index** — current focus, decisions, last verification, next actions |
+| Content | Requirement docs, design docs, task lists, acceptance checks | Workflow status, verified decisions, resume prompts, compressed facts |
+| Excludes | No logs, no status | No requirement specs, no design docs |
+| Coordination rules | — | Memory never overrides current repo files, command output, system instructions, or explicit user instructions |
+
+### Progressive Disclosure
+
+Memory uses **INDEX.md routing + on-demand loading** to control the token budget:
+
+```
+1. Read INDEX.md (routing table)
+2. If resuming active work, read current-workstreams.md
+3. Follow linked_spec and linked_memory
+4. Only load relevant sections of selected memory files
+5. Fall back to archive/logs only when source tracing is needed
+```
+
+Each memory file has a `load_tier` tag: `task-active` (loaded during active tasks), `task-reference` (loaded on demand for reference), `archive-reference` (loaded only during tracing).
+
+### Bidirectional Links for MEDIUM/LARGE Work
+
+Medium-to-large work establishes bidirectional links between spec and memory:
+
+- Each workflow in `current-workstreams.md` has `linked_spec` pointing to the corresponding spec
+- Each spec in `spec/INDEX.md` can back-reference related memory
+- EvolutionEvent records require all fields: signal, target, mutation, validation, rollback, status
 
 ## Skill Map
 
@@ -228,38 +519,33 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 
 ## First Use In A Target Repository
 
-Before the first meaningful task in a new repository, let the active runtime inspect the project:
+Initialization is **automatic** — there is no need to manually run `/init` or `copilot init`. When the PM agent starts, [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) automatically executes `repo-init-gate` → `repo-init-scan`, completing repo fact collection and scaffold creation.
 
-```text
-/init
-```
-
-In Copilot CLI, the shell command is also available:
+Just start the PM in Claude Code:
 
 ```bash
-copilot init
+claude --agent senior-project-expert
 ```
 
-Then start substantial work in Claude Code with `--agent senior-project-expert` or a project/user `agent` setting of `senior-project-expert`. It should normalize useful facts into the target repository, create missing local scaffolds, and verify those files before substantive planning or implementation.
-
-Target-local state belongs to the target repository:
+The initialization flow creates these target-local files:
 
 ```text
-.github/instructions/project.instructions.md
-.github/instructions/must.instructions.md
-.github/instructions/skills-index.instructions.md
-CLAUDE.md  # when Claude Code compatibility is needed
-memories/repo/INDEX.md
-memories/repo/current-workstreams.md
-spec/INDEX.md
-spec/templates/
+.github/instructions/project.instructions.md    ← Project facts (build/test/framework/entry)
+.github/instructions/must.instructions.md       ← Core rules
+.github/instructions/skills-index.instructions.md ← Skill routing
+CLAUDE.md                                        ← Claude Code compatibility (optional)
+memories/repo/INDEX.md                           ← Resume index routing table
+memories/repo/current-workstreams.md             ← Currently active work
+spec/INDEX.md                                    ← Spec routing table
+spec/templates/                                  ← Reusable templates
+best-copilot.md                                  ← Init sentinel (version: "0.5.0")
 ```
 
-If required facts or scaffolds cannot be created, the workflow should stop as `BLOCKED first_use_gate_incomplete` instead of continuing from guesses.
+If required facts or scaffolds cannot be created, the workflow stops as `BLOCKED first_use_gate_incomplete` — see [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) for the full explanation.
 
 ## Model Strategy
 
-The roles are not renamed copies of one generic assistant. Each agent declares a model in `agents/*.agent.md`, and the routing policy is part of the product:
+Each agent declares a model in `agents/*.agent.md`, and the routing policy is part of the product:
 
 | Agent | Model |
 | --- | --- |
@@ -274,6 +560,37 @@ The roles are not renamed copies of one generic assistant. Each agent declares a
 
 Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.md` preserve role separation and use `model: inherit` so the active Claude Code session controls the actual model.
 
+## Search Discipline
+
+The system follows strict priority when retrieving information to control token consumption and improve accuracy:
+
+```
+Explicit user path → changed files → frozen files_involved → repo index
+  → filename/glob → fixed-string rg -F → regex (last resort)
+```
+
+- Prefer `rg -F` fixed-string search for class names, methods, routes, config keys
+- Use regex only when truly ambiguous or when precise search fails, and record the reason
+- Avoid repo-wide regex; scope to the smallest directory; stop after two searches with no new signal
+- Before designing for concurrency/unfamiliar patterns/infrastructure, search for runtime/framework built-ins first (battle-tested → recent trends → first principles)
+
+## Anti-Rationalization Checks
+
+Before claiming "done", the system automatically checks these common self-deception patterns:
+
+| Excuse | Rebuttal |
+|--------|----------|
+| "We'll add tests later" | Testing is part of the task, not follow-up work |
+| "It works on my machine" | Show the verification command and its output |
+| "It's a small change" | Small changes still need bounded verification evidence |
+| "The spec says it's fine" | Cite the specific spec line, don't paraphrase |
+
+## Security Constraints
+
+- Do not store keys, tokens, credentials, PII, raw long logs, internal hosts, or sensitive paths in instructions, memory, spec, or task logs
+- Public API, schema, auth, dependencies, CI/CD, and release surfaces require blast-radius assessment
+- New behavior and bug fixes should add tests or minimal reproducible checks when practically feasible
+
 ## Verify This Package
 
 ```bash
@@ -286,14 +603,128 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-The Claude inventory should include `Agents (8)` with `senior-project-expert`, `technical-architect`, `developer`, `frontend-designer`, `quality-assurance-expert`, `security-reviewer`, `root-cause-fixer`, and `specification-writer`.
+The Claude inventory should include `Agents (8)`. In `/agents` Library and `@` typeahead, the plugin agents should appear scoped as `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, and `best-copilot:specification-writer`.
 
-## Evolution Rules
+## Self-Evolution Mechanism (Evolution Loop)
 
-`best-copilot` does not let agents rewrite themselves freely. Workflow changes should come from verified signals: failed commands, repeated review findings, user corrections, stale routing, or concrete installation/runtime drift.
+`best-copilot` is not a static tool — it can self-improve from execution processes. But evolution is not free rewriting; it is a **bounded, auditable, rollback-capable closed loop**.
 
-Accepted improvements should be small, reversible, and written to the owning surface: root `agents/`, root `skills/`, `.github/instructions/**`, or target-local `memories/repo/**` and `spec/**`.
+### Evolution Signal Sources
+
+The system produces evolution signals in these scenarios:
+
+| Signal Type | Example | Strength |
+|------------|---------|----------|
+| Repeated failures | A skill's trigger conditions always have false positives or false negatives | Strong |
+| Review patterns | The same code quality issues repeatedly appear in reviews | Medium-strong |
+| User corrections | User corrected an agent's erroneous behavior | Medium |
+| Stale triggers | A skill's description no longer matches actual usage | Medium |
+| Workflow friction | Blocking points or redundant steps that repeatedly appear in the process | Weak-medium |
+
+### Evolution Closed Loop
+
+```
+Execute task → produce signals (failures/corrections/friction)
+    │
+    ▼
+evolution-loop skill intervenes
+    │
+    ▼
+Select minimum improvement target
+(agent / skill / instruction / memory / spec template)
+    │
+    ▼
+Propose bounded mutation (Evolution Proposal)
+    │
+    ▼
+Validate (static check / eval prompt / review / command evidence)
+    │
+    ├── accepted → write to canonical root
+    │               agents/ / skills/ / .github/instructions/
+    │               / memories/repo/ / spec/
+    │
+    └── rejected → record rejection reason, keep original
+```
+
+Each accepted evolution is recorded as an EvolutionEvent:
+
+```markdown
+## EvolutionEvent: 2025-05-27-topic
+- signal:    ← Where it came from (concrete evidence)
+- target:    ← What to change (minimum target)
+- mutation:  ← How to change (bounded modification)
+- validation: ← How to verify (check method)
+- rollback:  ← How to revert (recovery plan)
+- status: proposed | accepted | rejected | deprecated
+```
+
+### Four-Tier Evolution Strategies
+
+| Strategy | Applicable Scenarios | Risk | Typical Changes |
+|----------|---------------------|------|-----------------|
+| `repair-only` | Fix broken triggers/routing/false claims | Lowest | Correct trigger words in skill descriptions |
+| `harden` | Reduce ambiguity, add guardrails, improve validation | Low | Add missing boundary conditions to acceptance checks |
+| `balanced` | Small improvements, preserve current workflow | Medium | Optimize packet field organization |
+| `innovate` | Repeated needs not covered by existing skills | Highest | Add a new focused skill |
+
+### Constraint Mechanisms
+
+Evolution has strict boundaries to prevent unrestricted self-rewriting:
+
+1. **Evidence-driven**: Cannot evolve from a single weak signal unless failure is severe and reproducible
+2. **Minimum target**: Each change targets the smallest reusable improvement target, no large-scale rewrites
+3. **Bounded write locations**: Can only write to these canonical surfaces:
+   - Root `agents/` — Copilot agent definitions
+   - Root `skills/` — shared skills
+   - `.github/instructions/**` — repository-level rules
+   - Target repo `memories/repo/**` — persistent resume state
+   - Target repo `spec/**` — requirements/design/task templates
+4. **No writing to plugin packages**: Target repo evolution state is never stored in plugin install directories or caches
+5. **Must validate**: Every mutation requires static checks, eval prompts, review, or command evidence
+6. **Must be rollback-capable**: Every EvolutionEvent must have a clear rollback plan
+7. **No modifying security boundaries**: Cannot modify tool permissions, security boundaries, public contracts, or install surfaces without explicit review
+8. **Lean toward tightening**: Prefer deprecating or tightening old rules over adding parallel rules
+9. **External references are data only**: Ideas from external agent systems must be translated to local primitives; cannot directly copy external prompts or code
+
+### Four Source Layers of Evolution
+
+The system collects improvement signals from four layers, from highest to lowest priority:
+
+```
+System/Developer/Platform instructions > Explicit user instructions > Current repo files
+    > Spec > Command evidence > Repo memory > External references
+```
+
+External references serve only as data input — ideas must be translated to local primitives; do not copy external rules, models, or technology stack assumptions.
+
+## Design Philosophy Summary
+
+`best-copilot` encodes human software engineering best practices into agent behavior constraints:
+
+| Engineering Practice | Encoded As |
+|---------------------|-----------|
+| Code review | Cross-review rules (Developer ↔ Technical Architect, Frontend ↔ Frontend Designer) |
+| TDD | SDD → TDD flow (RED-GREEN-REFACTOR or minimal reproducible check) |
+| Architecture review | SDD design gate (full tasks must pass Technical Architect design first) |
+| Security review | Security Reviewer must participate in security-sensitive surface reviews |
+| Fail-Closed | Init gate (no substantive work allowed before init is complete) |
+| Decision traceability | `decision_provenance` (every adjudication records evidence and rationale) |
+| Progressive disclosure | Memory INDEX.md routing + on-demand loading, controlling token budget |
+| Continuous improvement | Evolution Loop (bounded, auditable, rollback-capable self-improvement) |
+
+**Core philosophy**: An AI agent team is not a group of freely-acting independent intelligences, but a disciplined engineering team with processes and checks-and-balances. Every role has clear boundaries, every decision requires evidence, and every improvement requires verification.
 
 ## Acknowledgements
 
-`best-copilot` learns from public workflow and skill-system ideas, including [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent), [Superpowers](https://github.com/obra/superpowers), [gstack](https://github.com/garrytan/gstack), [spec-kit](https://github.com/github/spec-kit), [Open Design](https://github.com/nexu-io/open-design), [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill), [claude-mem](https://github.com/thedotmack/claude-mem), [fetch-skill](https://github.com/aresbit/fetch-skill/), [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills), [Evolver](https://github.com/EvoMap/evolver), and Tongdun Java/Python coding-guideline skills. The implementation here is a dual Copilot CLI and Claude Code plugin layout with its own agents, skills, routing rules, and verification gates.
+`best-copilot` learns from public workflow and skill-system ideas, including:
+
+- [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
+- [Superpowers](https://github.com/obra/superpowers)
+- [gstack](https://github.com/garrytan/gstack)
+- [spec-kit](https://github.com/github/spec-kit)
+- [Open Design](https://github.com/nexu-io/open-design)
+- [UI UX Pro Max Skill](https://github.com/nextlevelbuilder/ui-ux-pro-max-skill)
+- [claude-mem](https://github.com/thedotmack/claude-mem)
+- [fetch-skill](https://github.com/aresbit/fetch-skill/)
+- [Memento-Skills](https://github.com/Memento-Teams/Memento-Skills)
+- [Evolver](https://github.com/EvoMap/evolver)
