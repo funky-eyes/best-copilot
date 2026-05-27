@@ -11,7 +11,8 @@ Shared contract for all `best-copilot` runtime adapters. Runtime files keep inco
 
 - PM/coordinator: load this + `senior-project-expert-workflow`.
 - Specialists: load this + matching role workflow skill before work.
-- Claude Code: invoke as `/best-copilot:core-workflow-contract`. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
+- Claude Code: invoke plugin skills with bare slash commands such as `/core-workflow-contract`; the command picker shows the plugin source, for example `(best-copilot)`, in the description. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
+- Compatibility alias: if a runtime loads `/senior-project-expert` as a skill instead of the Senior Project Expert agent, treat that skill as a PM/coordinator entrypoint and run the mandatory init preflight before any substantive target-repository work.
 
 ## Source Priority
 
@@ -42,7 +43,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 | Runtime | Contract | Native Ask Mechanism |
 | --- | --- | --- |
 | Copilot CLI / VS Code Copilot | `agents/*.agent.md` + `skills/`; Copilot-only metadata in agent files. | VS Code: `vscode_askQuestions` (preferred), fallback `vscode/askQuestions`, `askQuestions`. CLI: `Asking user`. PM frontmatter declares these as availability signals. |
-| Claude Code | `claude-plugin/` manifest; skills as `/best-copilot:<skill>`, agents as scoped names; `model: inherit` by default. | Built-in `AskUserQuestion`. No declaration needed. |
+| Claude Code | `claude-plugin/` manifest; skills as bare slash commands like `/<skill>` with `(best-copilot)` shown as the source; agents selected by the names shown in `/agents`; `model: inherit` by default. | Built-in `AskUserQuestion`. No declaration needed. |
 | Other runtimes | Map contract to local tools. | Check runtime tool inventory. |
 
 ## Skill Loading Guarantees
@@ -50,11 +51,15 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 - Claude agent: `skills:` preloads listed skills.
 - Claude team teammate: `skills:` ignored — spawn prompt must name skills + minimal checklist, or return `NEEDS_CONTEXT missing_required_skill`.
 - Copilot CLI: body refs are not a mechanical preload — include minimal checklist in packet or return `NEEDS_CONTEXT missing_required_skill`.
+- `senior-project-expert` exists as a skill only to catch runtimes that resolve the Senior Project Expert request through the skill path. It must not bypass this contract, `senior-project-expert-workflow`, or the repo init preflight.
 
 ## Init And Fact Capture
 
 - Fail closed when repo facts or first-use scaffolds are missing. Allowed work: official init, bounded fact capture, target bootstrap only.
-- Invoke `repo-init-gate` first. Only invoke `repo-init-scan` when that gate fails or explicit reinitialization is requested. Continue only after `repo-init-scan` reports `next_task_ready: yes`; otherwise return its blocker.
+- Direct PM/coordinator/Senior Project Expert requests that analyze, plan, review, verify, or implement target-repository code start with an init preflight before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
+- The init preflight always invokes `repo-init-gate` and reads only the target root `best-copilot.md`. A matching current sentinel is the only normal reason to skip `repo-init-scan`.
+- Invoke `repo-init-scan` when the gate reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, or when explicit reinitialization/repair is requested. Continue only after `repo-init-scan` reports `next_task_ready: yes`; otherwise return its blocker.
+- If a runtime cannot invoke the gate skill mechanically, perform the gate's documented shallow sentinel read exactly, report `HARNESS_DEGRADED skill_invocation_unavailable`, and then apply the same scan-or-skip decision.
 - Required project fact file: target `.github/instructions/project.instructions.md` with build/test/check/dev, runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
 - Use active runtime `/init` when available. Normalize output into the project facts file. Command output without a verified facts file is `official_init_no_write`, not success.
 - Once facts are sufficient, do not rerun init. Create missing target-local scaffolds (`target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap`) when persistent recovery is needed. For Claude Code, create or verify a project `CLAUDE.md`.
@@ -83,7 +88,7 @@ For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask nat
 
 ## Default Flow
 
-1. Pass init/fact gate if needed (`repo-init-gate` → `repo-init-scan` only when that gate fails).
+1. Pass init/fact preflight for target-repository work (`repo-init-gate` → `repo-init-scan` only when that gate fails).
 2. Parse intent, success criteria, scope, non-goals, acceptance checks, verification budget, context budget, and stop conditions.
 3. For large ambiguous work, PM dispatches Technical Architect for SDD design brainstorming and self-review before other lanes review the plan (Developer, QA, Frontend Designer for user-visible surfaces).
 4. Use `writing-plans` for reviewed direction; require parallel-ready tasks with dependencies, owner lanes, reviewer lanes, write sets, and verification.

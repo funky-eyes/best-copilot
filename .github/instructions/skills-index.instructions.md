@@ -10,6 +10,7 @@ This file is only for discovery and routing. Match the current task to the index
 
 ## Initialization and Orchestration
 
+- `senior-project-expert`: compatibility skill for runtimes that resolve the Senior Project Expert request as a skill instead of the Senior Project Expert agent; it loads the PM workflow and runs the same mandatory init preflight before substantive target-repository work.
 - `repo-init-gate`: read only the target root `best-copilot.md` and decide whether the current init contract version is already satisfied.
 - `repo-init-scan`: heavy init/repair flow used only after `repo-init-gate` fails. Typical triggers are first use in a target repository, placeholder or stale project facts, missing or mismatched `best-copilot.md`, missing target-local scaffolds, or `/init` / `copilot init` output that still needs to be normalized into reusable repo facts.
 - `repo-init-official`: official `/init` or `copilot init` stage used inside `repo-init-scan` before manual fallback.
