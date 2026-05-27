@@ -237,13 +237,14 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - In Copilot CLI, plugin agents normally appear through `/agent`, and plugin skills appear through the runtime's skills interface.
 - In Claude Code, plugin skills are invoked as bare slash commands such as `/repo-init-gate`; the command picker shows the plugin source such as `(best-copilot)` in the description. Plugin subagents appear in `/agents`; use the agent names shown there, such as `technical-architect`. For a Senior-owned session, start with `--agent senior-project-expert` or set Claude's `agent` setting to `senior-project-expert`; do not use `best-copilot:` as part of the Claude Code agent or skill command name.
 - If Claude Code resolves the Senior Project Expert request through the skill path instead of the subagent path, the compatibility skill must run the same `repo-init-gate` / `repo-init-scan` preflight before substantive work.
-- When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed slash-command skill or include the needed checklist in the spawn prompt.
+- When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed slash-command skill or include the needed checklist in the spawn prompt, and must pass current `INIT_GATE` / `INIT_SCAN` evidence.
+- If any best-copilot specialist is invoked directly for target-repository work without a PM packet containing current `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` before broad search, generic Explore, planning, review, or implementation; run `repo-init-scan` only if the gate fails.
 
 ## Agents and Dispatch
 
 - The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code for medium or large work.
 - Parallel subtasks are allowed only when file write sets do not overlap.
-- Multi-agent dispatch should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`.
+- Multi-agent dispatch should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`, plus current `INIT_GATE` / `INIT_SCAN` evidence.
 - Delegated specialists do not ask users directly. If repository or task context is missing, return `NEEDS_CONTEXT`; if human input or approval is required, return `NEEDS_USER_INPUT` for PM/coordinator to ask.
 - Delegated handbacks must preserve shared field names such as `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`, and when blocked on missing context, `clarification_request` plus `pm_action: "pm_clarify"`.
 - For large ambiguous work, PM delegates SDD design brainstorming to Technical Architect first. Technical Architect self-reviews and repairs the design before PM asks Developer and Quality Assurance Expert for second-pass review; add Frontend Designer review for frontend/user-visible surfaces. Only a blocker-free reviewed design proceeds to implementation.
@@ -288,7 +289,7 @@ Read only the selected skill, not the whole skill tree.
 ## Planning And Execution
 
 - `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, dispatch packet shape, review/verification, memory/spec, and closeout rules.
-- Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
+- Role workflow skills: load one matching the active agent role together with `core-workflow-contract`; direct specialist use also needs current init-gate evidence or must run `repo-init-gate` first.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
   - `technical-architect-workflow`: full-stack architecture, SDD design brainstorming, service boundaries, data/API contracts, blast radius, mainline implementation, parallel decomposition, and cross-review.
@@ -319,7 +320,7 @@ Read only the selected skill, not the whole skill tree.
 
 ## Claude Code Skill Names
 
-After installing this plugin in Claude Code, invoke plugin skills as bare slash commands, for example `/repo-init-gate`, `/repo-init-scan`, `/structured-review`, and `/verification-before-completion`. The command picker shows `(best-copilot)` in the description column to identify the plugin source. For a Senior-owned session, start Claude Code with `--agent senior-project-expert` or set `.claude/settings.json` / user settings with `"agent": "senior-project-expert"`. Invoke plugin subagents through `/agents` using the displayed names, such as `senior-project-expert`. Do not rely on prompt text like `@agent-best-copilot:senior-project-expert` as a first-use gate; if Claude Code does not accept it as a subagent mention, plugin skills will not load before generic exploration. If the Senior Project Expert request is resolved as `Skill(senior-project-expert)`, use that compatibility skill only as a PM entrypoint; it must run the same init preflight before analysis, planning, dispatch, or implementation.
+After installing this plugin in Claude Code, invoke plugin skills as bare slash commands, for example `/repo-init-gate`, `/repo-init-scan`, `/structured-review`, and `/verification-before-completion`. The command picker shows `(best-copilot)` in the description column to identify the plugin source. For a Senior-owned session, start Claude Code with `--agent senior-project-expert` or set `.claude/settings.json` / user settings with `"agent": "senior-project-expert"`. Invoke plugin subagents through `/agents` using the displayed names, or via `@best-copilot:<agent-name>` (e.g., `@best-copilot:technical-architect`). For first-use init gates, prefer `--agent` or the `agent` setting over `@` mentions, since the UI may not accept `@` as a subagent invocation in all contexts. If the Senior Project Expert request is resolved as `Skill(senior-project-expert)`, use that compatibility skill only as a PM entrypoint; it must run the same init preflight before analysis, planning, dispatch, or implementation. If a specialist such as `technical-architect` or `developer` is invoked directly, it must receive current init evidence from PM or run `/repo-init-gate` itself before target-repository exploration.
 ```
 
 ## `AGENTS.md`
@@ -344,7 +345,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - When resuming multi-step work, read `memories/repo/INDEX.md`, then `current-workstreams.md`, then only linked spec or memory shards.
 - Do not treat plugin package state as active project state.
 - Detect the user's primary language and answer in that language unless the user asks otherwise.
-- When running under Claude Code, use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent teams with the displayed names such as `senior-project-expert`; for a Senior-owned session, use `--agent senior-project-expert` or the Claude `agent` setting. Do not rely on prompt text like `@agent-best-copilot:senior-project-expert` as a first-use gate. If the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
+- When running under Claude Code, use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or `@best-copilot:<agent-name>` (e.g., `@best-copilot:technical-architect`); for a Senior-owned session, use `--agent senior-project-expert` or the Claude `agent` setting. If the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight. Direct specialist use needs current init evidence or must run `/repo-init-gate` first.
 ```
 
 ## `CLAUDE.md`
@@ -361,7 +362,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - This file is the Claude Code adapter for the target repository. The imported `.github/instructions/**` files remain the shared source for repository facts, workflow gates, and skill routing.
 - System, platform, and explicit user instructions outrank imported repository files.
 - Stable Senior Project Expert session entry is `claude --agent senior-project-expert`, or `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert` for local plugin development.
-- Use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent-team names shown by Claude Code, such as `senior-project-expert`; do not rely on prompt text like `@agent-best-copilot:senior-project-expert` as a first-use gate. If the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
+- Use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or `@best-copilot:<agent-name>` (e.g., `@best-copilot:technical-architect`); for first-use init gates, prefer `--agent` or the `agent` setting. If the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight. Direct specialist use needs current init evidence or must run `/repo-init-gate` first.
 - Keep this file short. Add project facts to `.github/instructions/project.instructions.md`, durable recovery state to `memories/repo/**`, and task specs to `spec/**`.
 ```
 

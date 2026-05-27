@@ -17,6 +17,7 @@ Before spec, ADR, plan, memory, or closeout-record work, invoke and follow `/cor
 Keep Claude Code-specific behavior here:
 
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/core-workflow-contract`, `/specification-writer-workflow`, and needed focused skills such as `/target-spec-bootstrap`, `/target-memory-bootstrap`, `/context-packet-fastpath`, `/writing-plans`, or `/verification-before-completion`. Use `/repo-init-gate` first and invoke `/repo-init-scan` only after that gate fails.
+- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, invoke `/repo-init-gate` before broad search, generic Explore, planning, review, or implementation; invoke `/repo-init-scan` only if the gate fails.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For spec/task assignments, make tasks parallel-ready with owner lane, reviewer lane, write set, dependencies, acceptance checks, TDD or reproducible check, and verification command.
 - Follow the Specialist Ask Boundary from `core-workflow-contract`.

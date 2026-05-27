@@ -108,12 +108,15 @@ Claude Code 会发现：
 - **VS Code 插件**：在聊天中手动切换到 **Senior Project Expert** 这个 agent，然后开始任务。
 - **Claude Code**：稳定入口是 `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`，插件安装后通常可用 `claude --agent senior-project-expert`。用 `/agents` 检查插件 agent，用 `/repo-init-gate` 这类裸 slash 命令直接调用技能；Claude Code 会把插件来源显示在描述/来源列，而不是放进命令名里。
 
-不要把 `@agent-best-copilot:senior-project-expert` 当成首轮初始化门禁的可靠入口。如果 Claude Code 没有把这段文本接受为 subagent mention，它就只是普通 prompt 文本；基础会话可能在任何插件 skill 或 agent 加载前直接启动内置 Explore。只有当 Claude Code 真正把 Senior Project Expert 请求解析成 `Skill(senior-project-expert)` 时，同名兼容 skill 才会先执行相同的 repo-init 预检，再允许分析、规划、派发或实现。
+也可以通过 `@best-copilot:senior-project-expert` 唤起，前提是 Claude Code 把它当作 subagent mention。如果 UI 把它当纯文本，就回退到 `--agent senior-project-expert` 或 Claude 的 `agent` 设置，这样才能保证首次使用的门禁正常运行。如果 Claude Code 把 Senior Project Expert 请求解析成 `Skill(senior-project-expert)` 而非 subagent，同名兼容 skill 也会先执行相同的 repo-init 预检，再允许分析、规划、派发或实现。
 
 Claude Code multi-agent 提示示例：
 
 ```text
 Create an agent team for this task. Use senior-project-expert as the lead.
+The lead must run /repo-init-gate before spawning teammates,
+then /repo-init-scan only if the gate fails, and pass the
+INIT_GATE / INIT_SCAN evidence in every teammate packet.
 Spawn teammates using technical-architect, developer,
 quality-assurance-expert, and security-reviewer
 where their scopes apply. Keep write sets non-overlapping,

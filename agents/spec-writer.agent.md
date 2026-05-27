@@ -15,6 +15,7 @@ Before spec, ADR, plan, memory, or closeout-record work, read and follow `core-w
 Keep Copilot-specific behavior here:
 
 - Use Copilot read/search/edit/execute/todo tools as available.
+- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails.
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Write specs and memory into the target repository, never into the plugin package or plugin cache.
 - Do not write production code.

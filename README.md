@@ -108,12 +108,15 @@ Start requirement orchestration with the coordinator agent in [agents/pm-coordin
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
 - **Claude Code**: the stable entry is `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`, or `claude --agent senior-project-expert` after installation. Use `/agents` to inspect plugin agents and bare slash commands such as `/repo-init-gate` to invoke skills; Claude Code displays plugin names in the description/source column, not in the command name.
 
-Do not rely on typing `@agent-best-copilot:senior-project-expert` as the first request. If Claude Code does not accept that text as a subagent mention, it is just prompt text; the base session may launch built-in Explore workers before any plugin skill or agent loads. If Claude Code resolves the Senior Project Expert request as `Skill(senior-project-expert)` instead of a subagent, the compatibility skill runs the same repo-init preflight before analysis, planning, dispatch, or implementation.
+You can also invoke via `@best-copilot:senior-project-expert` when Claude Code accepts it as a subagent mention. If the UI treats it as plain text instead, fall back to `--agent senior-project-expert` or the Claude `agent` setting for reliable first-use gates. If Claude Code resolves the Senior Project Expert request as `Skill(senior-project-expert)` instead of a subagent, the compatibility skill runs the same repo-init preflight before analysis, planning, dispatch, or implementation.
 
 Claude Code multi-agent prompt example:
 
 ```text
 Create an agent team for this task. Use senior-project-expert as the lead.
+The lead must run /repo-init-gate before spawning teammates,
+then /repo-init-scan only if the gate fails, and pass the
+INIT_GATE / INIT_SCAN evidence in every teammate packet.
 Spawn teammates using technical-architect, developer,
 quality-assurance-expert, and security-reviewer
 where their scopes apply. Keep write sets non-overlapping,

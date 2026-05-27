@@ -12,8 +12,9 @@ Shared contract for all `best-copilot` runtime adapters. Runtime files keep inco
 - PM/coordinator: load this + `senior-project-expert-workflow`.
 - Specialists: load this + matching role workflow skill before work.
 - Claude Code: invoke plugin skills with bare slash commands such as `/core-workflow-contract`; the command picker shows the plugin source, for example `(best-copilot)`, in the description. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
-- Claude Code session ownership: for reliable first-use gates, start the session with `--agent senior-project-expert` or set Claude Code's project/user `agent` setting to `senior-project-expert`. A plain-text `@agent-best-copilot:senior-project-expert` mention is not a boot guarantee; if the UI does not accept it as a subagent mention, this contract will not load and generic Explore can run before repo init gates.
+- Claude Code session ownership: for reliable first-use gates, start the session with `--agent senior-project-expert` or set Claude Code's project/user `agent` setting to `senior-project-expert`. An `@best-copilot:senior-project-expert` mention works as a subagent invocation when the UI accepts it; if it is treated as plain text instead, the contract will not load and generic Explore can run before repo init gates. When in doubt, prefer the `--agent` flag or `agent` setting.
 - Compatibility alias: if a runtime loads `/senior-project-expert` as a skill instead of the Senior Project Expert agent, treat that skill as a PM/coordinator entrypoint and run the mandatory init preflight before any substantive target-repository work.
+- Direct specialist invocation: if any user-invocable best-copilot specialist is invoked directly for target-repository work without a PM packet that contains visible `INIT_GATE` / `INIT_SCAN` evidence, run the same `repo-init-gate` preflight before broad search, generic Explore, planning, review, or implementation.
 
 ## Source Priority
 
@@ -50,6 +51,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 ## Skill Loading Guarantees
 
 - Claude agent: `skills:` preloads listed skills.
+- Claude base session: agent `skills:` frontmatter is not active until that agent is actually selected; prompt text alone does not preload agent skills.
 - Claude team teammate: `skills:` ignored — spawn prompt must name skills + minimal checklist, or return `NEEDS_CONTEXT missing_required_skill`.
 - Copilot CLI: body refs are not a mechanical preload — include minimal checklist in packet or return `NEEDS_CONTEXT missing_required_skill`.
 - `senior-project-expert` exists as a skill only to catch runtimes that resolve the Senior Project Expert request through the skill path. It must not bypass this contract, `senior-project-expert-workflow`, or the repo init preflight.
@@ -57,7 +59,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 ## Init And Fact Capture
 
 - Fail closed when repo facts or first-use scaffolds are missing. Allowed work: official init, bounded fact capture, target bootstrap only.
-- Direct PM/coordinator/Senior Project Expert requests that analyze, plan, review, verify, or implement target-repository code start with an init preflight before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
+- Direct user-invoked best-copilot agents that analyze, plan, review, verify, or implement target-repository code start with an init preflight before classification, broad search, generic Explore workers, planning, dispatch, or implementation unless a PM dispatch packet already carries current `INIT_GATE` / `INIT_SCAN` evidence.
 - The init preflight always invokes `repo-init-gate` and reads only the target root `best-copilot.md`. A matching current sentinel is the only normal reason to skip `repo-init-scan`.
 - Invoke `repo-init-scan` when the gate reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, or when explicit reinitialization/repair is requested. Continue only after `repo-init-scan` reports `next_task_ready: yes`; otherwise return its blocker.
 - If a runtime cannot invoke the gate skill mechanically, perform the gate's documented shallow sentinel read exactly, report `HARNESS_DEGRADED skill_invocation_unavailable`, and then apply the same scan-or-skip decision.

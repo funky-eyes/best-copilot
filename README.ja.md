@@ -108,12 +108,15 @@ Claude Code は次を検出します：
 - **VS Code 拡張機能**：チャットのエージェントを手動で **Senior Project Expert** に切り替えてからタスクを開始します。
 - **Claude Code**：安定した入口は `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`、インストール後は通常 `claude --agent senior-project-expert` です。`/agents` で plugin agents を確認し、`/repo-init-gate` のような裸の slash command で skills を呼び出します。Claude Code は plugin source を説明/ソース列に表示し、コマンド名には入れません。
 
-`@agent-best-copilot:senior-project-expert` を初回 init gate の信頼できる入口として使わないでください。Claude Code がその文字列を subagent mention として受け入れない場合、それは単なる prompt text です。その場合、base session が plugin skill / agent を読み込む前に built-in Explore を起動することがあります。Senior Project Expert 要求が実際に `Skill(senior-project-expert)` として解決された場合のみ、互換 skill が同じ repo-init preflight を実行します。
+Claude Code が `@best-copilot:senior-project-expert` を subagent mention として受け入れる場合、これでも呼び出せます。UI がこれをプレーンテキストとして扱う場合は、`--agent senior-project-expert` または Claude の `agent` 設定にフォールバックしてください。Senior Project Expert 要求が `Skill(senior-project-expert)` として解決された場合、互換 skill が同じ repo-init preflight を実行します。
 
 Claude Code multi-agent プロンプト例：
 
 ```text
 Create an agent team for this task. Use senior-project-expert as the lead.
+The lead must run /repo-init-gate before spawning teammates,
+then /repo-init-scan only if the gate fails, and pass the
+INIT_GATE / INIT_SCAN evidence in every teammate packet.
 Spawn teammates using technical-architect, developer,
 quality-assurance-expert, and security-reviewer
 where their scopes apply. Keep write sets non-overlapping,

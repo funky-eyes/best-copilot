@@ -104,12 +104,15 @@ Claude Code는 다음을 발견합니다:
 - **VS Code 확장**: 채팅 에이전트를 **Senior Project Expert**로 수동 전환한 뒤 작업을 시작합니다.
 - **Claude Code**: 안정적인 진입점은 `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert`이며, 설치 후에는 보통 `claude --agent senior-project-expert`입니다. `/agents`로 plugin agents를 확인하고 `/repo-init-gate` 같은 prefix 없는 slash command로 skills를 호출하세요. Claude Code는 plugin source를 설명/소스 열에 표시하고 command 이름에는 넣지 않습니다.
 
-`@agent-best-copilot:senior-project-expert`를 첫 init gate의 신뢰 가능한 진입점으로 쓰지 마세요. Claude Code가 이 문자열을 subagent mention으로 받아들이지 않으면 단순 prompt text일 뿐이며, base session이 plugin skill / agent를 로드하기 전에 built-in Explore를 시작할 수 있습니다. Senior Project Expert 요청이 실제로 `Skill(senior-project-expert)`로 해석된 경우에만 호환 skill이 동일한 repo-init preflight를 실행합니다.
+Claude Code가 `@best-copilot:senior-project-expert`를 subagent mention으로 받아들이면 이것으로도 호출할 수 있습니다. UI가 이를 일반 텍스트로 처리하면 `--agent senior-project-expert` 또는 Claude의 `agent` 설정으로 폴백하세요. Senior Project Expert 요청이 `Skill(senior-project-expert)`로 해석되면 호환 skill이 동일한 repo-init preflight를 실행합니다.
 
 Claude Code multi-agent 프롬프트 예시:
 
 ```text
 Create an agent team for this task. Use senior-project-expert as the lead.
+The lead must run /repo-init-gate before spawning teammates,
+then /repo-init-scan only if the gate fails, and pass the
+INIT_GATE / INIT_SCAN evidence in every teammate packet.
 Spawn teammates using technical-architect, developer,
 quality-assurance-expert, and security-reviewer
 where their scopes apply. Keep write sets non-overlapping,

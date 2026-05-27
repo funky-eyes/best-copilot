@@ -17,6 +17,7 @@ Before root-cause analysis or patching, invoke and follow `/core-workflow-contra
 Keep Claude Code-specific behavior here:
 
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/core-workflow-contract`, `/root-cause-fixer-workflow`, and needed focused skills such as `/systematic-debugging`, `/root-cause-investigation`, `/test-driven-development`, `/change-verification`, or `/verification-before-completion`.
+- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, invoke `/repo-init-gate` before broad search, generic Explore, planning, review, or implementation; invoke `/repo-init-scan` only if the gate fails.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For fix assignments, state the concrete failing evidence, root cause, minimal patch, regression proof, and any residual uncertainty.
 - Follow the Specialist Ask Boundary from `core-workflow-contract`.

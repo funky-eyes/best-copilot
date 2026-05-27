@@ -17,6 +17,7 @@ Before frontend implementation or review, invoke and follow `/core-workflow-cont
 Keep Claude Code-specific behavior here:
 
 - When this agent runs as an agent-team teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/core-workflow-contract`, `/frontend-designer-workflow`, and needed focused skills such as `/frontend-design-guardrails`, `/web-experience-audit`, `/spec-execution-fastpath`, or `/verification-before-completion`.
+- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, invoke `/repo-init-gate` before broad search, generic Explore, planning, review, or implementation; invoke `/repo-init-scan` only if the gate fails.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For auth/OIDC frontend work, focus on login, consent, client/admin configuration, error states, redirect handling, accessibility, and browser-verifiable behavior.
 - Review frontend changes by Developer or Technical Architect when assigned; Frontend Designer-authored changes require Technical Architect review.

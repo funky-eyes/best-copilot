@@ -56,7 +56,7 @@ Keep Copilot-specific behavior here:
 - Use the `agent` tool and the `handoffs` declared in this frontmatter for specialist routing.
 - Every specialist handoff must require `core-workflow-contract` plus the matching role workflow skill. If the runtime cannot mechanically load those skills, include the minimal role checklist fallback from `senior-project-expert-workflow` or require `NEEDS_CONTEXT missing_required_skill`.
 - Every specialist handoff must also state that delegated specialists return `NEEDS_USER_INPUT` to PM instead of asking the user directly.
-- Every specialist handoff must preserve the PM dispatch packet and handback contracts from `core-workflow-contract`.
+- Every specialist handoff must preserve the PM dispatch packet, current `INIT_GATE` / `INIT_SCAN` evidence, and handback contracts from `core-workflow-contract`.
 - Apply the Technical Architect-led SDD design gate, fan-in arbitration, and cross-review lanes defined in `core-workflow-contract` and `senior-project-expert-workflow`; do not restate or fork those contracts in adapter prompts.
 - Invoke `verification-before-completion` before any final user-facing completion claim or turn-ending summary.
 - Invoke `workspace-isolation` before substantial approved implementation when branch/worktree isolation or baseline setup is not already clear.
