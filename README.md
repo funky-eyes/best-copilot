@@ -6,7 +6,7 @@ English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japa
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
-[![skills](https://img.shields.io/badge/skills-38-10b981)](skills/)
+[![skills](https://img.shields.io/badge/skills-39-10b981)](skills/)
 [![license](https://img.shields.io/badge/license-Apache--2.0-64748b)](LICENSE)
 
 ![best-copilot hero](assets/best-copilot-hero.png)
@@ -21,7 +21,7 @@ Large AI coding tasks fail when they jump straight from a vague request to a pat
 
 - **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable workflow signals.
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
-- **Thirty-eight skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, and workflow evolution are installable skills.
+- **Thirty-nine skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, workflow evolution, and a Senior Project Expert compatibility entrypoint are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
 - **Evidence-first closure**: “done” requires command output, static checks, browser evidence, or an explicit blocker.
 
@@ -82,7 +82,7 @@ Claude Code discovers:
 
 - marketplace metadata from [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
 - plugin metadata from [claude-plugin/.claude-plugin/plugin.json](claude-plugin/.claude-plugin/plugin.json)
-- shared skills from [skills/](skills/) as `/best-copilot:<skill-name>`
+- shared skills from [skills/](skills/) as bare slash commands such as `/repo-init-gate`; the picker shows `(best-copilot)` in the description
 - Claude-compatible subagents from [claude-agents/](claude-agents/)
 - default main agent from [settings.json](settings.json), currently `best-copilot:senior-project-expert`
 
@@ -94,17 +94,19 @@ Start requirement orchestration with the coordinator agent in [agents/pm-coordin
 
 - **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
-- **Claude Code**: start with `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`; the plugin default agent is `best-copilot:senior-project-expert`. Use `/agents` to inspect plugin agents and `/best-copilot:<skill-name>` to invoke a skill directly.
+- **Claude Code**: start with `claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin`; the plugin default agent setting is `best-copilot:senior-project-expert`, while the CLI normally displays agent and skill names without that prefix. Use `/agents` to inspect plugin agents and bare slash commands such as `/repo-init-gate` to invoke skills.
+
+If Claude Code resolves the Senior Project Expert request as `Skill(senior-project-expert)` instead of a subagent, the compatibility skill now runs the same repo-init preflight before analysis, planning, dispatch, or implementation. Prefer `/agents` or agent teams for the full Senior Project Expert subagent path.
 
 Claude Code multi-agent prompt example:
 
 ```text
-Create an agent team for this task. Use best-copilot:senior-project-expert as the lead.
-Spawn teammates using best-copilot:technical-architect, best-copilot:developer,
-best-copilot:quality-assurance-expert, and best-copilot:security-reviewer
+Create an agent team for this task. Use senior-project-expert as the lead.
+Spawn teammates using technical-architect, developer,
+quality-assurance-expert, and security-reviewer
 where their scopes apply. Keep write sets non-overlapping,
 prevent self-review, and report command evidence before closeout.
-For each teammate, invoke /best-copilot:core-workflow-contract plus its
+For each teammate, invoke /core-workflow-contract plus its
 matching role workflow skill, or include the minimal role checklist fallback.
 ```
 
@@ -112,11 +114,11 @@ Claude Code can match the Copilot-style multi-agent workflow through plugin agen
 
 ## Runtime Adapter Architecture
 
-Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): scoped plugin agent names, `model: inherit`, read-only restrictions, and the agent-team rule that `skills` frontmatter is not applied to teammates.
+Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, `model: inherit`, read-only restrictions, and the agent-team rule that `skills` frontmatter is not applied to teammates.
 
 This keeps shared behavior, role-specific behavior, and incompatible runtime metadata isolated while requiring every agent to load both the shared contract and its role workflow.
 
-Claude agent frontmatter preloads only `core-workflow-contract` and the matching role workflow skill. Focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
+Claude agent frontmatter normally preloads only `core-workflow-contract` and the matching role workflow skill. Senior Project Expert also preloads `repo-init-gate` and `repo-init-scan` because the init preflight is a mandatory boot gate. Other focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
 
 Copilot handoffs are fail-closed: each PM handoff prompt requires `core-workflow-contract` plus the target role workflow skill. If the runtime cannot load those skills, the handoff includes a minimal role checklist fallback; without either, the specialist returns `NEEDS_CONTEXT missing_required_skill`.
 
@@ -199,6 +201,7 @@ For small scoped edits, the flow stays light. For cross-module work, public cont
 
 | Area | Skills |
 | --- | --- |
+| Compatibility | `senior-project-expert` |
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-gate`, `repo-init-scan`, `repo-init-official`, `repo-init-manual-fallback`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
 | Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
@@ -222,7 +225,7 @@ In Copilot CLI, the shell command is also available:
 copilot init
 ```
 
-Then start substantial work with **Senior Project Expert** / `best-copilot:senior-project-expert`. It should normalize useful facts into the target repository, create missing local scaffolds, and verify those files before substantive planning or implementation.
+Then start substantial work with **Senior Project Expert** / `senior-project-expert` in Claude Code. It should normalize useful facts into the target repository, create missing local scaffolds, and verify those files before substantive planning or implementation.
 
 Target-local state belongs to the target repository:
 

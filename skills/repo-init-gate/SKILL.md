@@ -9,6 +9,7 @@ Use this tiny skill before loading `repo-init-scan`.
 
 ## Contract
 
+- This is the mandatory first observable preflight for Senior Project Expert target-repository requests. Run it before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
 - Read only the target root `best-copilot.md`.
 - Expected file content is exactly:
 
@@ -23,6 +24,7 @@ version: "0.5.0"
 - Do not read `.github/instructions/**`, `memories/repo/**`, `spec/**`, or runtime adapters here.
 - Explicit reinitialize/repair requests bypass the gate and run `repo-init-scan` directly.
 - `best-copilot.md` is written only by `repo-init-scan` after full verification.
+- If a runtime cannot mechanically invoke this skill, use the same shallow sentinel read as a degraded fallback and report `HARNESS_DEGRADED skill_invocation_unavailable`.
 
 ## Output
 

@@ -233,8 +233,9 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ## Runtime Notes
 
 - In Copilot CLI, plugin agents normally appear through `/agent`, and plugin skills appear through the runtime's skills interface.
-- In Claude Code, plugin skills are namespaced as `/best-copilot:<skill-name>` after installation, plugin subagents appear in `/agents`, and agent teams can reference plugin subagent types by scoped name such as `best-copilot:technical-architect`.
-- When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed namespaced skill or include the needed checklist in the spawn prompt.
+- In Claude Code, plugin skills are invoked as bare slash commands such as `/repo-init-gate`; the command picker shows the plugin source such as `(best-copilot)` in the description. Plugin subagents appear in `/agents`; use the agent names shown there, such as `technical-architect`.
+- If Claude Code resolves the Senior Project Expert request through the skill path instead of the subagent path, the compatibility skill must run the same `repo-init-gate` / `repo-init-scan` preflight before substantive work.
+- When Claude Code uses a subagent definition as an agent-team teammate, the subagent's `skills` frontmatter is not automatically applied. The lead must tell the teammate to invoke the needed slash-command skill or include the needed checklist in the spawn prompt.
 
 ## Agents and Dispatch
 
@@ -273,6 +274,7 @@ Read only the selected skill, not the whole skill tree.
 
 ## Initialization
 
+- `senior-project-expert`: compatibility skill used when a runtime resolves the Senior Project Expert request as a skill instead of the Senior Project Expert agent; it still runs the mandatory init preflight before substantive target-repository work.
 - `repo-init-gate`: read only the target root `best-copilot.md` and decide whether full init is needed.
 - `repo-init-scan`: use only after `repo-init-gate` fails; typical triggers are first substantial task, missing scaffolds, missing or placeholder `.github/instructions/project.instructions.md`, missing or mismatched `best-copilot.md`, or incomplete `/init` output.
 - `repo-init-official`: try official `/init` or `copilot init` and normalize the resulting project facts file.
@@ -315,7 +317,7 @@ Read only the selected skill, not the whole skill tree.
 
 ## Claude Code Skill Names
 
-After installing this plugin in Claude Code, invoke plugin skills as `/best-copilot:<skill-name>`, for example `/best-copilot:repo-init-gate`, `/best-copilot:repo-init-scan`, `/best-copilot:structured-review`, and `/best-copilot:verification-before-completion`. Invoke plugin subagents with scoped names such as `best-copilot:senior-project-expert`.
+After installing this plugin in Claude Code, invoke plugin skills as bare slash commands, for example `/repo-init-gate`, `/repo-init-scan`, `/structured-review`, and `/verification-before-completion`. The command picker shows `(best-copilot)` in the description column to identify the plugin source. Invoke plugin subagents through `/agents` using the displayed names, such as `senior-project-expert`. If the Senior Project Expert request is resolved as `Skill(senior-project-expert)`, use that compatibility skill only as a PM entrypoint; it must run the same init preflight before analysis, planning, dispatch, or implementation.
 ```
 
 ## `AGENTS.md`
@@ -340,7 +342,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - When resuming multi-step work, read `memories/repo/INDEX.md`, then `current-workstreams.md`, then only linked spec or memory shards.
 - Do not treat plugin package state as active project state.
 - Detect the user's primary language and answer in that language unless the user asks otherwise.
-- When running under Claude Code, use plugin skills as `/best-copilot:<skill-name>` and plugin subagents through `/agents` or agent teams with scoped names such as `best-copilot:senior-project-expert`.
+- When running under Claude Code, use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent teams with the displayed names such as `senior-project-expert`; if the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
 ```
 
 ## `CLAUDE.md`
@@ -356,7 +358,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 
 - This file is the Claude Code adapter for the target repository. The imported `.github/instructions/**` files remain the shared source for repository facts, workflow gates, and skill routing.
 - System, platform, and explicit user instructions outrank imported repository files.
-- Use plugin skills as `/best-copilot:<skill-name>` and plugin subagents through `/agents` or scoped agent-team names such as `best-copilot:senior-project-expert`.
+- Use plugin skills as bare slash commands such as `/repo-init-gate` and plugin subagents through `/agents` or agent-team names shown by Claude Code, such as `senior-project-expert`; if the Senior name is resolved as a skill, its compatibility skill still starts with the repo init preflight.
 - Keep this file short. Add project facts to `.github/instructions/project.instructions.md`, durable recovery state to `memories/repo/**`, and task specs to `spec/**`.
 ```
 
