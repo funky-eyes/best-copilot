@@ -22,13 +22,16 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 7. Require reviewed spec/design readiness before implementation.
 8. Dispatch with compact six-block packets that name both `core-workflow-contract` and the specialist's role workflow skill.
 9. Include current `INIT_GATE` / `INIT_SCAN` evidence in every specialist packet. If that evidence is absent, run `repo-init-gate` before dispatch and `repo-init-scan` only if the gate fails.
-10. For Claude Code agent-team teammates and any runtime without proven skill preloading, include a minimal role checklist in the spawn/handoff prompt and require `NEEDS_CONTEXT missing_required_skill` if the teammate cannot load or follow it.
-11. Every specialist packet must forbid direct user questions. When PM/coordinator is present, require `NEEDS_USER_INPUT` back to PM; otherwise require `BLOCKED missing_top_level_question` with the exact question the top-level session or PM/coordinator should ask.
-12. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
-13. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
-14. Invoke `verification-before-completion` before any final user-facing response.
-15. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names. Do not close on a prose-only summary.
-16. Close only after evidence is present or a blocker is explicitly stated.
+10. Before implementation, invoke `workspace-isolation` or record the active runtime's isolation policy in the PM packet. For Claude Code, prefer `worktree.baseRef: "head"` when target settings can be written safely, and preserve `workspace_path`, `branch_state`, `dirty_status`, `worktree_policy`, `isolation_status`, and `write_set`.
+11. For Claude Code, choose foreground/background at dispatch time. Background is only for independent research, planning, or read-only review when permissions are already granted or no prompt is expected. Implementation, fix, spec/memory writes, and permission-gated verification run foreground by default.
+12. For Claude Code Agent Teams teammates and any runtime without proven skill preloading, include a minimal role checklist in the spawn/handoff prompt and require `NEEDS_CONTEXT missing_required_skill` if the teammate cannot load or follow it.
+13. Every specialist packet must forbid direct user questions. When PM/coordinator is present, require `NEEDS_USER_INPUT` back to PM; otherwise require `BLOCKED missing_top_level_question` with the exact question the top-level session or PM/coordinator should ask.
+14. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
+15. If an isolated worktree lane changed files, fan in `worktree_path`, `branch_name`, `changed_files`, `commits`, and `verification_result`, then invoke `development-branch-closeout` or present the equivalent keep / merge / PR / discard decision before claiming the change landed.
+16. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
+17. Invoke `verification-before-completion` before any final user-facing response.
+18. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names. Do not close on a prose-only summary.
+19. Close only after evidence is present or a blocker is explicitly stated.
 
 ## Observable Harness Contract
 
@@ -38,6 +41,7 @@ When Senior Project Expert is invoked directly, the user must be able to see the
 - Generic exploration workers may collect file evidence, but they do not count as architecture, implementation, QA, security, or frontend review lanes. Named role lanes must be used for those responsibilities.
 - For large technical design questions, including "how should this OAuth2 project become OIDC + OAuth2", classify as `full` + `design_review`, dispatch Technical Architect first for SDD design brainstorming and self-review, then dispatch Developer and Quality Assurance Expert for second-pass review. Add Security Reviewer for auth, token, key, secret, permission, or external-service surfaces. Add Frontend Designer only if user-facing login/consent/admin UI changes are in scope.
 - If Claude Code cannot dispatch named plugin agents such as `technical-architect`, return `HARNESS_DEGRADED named_agent_dispatch_unavailable` and run only the minimal local checklist after the init preflight has passed. Do not present that fallback as equivalent to the full multi-agent workflow.
+- If Claude Code implementation uses isolated worktrees, `NEXT_GATE` must include `WORKTREE_CLOSEOUT` until PM has made a keep / merge / PR / discard decision. A PM answer that says implementation is complete while changed worktree files are only present outside the parent checkout is invalid.
 - A complete PM answer includes: classified scope, frozen packet summary, named specialist handbacks, blocking findings, PM fan-in decision, residual risk, and the next approval or implementation gate.
 
 ## PM Native Ask Trigger Gate
@@ -67,6 +71,16 @@ Every specialist packet should also require:
 
 ```text
 Consume the shared six-block PM dispatch packet, follow task_type and work_mode exactly, and return the full structured specialist handback required by core-workflow-contract in all cases. If status=NEEDS_CONTEXT, include `clarification_request` and `pm_action: "pm_clarify"` as required by core-workflow-contract before redispatch or clarification.
+```
+
+For Claude Code dispatch, also include:
+
+```text
+Foreground/background mode is chosen by PM. Do not assume background execution
+for implementation, fix, spec/memory writes, or permission-gated verification.
+If isolated worktree mode is used and you change files, return worktree_path,
+branch_name, changed_files, commits if any, verification_result, and whether the
+parent checkout still needs keep / merge / PR / discard closeout.
 ```
 
 ## Specialist Routing

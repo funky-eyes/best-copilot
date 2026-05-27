@@ -11,9 +11,9 @@ Shared contract for all `best-copilot` runtime adapters. Runtime files keep inco
 
 - PM/coordinator: load this + `senior-project-expert-workflow`.
 - Specialists: load this + matching role workflow skill before work.
-- Claude Code: invoke plugin skills with bare slash commands such as `/core-workflow-contract`; the command picker shows the plugin source, for example `(best-copilot)`, in the description. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
-- Claude Code session ownership: for reliable first-use gates, start the session with `--agent senior-project-expert` or set Claude Code's project/user `agent` setting to `senior-project-expert`. An `@best-copilot:senior-project-expert` mention works as a subagent invocation when the UI accepts it; if it is treated as plain text instead, the contract will not load and generic Explore can run before repo init gates. When in doubt, prefer the `--agent` flag or `agent` setting.
-- Compatibility alias: if a runtime loads `/senior-project-expert` as a skill instead of the Senior Project Expert agent, treat that skill as a PM/coordinator entrypoint and run the mandatory init preflight before any substantive target-repository work.
+- Claude Code: invoke plugin skills with namespaced slash commands such as `/best-copilot:core-workflow-contract`; if the command picker inserts another displayed form for the enabled plugin, use that exact picker value. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
+- Claude Code session ownership: for reliable first-use gates, start the session with `--agent senior-project-expert` or set Claude Code's project/user `agent` setting to `senior-project-expert`; if Claude reports an agent-name collision, use the scoped `best-copilot:senior-project-expert` form. `/agents` and `@` typeahead show plugin subagents under scoped names such as `best-copilot:senior-project-expert`; use the exact displayed scoped name for manual `@` mentions or explicit Agent-tool dispatch. Do not rely on a plain-text prompt mention as the only first-use gate.
+- Compatibility alias: if a runtime loads `/best-copilot:senior-project-expert` or legacy `/senior-project-expert` as a skill instead of the Senior Project Expert agent, treat that skill as a PM/coordinator entrypoint and run the mandatory init preflight before any substantive target-repository work.
 - Direct specialist invocation: if any user-invocable best-copilot specialist is invoked directly for target-repository work without a PM packet that contains visible `INIT_GATE` / `INIT_SCAN` evidence, run the same `repo-init-gate` preflight before broad search, generic Explore, planning, review, or implementation.
 
 ## Source Priority
@@ -33,7 +33,7 @@ System/developer/platform instructions > explicit user instructions > current re
 External agent systems are reference inputs. Translate them into local primitives:
 
 - intent/planning -> `brainstorming`, Technical Architect SDD, packet freeze, native ask, reviewed `writing-plans`
-- team/background work -> named role lanes, `dispatching-parallel-agents`, `subagent-driven-development`, non-overlapping writes, PM fan-in
+- team/background work -> named role lanes, `dispatching-parallel-agents`, `subagent-driven-development`, non-overlapping writes, PM-owned foreground/background choice, PM fan-in
 - precision search/edit safety -> CodeGraph or exposed structural tools, filename/fixed-string search, frozen scope, current reads, patch-context failure, verification
 - browser/design/QA -> `frontend-design-guardrails`, `web-experience-audit`, Frontend Designer, QA merge-readiness
 - learning/ship discipline -> target memory/spec, ready artifacts, checkpointed `executing-plans`, `development-branch-closeout`, `evolution-loop`
@@ -45,14 +45,15 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 | Runtime | Contract | Native Ask Mechanism |
 | --- | --- | --- |
 | Copilot CLI / VS Code Copilot | `agents/*.agent.md` + `skills/`; Copilot-only metadata in agent files. | VS Code: `vscode_askQuestions` (preferred), fallback `vscode/askQuestions`, `askQuestions`. CLI: `Asking user`. PM frontmatter declares these as availability signals. |
-| Claude Code | `claude-plugin/` manifest; skills as bare slash commands like `/<skill>` with `(best-copilot)` shown as the source; agents selected by the names shown in `/agents`; use `--agent senior-project-expert` or the Claude `agent` setting for a Senior-owned session; `model: inherit` by default. | Built-in `AskUserQuestion`. No declaration needed. |
+| Claude Code | `claude-plugin/` manifest; plugin skills as namespaced slash commands like `/best-copilot:<skill>` unless the picker inserts another displayed plugin form. PM is the main session (via `--agent senior-project-expert` or `.claude/settings.json` `"agent"` key; scoped `best-copilot:senior-project-expert` is valid when disambiguation is needed). PM dispatches specialists via the Agent tool using exact `/agents` names, which plugin agents display as scoped names such as `best-copilot:developer`. Background execution is an invocation-level PM choice for independent research/read-only review with pre-granted permissions; implementation/fix/spec writes run foreground by default so permission prompts can surface. Use `isolation: "worktree"` for file-conflict isolation, and PM owns the worktree fan-in plus `development-branch-closeout`. `model: inherit` by default. | Built-in `AskUserQuestion`. No declaration needed. |
 | Other runtimes | Map contract to local tools. | Check runtime tool inventory. |
 
 ## Skill Loading Guarantees
 
-- Claude agent: `skills:` preloads listed skills.
-- Claude base session: agent `skills:` frontmatter is not active until that agent is actually selected; prompt text alone does not preload agent skills.
-- Claude team teammate: `skills:` ignored — spawn prompt must name skills + minimal checklist, or return `NEEDS_CONTEXT missing_required_skill`.
+- Claude agent: `skills:` preloads listed skills when that agent is the active session.
+- Claude base session (no agent selected): agent `skills:` frontmatter is not active; prompt text alone does not preload agent skills.
+- Claude subagent (spawned via Agent tool): receives its own agent definition's `skills:` frontmatter. The spawn prompt should still name required skills explicitly as a fallback.
+- Claude Agent Teams teammate: can reference plugin subagent definitions, but teammate execution does not apply the definition's `skills:` field; the lead must name required skills or include checklist fallback in the spawn prompt.
 - Copilot CLI: body refs are not a mechanical preload — include minimal checklist in packet or return `NEEDS_CONTEXT missing_required_skill`.
 - `senior-project-expert` exists as a skill only to catch runtimes that resolve the Senior Project Expert request through the skill path. It must not bypass this contract, `senior-project-expert-workflow`, or the repo init preflight.
 
@@ -68,6 +69,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 - Once facts are sufficient, do not rerun init. Create missing target-local scaffolds (`target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap`) when persistent recovery is needed. For Claude Code, create or verify a project `CLAUDE.md`.
 - Store instructions, memory, and spec in the target repository, never in the plugin package/cache. Mark unknowns explicitly.
 - If required target paths cannot be verified, return `BLOCKED first_use_gate_incomplete`.
+- For Claude Code target use, prefer target `.claude/settings.json` with `"agent": "senior-project-expert"` and `"worktree": {"baseRef": "head"}` when safe to write. `baseRef: "head"` keeps isolated subagents aligned with the current branch HEAD instead of silently starting from the default branch.
 
 ## Work Modes
 
@@ -80,6 +82,15 @@ Classify every task before broad context loading:
 `task_type` tracks behavior separately from size: `implementation` (write/update), `design_review` (assess without implementing), `verification` (review risk, confirm merge readiness), `fix` (bounded repair), `spec` (requirements, design, tasks, ADRs — no production code).
 
 For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when a missing answer changes the route.
+
+## Claude Background And Worktree Policy
+
+- PM/coordinator chooses foreground versus background at dispatch time. Do not rely on Claude agent frontmatter to force background execution for roles that may edit files, run permission-gated commands, or ask blocking questions.
+- Background lanes are limited to independent research, planning, or read-only review when required permissions are already granted or no prompt is expected. If a background lane reports permission denial, retry that lane foreground or return the blocker to PM.
+- Implementation, fix, spec/memory writes, and verification that may need new tool approval run foreground by default.
+- For isolated implementation in Claude Code, PM records `workspace_path`, `branch_state`, `dirty_status`, `worktree_policy`, `isolation_status`, and non-overlapping `write_set` in the dispatch packet.
+- Any specialist that changes files in an isolated worktree must return `worktree_path`, `branch_name`, `changed_files`, `commits`, `verification_result`, and `merge_or_keep_note`.
+- PM must not claim isolated worktree changes have landed in the parent checkout until `development-branch-closeout` or an equivalent native keep / merge / PR / discard decision has completed.
 
 ## Search Discipline
 
