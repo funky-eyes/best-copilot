@@ -52,8 +52,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 
 - Claude agent: `skills:` preloads listed skills when that agent is the active session.
 - Claude base session (no agent selected): agent `skills:` frontmatter is not active; prompt text alone does not preload agent skills.
-- Claude subagent (spawned via Agent tool): receives its own agent definition's `skills:` frontmatter. The spawn prompt should still name required skills explicitly as a fallback.
-- Claude Agent Teams teammate: can reference plugin subagent definitions, but teammate execution does not apply the definition's `skills:` field; the lead must name required skills or include checklist fallback in the spawn prompt.
+- Claude subagent (spawned via Agent tool): receives its own agent definition's `skills:` frontmatter. The PM spawn prompt should still name required skills explicitly as a fallback.
 - Copilot CLI: body refs are not a mechanical preload — include minimal checklist in packet or return `NEEDS_CONTEXT missing_required_skill`.
 - `senior-project-expert` exists as a skill only to catch runtimes that resolve the Senior Project Expert request through the skill path. It must not bypass this contract, `senior-project-expert-workflow`, or the repo init preflight.
 
