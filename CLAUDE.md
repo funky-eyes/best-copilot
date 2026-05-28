@@ -47,7 +47,7 @@ Senior Project Expert owns orchestration (intent, scope, dispatch, fan-in, close
 
 ### Init Gate (mandatory preflight)
 
-Before any substantive target-repository work: `repo-init-gate` reads the target root `best-copilot.md` sentinel. If frontmatter `version: "0.5.0"` matches, skip `repo-init-scan`. Otherwise run `repo-init-scan` which orchestrates official init (`/init` or `copilot init`), normalizes facts into `.github/instructions/project.instructions.md`, and bootstraps missing scaffolds. Work is fail-closed until init is verified.
+Before any substantive target-repository work: `repo-init-gate` reads the target root `best-copilot.md` sentinel. If frontmatter `version: "0.5.1"` matches, skip `repo-init-scan`. Otherwise run `repo-init-scan` which orchestrates official init (`/init` or `copilot init`), normalizes facts into `.github/instructions/project.instructions.md`, and bootstraps missing scaffolds. Work is fail-closed until init is verified.
 
 ## Editing Conventions
 
@@ -62,6 +62,6 @@ When installed in another repository, persistent state goes to that target repo 
 - `.github/instructions/project.instructions.md` — project facts
 - `memories/repo/**` — persistent task recovery
 - `spec/**` — requirements, design, tasks
-- `best-copilot.md` — init sentinel (frontmatter `version: "0.5.0"`)
+- `best-copilot.md` — init sentinel (frontmatter `version: "0.5.1"`)
 
 Bootstrap skills (`target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap`) create these scaffolds on first use.

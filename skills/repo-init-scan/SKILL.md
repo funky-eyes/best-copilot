@@ -16,7 +16,7 @@ Use this thin orchestrator when the repository needs full init or scaffold repai
 
 ## Boundary
 
-- This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.5.0`.
+- This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.5.1`.
 
 ## Stage Split
 
@@ -33,7 +33,7 @@ Use this thin orchestrator when the repository needs full init or scaffold repai
 3. Run `repo-init-manual-fallback` after the official stage:
    - On official success, use it to verify scaffolds, repair any remaining gaps, and rewrite `best-copilot.md`.
    - On official unavailability, no-write, or incomplete output, use it to do the bounded manual repair and then rewrite `best-copilot.md`.
-4. Stop only when the target repository has a verified `.github/instructions/project.instructions.md`, all required scaffolds, and a rewritten `best-copilot.md` sentinel for version `0.5.0`.
+4. Stop only when the target repository has a verified `.github/instructions/project.instructions.md`, all required scaffolds, and a rewritten `best-copilot.md` sentinel for version `0.5.1`.
 5. If either stage cannot complete its verification barrier, return `BLOCKED` instead of continuing to the user's substantive task.
 
 ## Output

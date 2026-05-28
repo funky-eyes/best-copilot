@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | 한국어 | [日本語](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.5.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -261,7 +261,7 @@ INIT_GATE → [필요시 INIT_SCAN] → CLASSIFY → FREEZE_PACKET → LANE_SELE
 
 ### 단계 1: Init 게이트 (필수 프리체크)
 
-대상 저장소에서 실질적인 작업을 하기 전, 시스템은 먼저 `repo-init-gate`를 실행합니다 — 대상 저장소 루트의 `best-copilot.md`만 읽어서 frontmatter의 `version`이 현재 계약 버전 `"0.5.0"`과 일치하는지 확인합니다.
+대상 저장소에서 실질적인 작업을 하기 전, 시스템은 먼저 `repo-init-gate`를 실행합니다 — 대상 저장소 루트의 `best-copilot.md`만 읽어서 frontmatter의 `version`이 현재 계약 버전 `"0.5.1"`과 일치하는지 확인합니다.
 
 ```
 repo-init-gate
@@ -473,7 +473,7 @@ PM/코디네이터만 Native Ask 메커니즘(Copilot: `vscode_askQuestions` / `
 │   ├── must.instructions.md       ← 핵심 규칙
 │   └── skills-index.instructions.md ← 스킬 라우팅
 │
-└── best-copilot.md               ← Init sentinel (version: "0.5.0")
+└── best-copilot.md               ← Init sentinel (version: "0.5.1")
 ```
 
 ### Spec vs Memory 분업
@@ -542,7 +542,7 @@ memories/repo/INDEX.md                           ← 복구 인덱스 라우팅 
 memories/repo/current-workstreams.md             ← 현재 활성 작업
 spec/INDEX.md                                    ← 스펙 라우팅 테이블
 spec/templates/                                  ← 재사용 가능한 템플릿
-best-copilot.md                                  ← Init sentinel (version: "0.5.0")
+best-copilot.md                                  ← Init sentinel (version: "0.5.1")
 ```
 
 필요한 사실이나 스캐폴드를 생성할 수 없는 경우, 추측에 기반한 계속 대신 `BLOCKED first_use_gate_incomplete`로 중지합니다 — 전체 설명은 [핵심 워크플로 Stage 1](#단계-1-init-게이트-필수-프리체크)을 참조하세요.

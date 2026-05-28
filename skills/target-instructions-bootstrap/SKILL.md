@@ -24,7 +24,7 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 
 ```md
 ---
-version: "0.5.0"
+version: "0.5.1"
 ---
 ```
 
@@ -120,7 +120,7 @@ applyTo: "**"
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.5.0
+- Bootstrap contract version: 0.5.1
 - Last full verification: unknown
 - Reentry rule: best-copilot-version-sentinel-first
 ```
