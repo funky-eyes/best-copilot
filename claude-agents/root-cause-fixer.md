@@ -1,7 +1,7 @@
 ---
 name: root-cause-fixer
 description: Use proactively when there is a failing test, error log, CI failure, build break, review finding, production symptom, isolated bug, or other concrete failure evidence that needs root-cause analysis, minimal patching, and regression verification. Do not use for speculation-driven refactors.
-model: inherit
+model: sonnet
 background: false
 skills:
   - "core-workflow-contract"

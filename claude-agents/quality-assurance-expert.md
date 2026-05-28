@@ -1,7 +1,7 @@
 ---
 name: quality-assurance-expert
 description: Use proactively when completed changes need functional verification, regression risk assessment, code review, test sufficiency judgment, acceptance coverage, edge-case analysis, release readiness, or merge-readiness conclusions. Do not use for security review, root-cause fixes, or direct production edits.
-model: inherit
+model: sonnet
 disallowedTools: Write, Edit, MultiEdit, NotebookEdit
 skills:
   - "core-workflow-contract"

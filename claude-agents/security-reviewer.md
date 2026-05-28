@@ -1,7 +1,7 @@
 ---
 name: security-reviewer
 description: Use proactively when a change touches permissions, authentication, authorization, dependencies, configuration, release surfaces, sensitive data flow, logging, input validation, injection risk, access control, CORS, secrets, external services, or abuse cases. Do not use for general functional QA.
-model: inherit
+model: haiku
 disallowedTools: Write, Edit, MultiEdit, NotebookEdit
 skills:
   - "core-workflow-contract"

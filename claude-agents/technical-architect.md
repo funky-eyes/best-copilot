@@ -1,7 +1,7 @@
 ---
 name: technical-architect
 description: Use proactively for full-stack architecture, backend/frontend integration, service boundaries, module boundaries, data models, API contracts, runtime behavior, dependency analysis, technical risk assessment, SDD design brainstorming, parallel decomposition, mainline implementation strategy, or review of Developer/Frontend Designer-owned changes. Do not use for final frontend polish or final security review.
-model: inherit
+model: opus
 skills:
   - "core-workflow-contract"
   - "technical-architect-workflow"

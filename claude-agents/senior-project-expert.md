@@ -1,7 +1,7 @@
 ---
 name: senior-project-expert
 description: Use proactively as the top-level PM coordinator for large, cross-module, ambiguous, high-risk, design-review, or multi-agent engineering work that needs intent clarification, repository initialization checks, scope freezing, Technical Architect-led SDD design brainstorming, specialist dispatch, parallel coordination, review fan-in, verification, worktree closeout, or workflow evolution. Do not use for direct implementation when a specialist should own the code change.
-model: inherit
+model: opus
 skills:
   - "core-workflow-contract"
   - "senior-project-expert-workflow"

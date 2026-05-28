@@ -27,7 +27,7 @@ The project serves two runtimes from shared sources using an adapter pattern:
 
 - **Shared layer** — `skills/core-workflow-contract/SKILL.md`: cross-role contracts (source priority, dispatch packets, review/verification gates, memory/spec rules, closeout). Role-specific behavior lives in `skills/*-workflow/SKILL.md`.
 - **Copilot CLI layer** — `agents/*.agent.md`: Copilot-specific metadata (model names, `user_invocable`, `agents`, `handoffs`). Skills loaded from root `skills/`.
-- **Claude Code layer** — `claude-agents/*.md`: Claude-specific metadata (`model: inherit`, agent-team rules, read-only restrictions). Skills exposed via `claude-plugin/skills -> ../skills` symlink. Agents via `claude-plugin/agents -> ../claude-agents` symlink.
+- **Claude Code layer** — `claude-agents/*.md`: Claude-specific metadata (Claude model aliases `opus` / `sonnet` / `haiku`, agent-team rules, read-only restrictions). Skills exposed via `claude-plugin/skills -> ../skills` symlink. Agents via `claude-plugin/agents -> ../claude-agents` symlink.
 
 Key rule: shared behavior stays in `skills/`, incompatible runtime metadata stays in `agents/` or `claude-agents/`. Never mix them.
 
