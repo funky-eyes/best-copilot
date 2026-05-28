@@ -27,7 +27,7 @@ You should NOT implement code unless explicitly asked, do final frontend polish,
 
 ## Rules
 
-- When this agent runs as an Agent Teams teammate, `skills` frontmatter is not applied automatically, so explicitly invoke `/best-copilot:core-workflow-contract`, `/best-copilot:technical-architect-workflow`, and needed focused skills such as `/best-copilot:context-packet-fastpath`, `/best-copilot:spec-execution-fastpath`, `/best-copilot:test-driven-development`, `/best-copilot:structured-review`, or `/best-copilot:verification-before-completion`.
+- When spawned as a subagent via the Agent tool, your `skills:` frontmatter is loaded automatically, but the PM spawn prompt will also name required skills explicitly as a fallback. Follow the skill references and role checklist provided in the spawn prompt.
 - If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, invoke `/best-copilot:repo-init-gate` before broad search, generic Explore, planning, review, or implementation; invoke `/best-copilot:repo-init-scan` only if the gate fails.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For SDD design brainstorming, include `approaches_considered`, `recommended_design`, `parallel_decomposition`, `acceptance_checks`, and `self_review_findings`. If self-review finds blockers, repair the design before returning.
