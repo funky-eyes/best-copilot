@@ -249,6 +249,16 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELE
   → FAN_IN_ARBITRATION → NEXT_GATE
 ```
 
+### Behavioral Reliability Gates
+
+`FREEZE_PACKET` and execution preserve these constraints:
+
+- State assumptions, tradeoffs, and the simplest viable option; if uncertainty changes implementation, routing, or acceptance criteria, ask instead of guessing.
+- Choose the smallest change that satisfies success criteria; do not add speculative features or abstractions for one-time code.
+- Surgical changes: every changed line should trace to the user goal, acceptance checks, or verification repair; do not tidy adjacent code, comments, or formatting.
+- Read before writing: before code changes, read the target file's public surface/exports, the direct caller/callee, and obvious shared utilities or local patterns.
+- Drive execution with success criteria, constraints, verification, and stop conditions; prescribe steps only when dependencies, safety, or verification require them. Checkpoint significant steps with what was done, verified, and left.
+
 ### Stage 1: Init Gate (Mandatory Preflight)
 
 Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.5.0"`.
@@ -298,7 +308,7 @@ The PM freezes intent into a standard **six-block dispatch packet** (PM Dispatch
 1. task_intent     — Goal, user path, intent summary, expected outcome, task_type, work_mode
 2. frozen_scope    — Scope, non-goals, files involved, files changed, priority/read files, dependencies
 3. fact_packet     — Authoritative repo facts, source references, reference files
-4. execution_contract — Constraints, acceptance checks, verification budget, context budget, stop conditions, forbidden methods
+4. execution_contract — Assumptions, tradeoffs, simplest option, constraints, acceptance checks, verification/context budget, stop conditions, forbidden methods, read-before-write targets
 5. review_state    — Subsequent scope, verified items, review lanes, ready artifacts
 6. output_contract — Required skills, role checklist fallback, required artifacts, next stage
 ```
@@ -336,7 +346,7 @@ For each ready task:
      - Developer: bounded slices
      - Frontend Designer: UI-owned slices
      - Root Cause Fixer: confirmed failures
-  3. Request implementation evidence: files changed, tests/checks run, key output, risks
+  3. Request implementation evidence: files changed, read-before-write evidence, tests/checks run, key output, risks
   4. Stage 1 review: spec/task compliance (requirements, non-goals, file boundaries, acceptance checks)
   5. Stage 2 review: code quality and release risk (maintainability, coupling, security/performance risk, dead code, test sufficiency)
   6. Confirm findings enter fix cycle

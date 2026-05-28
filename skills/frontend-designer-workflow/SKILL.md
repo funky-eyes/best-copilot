@@ -15,11 +15,13 @@ Own user-facing frontend implementation and review: pages, components, interacti
 
 1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), especially frontend scope and design-system evidence, before changing UI.
 2. Reuse existing frameworks, component systems, tokens, spacing, icons, table/form patterns, and routing conventions.
-3. Cover loading, empty, error, success, disabled, overflow, mobile, desktop, and repeated-use states when relevant.
-4. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
-5. Review frontend changes authored by Developer or Technical Architect when PM assigns that lane; focus on user-visible states, accessibility risk, browser behavior, and visual quality.
-6. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
-7. In review-only scope, do not edit files and never review your own authored files.
+3. Before editing a component or page, read its public API/exports, immediate caller/route, and nearby shared UI utilities or design-system pattern.
+4. Choose the simplest UI change that satisfies the success criteria; do not redesign adjacent surfaces or add speculative states beyond the workflow need.
+5. Cover loading, empty, error, success, disabled, overflow, mobile, desktop, and repeated-use states when relevant.
+6. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
+7. Review frontend changes authored by Developer or Technical Architect when PM assigns that lane; focus on user-visible states, accessibility risk, browser behavior, and visual quality.
+8. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
+9. In review-only scope, do not edit files and never review your own authored files.
 
 ## Specialist Ask Boundary
 
@@ -33,4 +35,4 @@ Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users
 
 ## Output
 
-Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `changed_ui_surfaces`, `states_covered`, `experience_evidence`, and `browser_evidence`.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `changed_ui_surfaces`, `read_before_write_evidence`, `states_covered`, `experience_evidence`, and `browser_evidence`.

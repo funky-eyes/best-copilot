@@ -145,9 +145,18 @@ System, platform, and explicit user instructions outrank repository files. Curre
 1. Parse literal request, real intent, and success criteria.
 2. Before the first substantial action in a turn, record a per-request start timestamp. If that timestamp was missed, do not backfill a fake duration later.
 3. Read explicit user paths and any `/init` or `copilot init` artifacts first. If repository facts are incomplete, normalize official init output into `.github/instructions/project.instructions.md`; command output without that file is `official_init_no_write`, and substantive work stays blocked until the file exists and is verified.
-4. Before editing, freeze a minimal packet with at least `goal`, `scope`, `constraints`, `expected_outcome`, `acceptance_checks`, `verification_budget`, `work_mode`, and `task_type`. When multi-agent dispatch is used, preserve the shared six-block packet from `core-workflow-contract`.
+4. Before editing, freeze a minimal packet with at least `goal`, `scope`, `constraints`, `expected_outcome`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `verification_budget`, `work_mode`, and `task_type`. When multi-agent dispatch is used, preserve the shared six-block packet from `core-workflow-contract`.
 5. Search at most three rounds and stop after two rounds with no new signal. Prefer explicit paths, filename/glob lookup, and fixed-string `rg -F` before regex.
 6. Before completion, provide real verification evidence or state the blocker explicitly.
+
+## Reliability Gates
+
+- Think before coding: state material assumptions, surface tradeoffs, and name the simplest viable approach. If ambiguity changes implementation, routing, or acceptance criteria, ask instead of guessing. Stop when confused and name what is unclear.
+- Simplicity first: use the minimum change that satisfies the success criteria. Do not add speculative features, future-proofing, or abstractions for single-use code.
+- Surgical changes: every changed line must trace to the user request, acceptance checks, or verification repair. Do not improve adjacent code, comments, formatting, names, or structure unless required. Match existing style.
+- Read before writing: before adding or changing code in a file, read the file's public surface/exports, the immediate caller or callee, and obvious shared utilities or local patterns. If the existing structure is unclear, ask before adding to it.
+- Goal-driven execution: define success criteria, acceptance checks, verification budget, and stop conditions before implementation. Prefer outcome contracts over step-by-step implementation scripts; prescribe steps only when ordering, dependency, safety, or verification requires them. Loop until checks pass or a blocker is stated with evidence.
+- Checkpoint significant steps: after each meaningful step in multi-step work, record what was done, what is verified, and what remains. Do not continue from a state you cannot describe.
 
 ## Per-Request Hard Gates
 
@@ -244,7 +253,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 - The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code for medium or large work.
 - Parallel subtasks are allowed only when file write sets do not overlap.
-- Multi-agent dispatch should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`, plus current `INIT_GATE` / `INIT_SCAN` evidence.
+- Multi-agent dispatch should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`, including material assumptions/tradeoffs/simple-option fields when relevant, plus current `INIT_GATE` / `INIT_SCAN` evidence.
 - Delegated specialists do not ask users directly. If repository or task context is missing, return `NEEDS_CONTEXT`; if human input or approval is required, return `NEEDS_USER_INPUT` for PM/coordinator to ask.
 - Delegated handbacks must preserve shared field names such as `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`, and when blocked on missing context, `clarification_request` plus `pm_action: "pm_clarify"`.
 - For large ambiguous work, PM delegates SDD design brainstorming to Technical Architect first. Technical Architect self-reviews and repairs the design before PM asks Developer and Quality Assurance Expert for second-pass review; add Frontend Designer review for frontend/user-visible surfaces. Only a blocker-free reviewed design proceeds to implementation.

@@ -28,6 +28,16 @@ System/developer/platform instructions > explicit user instructions > current re
 - Parallel execution only when fan-in can prove each lane's owner, reviewer, evidence, and stop condition.
 - Code generation: SDD then TDD (RED-GREEN-REFACTOR or minimal reproducible check).
 
+## Reliability Gate Enforcement
+
+Canonical gate wording lives in `.github/instructions/must.instructions.md` and the target instruction bootstrap. This contract operationalizes those gates through packet fields, role handbacks, and review checks:
+
+- PM packets carry material `assumptions`, `tradeoffs`, `simpler_option_considered`, acceptance checks, verification budget, and stop conditions.
+- Code-editing packets carry read-before-write targets or evidence for the changed file surface, immediate caller/callee, and obvious shared utilities or local patterns.
+- Implementation handbacks include changed files, verification evidence, and any done/verified/left checkpoint summary for multi-step work.
+- Review lanes check that the diff stayed surgical, the simple option was considered, assumptions were explicit, and read-before-write evidence exists when code was edited.
+- Ambiguity that changes route, implementation, or acceptance criteria becomes `NEEDS_CONTEXT` / `NEEDS_USER_INPUT` instead of a silent guess.
+
 ## External Capability Translation
 
 External agent systems are reference inputs. Translate them into local primitives:
@@ -97,12 +107,13 @@ For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask nat
 - Prefer filename/glob and fixed-string `rg -F` for class names, methods, routes, config keys, and copied errors.
 - Use regex only when genuinely vague or prior exact searches failed; record the reason in `search_hints`.
 - Avoid repo-wide regex; scope to the smallest directory; stop after two searches with no new signal.
+- Before editing a code file, gather read-before-write evidence: its public surface/exports, the immediate caller/callee path, and any obvious shared utility or existing local pattern. Skip only for documentation-only edits where no code behavior changes.
 - Before designing with concurrency, unfamiliar patterns, or infrastructure, search for runtime/framework built-ins first (tried-and-true → new-and-popular → first-principles; Layer 3 is highest priority).
 
 ## Default Flow
 
 1. Pass init/fact preflight for target-repository work (`repo-init-gate` → `repo-init-scan` only when that gate fails).
-2. Parse intent, success criteria, scope, non-goals, acceptance checks, verification budget, context budget, and stop conditions.
+2. Parse intent, success criteria, scope, non-goals, assumptions, tradeoffs, simpler option considered, acceptance checks, verification budget, context budget, and stop conditions.
 3. For large ambiguous work, PM dispatches Technical Architect for SDD design brainstorming and self-review before other lanes review the plan (Developer, QA, Frontend Designer for user-visible surfaces).
 4. Use `writing-plans` for reviewed direction; require parallel-ready tasks with dependencies, owner lanes, reviewer lanes, write sets, and verification.
 5. Before risky implementation, run `spec-review-gauntlet` or `structured-review` design-review mode.
@@ -136,7 +147,7 @@ Every delegated task is a six-block packet:
 1. `task_intent`: goal, user paths, intent summary, expected outcome, task_type, work_mode
 2. `frozen_scope`: scope, non-goals, files involved, changed files, priority/already-read files, dependencies
 3. `fact_packet`: authoritative repo facts, provenance refs, reference files
-4. `execution_contract`: constraints, acceptance checks, verification/search/context budgets, stop conditions, forbidden approaches
+4. `execution_contract`: `assumptions`, `tradeoffs`, `simpler_option_considered`, constraints, acceptance checks, verification/search/context budgets, stop conditions, forbidden approaches, `read_before_write_targets` before edits or `read_before_write_evidence` after edits
 5. `review_state`: followup scope, verified items, review lanes, ready artifacts
 6. `output_contract`: required skills, role checklist fallback, required artifacts, next stage
 
@@ -206,7 +217,7 @@ When reviewers disagree, PM records `decision_provenance` (evidence, blocking st
 - Public APIs, schemas, auth, dependencies, CI/CD, and release surfaces need blast-radius assessment.
 - New behavior and bug fixes should add tests or minimal reproducible checks when practical. Frontend changes need browser evidence when runtime permits.
 - Do not store secrets, tokens, credentials, PII, raw long logs, internal hosts, or sensitive paths in instructions, memory, specs, or task logs.
-- Once a plan is approved, execute ready tasks through the checkpointed plan loop without pausing after every successful task. Respect explicit plan checkpoints and stop on `BLOCKED`, `NEEDS_USER_INPUT`, failed verification, review blockers, dependency conflicts, or checkpoint stop conditions.
+- Once a plan is approved, execute ready tasks through the checkpointed plan loop without pausing after every successful task. Each checkpoint records done/verified/left state for PM fan-in. Respect explicit plan checkpoints and stop on `BLOCKED`, `NEEDS_USER_INPUT`, failed verification, review blockers, dependency conflicts, or checkpoint stop conditions.
 
 ### Red Flags (Anti-Rationalization)
 

@@ -16,9 +16,10 @@ Own concrete failure evidence, root-cause analysis, minimal patching, and regres
 1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), then state the broken behavior, expected behavior, observed evidence, and falsification condition.
 2. Reproduce or localize the failure when practical before editing.
 3. Trace the actual runtime path instead of patching symptoms.
-4. Make the smallest fix that addresses the cause and preserves surrounding behavior.
-5. Add or run a focused regression check when practical.
-6. Verify the original symptom no longer reproduces, or state the blocker precisely.
+4. Before editing, read the target file's public surface/exports, the immediate failing caller/callee, and any obvious shared utility or local pattern in the failure path.
+5. Make the smallest fix that addresses the cause and preserves surrounding behavior. Do not refactor adjacent code or add speculative hardening outside the proven failure.
+6. Add or run a focused regression check when practical.
+7. Verify the original symptom no longer reproduces, or state the blocker precisely.
 
 ## Specialist Ask Boundary
 
@@ -31,4 +32,4 @@ Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users
 
 ## Output
 
-Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `root_cause`, `fix_summary`, `changed_files`, and `regression_evidence`.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `root_cause`, `fix_summary`, `changed_files`, `read_before_write_evidence`, and `regression_evidence`.
