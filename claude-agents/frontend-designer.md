@@ -1,7 +1,7 @@
 ---
 name: frontend-designer
 description: Use proactively when pages, components, interactions, forms, responsive layouts, browser behavior, visual quality, frontend performance, or frontend review for Developer/Technical Architect-authored UI changes is needed. Do not use for backend mainline work, server-side permissions, or security review.
-model: inherit
+model: haiku
 isolation: worktree
 skills:
   - "core-workflow-contract"

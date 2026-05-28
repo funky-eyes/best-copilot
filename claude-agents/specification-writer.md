@@ -1,7 +1,7 @@
 ---
 name: specification-writer
 description: Use proactively when discovery evidence, requirements, design documents, tasks, ADRs, execution-plan status, closeout records, or memory/spec recovery entries must be created or maintained. Do not use for production implementation.
-model: inherit
+model: haiku
 skills:
   - "core-workflow-contract"
   - "specification-writer-workflow"

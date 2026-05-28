@@ -84,12 +84,6 @@ After installing the plugin, the same session entry can usually be shortened to:
 claude --agent senior-project-expert
 ```
 
-The default multi-agent flow uses the PM main session plus Agent tool subagents; it does not require experimental Agent Teams. Enable Agent Teams only when you explicitly want Claude Code's experimental shared team runtime:
-
-```bash
-CLAUDE_CODE_EXPERIMENTAL_AGENT_TEAMS=1 claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin --agent senior-project-expert
-```
-
 Claude Code discovers:
 
 - marketplace metadata from [.claude-plugin/marketplace.json](.claude-plugin/marketplace.json)
@@ -140,7 +134,7 @@ The PM (`senior-project-expert`) as the main session receives user requirements 
 
 Available plugin subagents appear scoped in Claude Code: `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, `best-copilot:root-cause-fixer`.
 
-Claude adapters use `model: inherit`, so the actual model is controlled by the current Claude Code session's `/model`, `--model`, or user configuration. It does not reproduce Copilot's cross-provider model routing.
+Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. Claude Code still only runs Claude models; this preserves the Copilot role tiers inside Claude's model families.
 
 ## Runtime Adapter Architecture
 
@@ -159,7 +153,7 @@ Claude adapters use `model: inherit`, so the actual model is controlled by the c
         │  Copilot CLI Adapter│          │  Claude Code Adapter  │
         │                    │          │                       │
         │  agents/*.agent.md │          │  claude-agents/*.md   │
-        │  model: GPT-5.4 etc│          │  model: inherit       │
+        │  model: GPT-5.4 etc│          │  model: opus/haiku/...│
         │  handoffs: declares│          │  Agent tool dispatch  │
         │  vscode_askQ...    │          │  AskUserQuestion      │
         │                    │          │                       │
@@ -169,7 +163,7 @@ Claude adapters use `model: inherit`, so the actual model is controlled by the c
         └────────────────────┘          └───────────────────────┘
 ```
 
-Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, `model: inherit`, read-only restrictions, `isolation: worktree`, and PM-owned foreground/background dispatch policy.
+Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, Claude model aliases (`opus`, `sonnet`, `haiku`), read-only restrictions, `isolation: worktree`, and PM-owned foreground/background dispatch policy.
 
 This keeps shared behavior, role-specific behavior, and incompatible runtime metadata isolated while requiring every agent to load both the shared contract and its role workflow.
 
@@ -189,14 +183,14 @@ Claude agent frontmatter normally preloads only `core-workflow-contract` and the
 | Dimension | Copilot CLI | Claude Code |
 |-----------|-------------|-------------|
 | Entry agent | `agents/pm-coordinator.agent.md` | `claude-agents/senior-project-expert.md` (via `--agent` or `.claude/settings.json`) |
-| Model specification | Concrete names like `GPT-5.4 (copilot)` | `model: inherit` (user-configured) |
+| Model specification | Concrete names like `GPT-5.4 (copilot)` | `model: opus` / `haiku` / `sonnet` role-tier aliases |
 | Specialist dispatch | `handoffs:` declarations + `agent` tool | PM main session spawns via **Agent tool** |
 | Parallel execution | Handoff declarations handle automatically | PM chooses background only for safe independent research/review |
 | File isolation | Copilot built-in | `isolation: "worktree"` plus PM closeout |
 | User interaction | `vscode_askQuestions` / `Asking user` | Built-in `AskUserQuestion` |
 | Skill discovery | Directly reads root `skills/` | `claude-plugin/skills -> ../skills` symlink |
 | Agent discovery | Directly reads root `agents/` | `claude-plugin/agents -> ../claude-agents` symlink |
-| Cross-model routing | Supported (GPT / Gemini / Claude mixed) | Claude models only |
+| Cross-model routing | Supported (GPT / Gemini / Claude mixed) | Claude model-tier aliases only |
 
 Copilot handoffs are fail-closed: each PM handoff prompt requires `core-workflow-contract` plus the target role workflow skill. If the runtime cannot load those skills, the handoff includes a minimal role checklist fallback; without either, the specialist returns `NEEDS_CONTEXT missing_required_skill`.
 
@@ -558,7 +552,7 @@ Each agent declares a model in `agents/*.agent.md`, and the routing policy is pa
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.md` preserve role separation and use `model: inherit` so the active Claude Code session controls the actual model.
+Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`.
 
 ## Search Discipline
 
