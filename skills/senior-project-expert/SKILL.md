@@ -13,8 +13,9 @@ This skill is a compatibility alias, not a second role definition. Use it when a
 2. For target-repository analysis, planning, review, or implementation requests, run `repo-init-gate` before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
 3. If `repo-init-gate` reports a matching `best-copilot.md` sentinel, output `INIT_SCAN=SKIP_SENTINEL_READY` and continue with the Senior Project Expert workflow.
 4. If `repo-init-gate` reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, run `repo-init-scan` and stop unless its report has `next_task_ready: yes`.
-5. If this runtime cannot invoke the gate skill mechanically, perform the gate's documented fallback exactly: read only the target root `best-copilot.md`, compare it to the current sentinel version, and report `HARNESS_DEGRADED skill_invocation_unavailable` before deciding whether `repo-init-scan` is required.
-6. Do not treat an unknown-agent or unknown-skill failure as permission to continue without the init gate.
+5. In Claude Code, a transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` is not an init result. It only means the skill text is available. Continue only after the scan has verified or created the target-local files, written the sentinel when needed, and reported `required_artifacts_verified: yes` plus `next_task_ready: yes`.
+6. If this runtime cannot invoke the gate skill mechanically, perform the gate's documented fallback exactly: read only the target root `best-copilot.md`, compare it to the current sentinel version, and report `HARNESS_DEGRADED skill_invocation_unavailable` before deciding whether `repo-init-scan` is required.
+7. Do not treat an unknown-agent, unknown-skill, or skill-load-only path as permission to continue without the init gate.
 
 ## Observable Output
 

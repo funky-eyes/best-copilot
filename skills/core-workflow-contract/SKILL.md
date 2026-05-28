@@ -63,6 +63,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 - Claude agent: `skills:` preloads listed skills when that agent is the active session.
 - Claude base session (no agent selected): agent `skills:` frontmatter is not active; prompt text alone does not preload agent skills.
 - Claude subagent (spawned via Agent tool): receives its own agent definition's `skills:` frontmatter. The PM spawn prompt should still name required skills explicitly as a fallback.
+- Claude `Skill(...) Successfully loaded` output is instruction-loading evidence only. It does not prove that a workflow step ran, files were created, or verification passed. Init workflows require the explicit gate/scan report and target-path verification before any substantive target-repository work.
 - Copilot CLI: body refs are not a mechanical preload — include minimal checklist in packet or return `NEEDS_CONTEXT missing_required_skill`.
 - `senior-project-expert` exists as a skill only to catch runtimes that resolve the Senior Project Expert request through the skill path. It must not bypass this contract, `senior-project-expert-workflow`, or the repo init preflight.
 
@@ -72,6 +73,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 - Direct user-invoked best-copilot agents that analyze, plan, review, verify, or implement target-repository code start with an init preflight before classification, broad search, generic Explore workers, planning, dispatch, or implementation unless a PM dispatch packet already carries current `INIT_GATE` / `INIT_SCAN` evidence.
 - The init preflight always invokes `repo-init-gate` and reads only the target root `best-copilot.md`. A matching current sentinel is the only normal reason to skip `repo-init-scan`.
 - Invoke `repo-init-scan` when the gate reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, or when explicit reinitialization/repair is requested. Continue only after `repo-init-scan` reports `next_task_ready: yes`; otherwise return its blocker.
+- `repo-init-scan` success is never inferred from skill loading, official init chat output, or analysis text. It requires a verified `.github/instructions/project.instructions.md`, required scaffolds, and the current `best-copilot.md` sentinel on disk.
 - If a runtime cannot invoke the gate skill mechanically, perform the gate's documented shallow sentinel read exactly, report `HARNESS_DEGRADED skill_invocation_unavailable`, and then apply the same scan-or-skip decision.
 - Required project fact file: target `.github/instructions/project.instructions.md` with build/test/check/dev, runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
 - Use active runtime `/init` when available. Normalize output into the project facts file. Command output without a verified facts file is `official_init_no_write`, not success.

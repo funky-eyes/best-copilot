@@ -12,6 +12,8 @@ Use this stage inside `repo-init-scan` whenever scaffold verification, bounded r
 - This stage is fail-closed. Do not continue to requirements analysis, planning, dependency/framework changes, security rewrites, or implementation until the required files have been created or a `BLOCKED` result has been returned.
 - Reading package/build files is allowed only as bounded evidence for creating `.github/instructions/project.instructions.md`.
 - Write persistent state into the target repository, never into the plugin installation/cache directory.
+- Loading this skill or the bootstrap skills is not enough. Success requires actual create/repair operations in the target repository followed by path and content checks on disk.
+- If `target-instructions-bootstrap`, `target-memory-bootstrap`, or `target-spec-bootstrap` cannot be invoked mechanically, read their `SKILL.md` templates and perform the documented create-only repair inline. Do not skip a missing scaffold because skill invocation was unavailable.
 
 ## Required First-Use Artifacts
 
@@ -64,6 +66,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
    - `target-instructions-bootstrap`
    - `target-memory-bootstrap`
    - `target-spec-bootstrap`
+   Loading those skills only makes their templates available; the caller must still create or repair the listed target files before continuing.
 7. Re-check the required artifact paths on disk.
 8. Re-check the required instruction content.
 9. After the other required artifacts and content checks pass, write the target root `best-copilot.md` exactly as:
