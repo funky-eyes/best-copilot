@@ -10,6 +10,7 @@ Use this tiny skill before loading `repo-init-scan`.
 ## Contract
 
 - This is the mandatory first observable preflight for Senior Project Expert target-repository requests. Run it before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
+- Loading this skill is not the gate result. The gate result exists only after the target root `best-copilot.md` has been read or found missing and the output block below is produced.
 - Read only the target root `best-copilot.md`.
 - Expected file content is exactly:
 

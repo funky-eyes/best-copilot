@@ -12,6 +12,7 @@ description: "Use inside repo-init-scan to try `/init` or `copilot init`, normal
 - Use `copilot init` only when shell execution is available and the command exists.
 - Normalize useful output into the target `.github/instructions/project.instructions.md`.
 - Do not treat command output alone as success. The facts file must exist on disk, not be a neutral scaffold, have no unresolved placeholders, and contain real facts or explicit `unknown` gaps for commands, runtime/framework, entrypoints, and module boundaries.
+- In Claude Code, if `/init` is unavailable from the current execution context, cannot be triggered non-interactively, or only returns chat text without a verified facts file, report `official_init_unavailable` or `official_init_no_write` and continue to `repo-init-manual-fallback`. Do not stop after loading this skill.
 - If official init is unavailable, does not write the file, or leaves those fact categories incomplete, hand off to `repo-init-manual-fallback`.
 - This stage does not certify scaffold completeness and does not write `best-copilot.md`; those remain owned by `repo-init-manual-fallback`.
 
