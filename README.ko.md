@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | 한국어 | [日本語](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.5.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -249,9 +249,19 @@ INIT_GATE → [필요시 INIT_SCAN] → CLASSIFY → FREEZE_PACKET → LANE_SELE
   → FAN_IN_ARBITRATION → NEXT_GATE
 ```
 
+### 행동 신뢰성 게이트
+
+`FREEZE_PACKET`과 실행 단계는 다음 제약을 유지합니다:
+
+- 가정, 트레이드오프, 가장 단순한 실행 가능안을 명시합니다. 불확실성이 구현, 라우팅, 수용 기준을 바꾸면 추측하지 말고 질문합니다.
+- 성공 기준을 만족하는 최소 변경을 선택합니다. 투기적 기능이나 일회성 코드의 추상화를 추가하지 않습니다.
+- 수술적 변경: 모든 변경 줄은 사용자 목표, 수용 검증, 또는 검증 수리에 추적 가능해야 합니다. 인접 코드, 주석, 포맷을 덤으로 정리하지 않습니다.
+- 쓰기 전에 읽기: 코드 변경 전 대상 파일의 public surface/exports, 직접 caller/callee, 명확한 공유 유틸리티나 로컬 패턴을 읽습니다.
+- 성공 기준, 제약, 검증, 중지 조건으로 실행을 구동합니다. 의존성, 안전, 검증상 필요한 경우에만 절차를 지정합니다. 다단계 작업은 중요한 단계마다 checkpoint를 남깁니다.
+
 ### 단계 1: Init 게이트 (필수 프리체크)
 
-대상 저장소에서 실질적인 작업을 하기 전, 시스템은 먼저 `repo-init-gate`를 실행합니다 — 대상 저장소 루트의 `best-copilot.md`만 읽어서 frontmatter의 `version`이 현재 계약 버전 `"0.5.0"`과 일치하는지 확인합니다.
+대상 저장소에서 실질적인 작업을 하기 전, 시스템은 먼저 `repo-init-gate`를 실행합니다 — 대상 저장소 루트의 `best-copilot.md`만 읽어서 frontmatter의 `version`이 현재 계약 버전 `"0.5.1"`과 일치하는지 확인합니다.
 
 ```
 repo-init-gate
@@ -298,7 +308,7 @@ PM은 의도를 표준 **6블록 디스패치 패키지**(PM Dispatch Packet)로
 1. task_intent     — 목표, 사용자 경로, 의도 요약, 예상 결과, task_type, work_mode
 2. frozen_scope    — 범위, 비목표, 관련 파일, 변경 파일, 우선순위/읽은 파일, 의존성
 3. fact_packet     — 권위 있는 저장소 사실, 출처 참조, 참조 파일
-4. execution_contract — 제약, 수용 검증, 검증 예산, 컨텍스트 예산, 중지 조건, 금지 방법
+4. execution_contract — 가정, 트레이드오프, 가장 단순한 안, 제약, 수용 검증, 검증/컨텍스트 예산, 중지 조건, 금지 방법, 쓰기 전 읽기 대상
 5. review_state    — 후속 범위, 검증된 항목, 리뷰 레인, 준비된 산출물
 6. output_contract — 필요한 스킬, 역할 체크리스트 대체, 필요한 산출물, 다음 단계
 ```
@@ -336,7 +346,7 @@ PM은 의도를 표준 **6블록 디스패치 패키지**(PM Dispatch Packet)로
      - Developer: 경계 있는 슬라이스
      - Frontend Designer: UI 소유 슬라이스
      - Root Cause Fixer: 확인된 실패
-  3. 구현 증거 요청: 변경된 파일, 실행한 테스트/검사, 핵심 출력, 위험
+  3. 구현 증거 요청: 변경된 파일, 쓰기 전 읽기 증거, 실행한 테스트/검사, 핵심 출력, 위험
   4. Stage 1 리뷰: 스펙/작업 준수 (요구사항, 비목표, 파일 경계, 수용 검증)
   5. Stage 2 리뷰: 코드 품질 및 릴리스 위험 (유지보수성, 결합도, 보안/성능 위험, 데드 코드, 테스트 충분성)
   6. 발견 사항이 수정 사이클에 진입 확인
@@ -463,7 +473,7 @@ PM/코디네이터만 Native Ask 메커니즘(Copilot: `vscode_askQuestions` / `
 │   ├── must.instructions.md       ← 핵심 규칙
 │   └── skills-index.instructions.md ← 스킬 라우팅
 │
-└── best-copilot.md               ← Init sentinel (version: "0.5.0")
+└── best-copilot.md               ← Init sentinel (version: "0.5.1")
 ```
 
 ### Spec vs Memory 분업
@@ -532,7 +542,7 @@ memories/repo/INDEX.md                           ← 복구 인덱스 라우팅 
 memories/repo/current-workstreams.md             ← 현재 활성 작업
 spec/INDEX.md                                    ← 스펙 라우팅 테이블
 spec/templates/                                  ← 재사용 가능한 템플릿
-best-copilot.md                                  ← Init sentinel (version: "0.5.0")
+best-copilot.md                                  ← Init sentinel (version: "0.5.1")
 ```
 
 필요한 사실이나 스캐폴드를 생성할 수 없는 경우, 추측에 기반한 계속 대신 `BLOCKED first_use_gate_incomplete`로 중지합니다 — 전체 설명은 [핵심 워크플로 Stage 1](#단계-1-init-게이트-필수-프리체크)을 참조하세요.

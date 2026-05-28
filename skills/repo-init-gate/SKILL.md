@@ -15,7 +15,7 @@ Use this tiny skill before loading `repo-init-scan`.
 
 ```md
 ---
-version: "0.5.0"
+version: "0.5.1"
 ---
 ```
 

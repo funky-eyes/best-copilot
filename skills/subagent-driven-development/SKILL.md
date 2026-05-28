@@ -11,8 +11,8 @@ Use this skill when a MEDIUM/LARGE plan is ready for implementation and fresh co
 ## Preconditions
 
 - A current plan or `tasks.md` exists and is approved for execution.
-- Each task has a complete task statement, `files_involved`, dependencies, acceptance checks, and verification budget.
-- PM has frozen `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
+- Each task has a complete task statement, `files_involved`, dependencies, assumptions or explicit unknowns, acceptance checks, and verification budget.
+- PM has frozen `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
 - If the work came through PM planning, `execution_confirmed` must match the current `plan_revision`.
 
 ## Task Cycle
@@ -21,7 +21,7 @@ For every ready task:
 
 1. Build a fresh context packet with `context-packet-fastpath`.
 2. Dispatch implementation to the right specialist: Technical Architect for full-stack architecture/mainline slices, Developer for scoped slices, Frontend Designer for UI-owned slices, or Root Cause Fixer for confirmed failures.
-3. Require implementation evidence: changed files, tests/checks run, key output, risk, and next-step notes.
+3. Require implementation evidence: changed files, read-before-write evidence for code edits, tests/checks run, key output, risk, and next-step notes.
 4. Run Stage 1 review: spec/task compliance. The reviewer checks whether requirements, non-goals, file boundaries, and acceptance checks were honored.
 5. Run Stage 2 review: code quality and release risk. The reviewer checks maintainability, coupling, security/performance risk, dead code, and test adequacy.
 6. Send confirmed findings to a fix loop using `structured-review` feedback-intake and targeted re-review modes.

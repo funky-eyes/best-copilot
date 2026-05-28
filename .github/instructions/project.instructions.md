@@ -20,6 +20,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - Repository instruction source: `.github/instructions/**`; target repositories that need Claude Code compatibility should also get a root `CLAUDE.md` adapter that imports those shared instruction files.
 - Current compatibility targets: Copilot CLI plugin installation and Claude Code plugin loading. Codex compatibility is not a release target for this layout.
 - Runtime adapter architecture: shared cross-role behavior lives in `skills/core-workflow-contract/SKILL.md`; role-specific workflow behavior lives in matching `skills/*-workflow/SKILL.md` files; Copilot-only model/tool/handoff metadata lives in `agents/*.agent.md`; Claude-only runtime agent adapter names, Claude model aliases, and agent-team limitations live in runtime-named `claude-agents/*.md` files.
+- Reliability gates for assumptions/tradeoffs, simplicity, surgical diffs, read-before-write, goal-driven verification, and checkpoints live in `.github/instructions/must.instructions.md` and `skills/core-workflow-contract/SKILL.md`; target bootstrap templates must keep the same behavior.
 - Claude Code adapters normally preload only `core-workflow-contract` and their matching role workflow skill in frontmatter. Senior Project Expert additionally preloads `repo-init-gate` and `repo-init-scan` because init preflight is a mandatory boot gate. Other focused skills stay on-demand in the agent body to avoid unnecessary startup context.
 
 ## First Repository Initialization

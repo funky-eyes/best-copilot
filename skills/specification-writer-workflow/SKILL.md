@@ -42,7 +42,7 @@ Spec-kit style implementation tasks map to the six-block PM dispatch packet from
 
 - **task_intent**: `task_id`, `goal`
 - **frozen_scope**: `owner_lane` (`technical-architect | developer | frontend-designer | root-cause-fixer`), `reviewer_lanes`, `files_involved`, `write_set`, `dependencies`, `parallel_group` or `parallel_ready: false`
-- **execution_contract**: `acceptance_checks`, `tdd_or_check` (failing test target or minimal reproducible check), `verification_command`, `stop_conditions`
+- **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check` (failing test target or minimal reproducible check), `verification_command`, `stop_conditions`, `read_before_write_targets`
 
 Default decomposition should expose parallel work for Technical Architect and Developer when write sets do not overlap; add Frontend Designer as an owner or reviewer when frontend surfaces are present.
 

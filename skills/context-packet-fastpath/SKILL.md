@@ -23,7 +23,7 @@ Uses the six-block PM dispatch packet from `core-workflow-contract`. This skill 
 
 ### 4. execution_contract
 
-`constraints`, `acceptance_checks`, `verification_budget`, `search_hints`, `context_budget` (max files/shards before returning for scope widening), `stop_conditions`, `forbidden_approaches`
+`assumptions`, `tradeoffs`, `simpler_option_considered`, `constraints`, `acceptance_checks`, `verification_budget`, `search_hints`, `context_budget` (max files/shards before returning for scope widening), `stop_conditions`, `forbidden_approaches`, `read_before_write_targets`
 
 ### 5. review_state
 
@@ -40,6 +40,8 @@ Uses the six-block PM dispatch packet from `core-workflow-contract`. This skill 
 - Prefer `micro` or `standard` packets when the file set and acceptance checks are already clear.
 - Do not include whole logs, whole specs, or unrelated memory.
 - Include only the retrieval provenance needed to justify selected files.
+- Include material assumptions and tradeoffs only when they affect implementation, routing, or verification; do not pad the packet with obvious facts.
+- For code-editing packets, include read-before-write targets: the file public surface/exports, immediate caller/callee, and obvious shared utility/local pattern to inspect.
 - If a delegate needs new files, return to PM to widen scope.
 - A delegate must consume `task_type`, `user_intent_summary`, `review_followup_scope`, `previously_verified_items`, `ready_artifacts`, `required_artifacts`, and `recommended_next_stage` before reopening search.
 - A delegate should stop at `context_budget` and return `NEEDS_CONTEXT` instead of broad-scanning.

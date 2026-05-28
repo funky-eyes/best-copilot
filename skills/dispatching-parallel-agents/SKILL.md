@@ -7,7 +7,7 @@ description: "Use when multiple frozen subtasks have non-overlapping write sets 
 
 ## Preconditions
 
-- Each subtask has goal, files, dependencies, acceptance checks, and verification.
+- Each subtask has goal, files, dependencies, material assumptions or explicit unknowns, acceptance checks, and verification.
 - Write sets do not overlap.
 - Shared foundation work is already done or assigned as a dependency.
 - Fan-in owner is identified.
@@ -18,7 +18,7 @@ Each parallel subtask uses the six-block PM dispatch packet from `core-workflow-
 
 - `task_intent`: `goal`, `task_type`, `work_mode`
 - `frozen_scope`: `files_involved`, `write_set`, `dependencies`
-- `execution_contract`: `constraints`, `acceptance_checks`, `verification_budget`, `forbidden_approaches`
+- `execution_contract`: `assumptions`, `tradeoffs`, `simpler_option_considered`, `constraints`, `acceptance_checks`, `verification_budget`, `forbidden_approaches`, `read_before_write_targets` when code edits are planned
 - `output_contract`: required skills, `required_artifacts`
 
 Add `sub_task_id` for fan-in tracking.

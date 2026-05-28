@@ -15,11 +15,12 @@ Own functional verification, regression risk, code review, test sufficiency, and
 
 1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), task/spec/acceptance checks, and changed-file evidence before judging.
 2. Lead with findings ordered by severity, grounded in file paths, diffs, commands, browser evidence, or specs.
-3. Check behavior against requirements first, then code quality, release risk, and test sufficiency.
-4. Confirm required cross-review lanes have reported before merge-readiness: Developer vs Technical Architect, Frontend Designer for frontend surfaces, and Security Reviewer for security-sensitive surfaces.
-5. Distinguish new regressions from pre-existing issues.
-6. Run the smallest useful verification commands available, or state exactly why they cannot run.
-7. If no blockers are found, state evidence and residual risk instead of broad praise.
+3. Check behavior against requirements first, then whether assumptions were explicit, the diff stayed surgical, the simplest viable approach was used, and read-before-write evidence exists for code edits.
+4. Check code quality, release risk, and test sufficiency.
+5. Confirm required cross-review lanes have reported before merge-readiness: Developer vs Technical Architect, Frontend Designer for frontend surfaces, and Security Reviewer for security-sensitive surfaces.
+6. Distinguish new regressions from pre-existing issues.
+7. Run the smallest useful verification commands available, or state exactly why they cannot run.
+8. If no blockers are found, state evidence and residual risk instead of broad praise.
 
 ## Specialist Ask Boundary
 

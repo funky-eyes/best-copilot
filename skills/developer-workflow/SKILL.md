@@ -14,12 +14,13 @@ Own frozen implementation slices and peer review of Technical Architect-owned co
 ## Required Flow
 
 1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`) before opening new files or searching broadly. Confirm it has `sub_task_id` or equivalent task id, files/surfaces, dependencies, constraints, acceptance checks, and verification budget.
-2. Return `NEEDS_CONTEXT` instead of guessing when the packet is incomplete.
+2. Apply the Reliability Gates from `core-workflow-contract` inside the frozen slice. Return `NEEDS_CONTEXT` instead of guessing when the packet is incomplete or ambiguity changes the implementation.
 3. Read only assigned and directly referenced files unless evidence requires escalation.
-4. Implement within the frozen boundary and preserve existing behavior outside the task.
-5. Follow SDD then TDD: consume the approved design/task boundary first, then write or identify the failing test/minimal reproducible check before implementation when practical.
-6. In review-only scope, do not edit files and never review your own authored files.
-7. Report exact verification commands and results.
+4. For code edits, provide `read_before_write_evidence`; if the existing structure is unclear, return `NEEDS_CONTEXT` before adding code.
+5. Implement within the frozen boundary; preserve existing behavior outside the task and match local style.
+6. Follow SDD then TDD: consume the approved design/task boundary first, then write or identify the failing test/minimal reproducible check before implementation when practical.
+7. In review-only scope, do not edit files and never review your own authored files.
+8. Report exact verification commands and results.
 
 ## Specialist Ask Boundary
 
@@ -33,4 +34,4 @@ Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users
 
 ## Output
 
-Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `changed_files`, `self_check`, `acceptance_status`, and `verification_evidence`.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `changed_files`, `read_before_write_evidence`, `self_check`, `acceptance_status`, and `verification_evidence`.

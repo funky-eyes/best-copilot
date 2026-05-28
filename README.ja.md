@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.5.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -249,9 +249,19 @@ INIT_GATE → [必要に応じて INIT_SCAN] → CLASSIFY → FREEZE_PACKET → 
   → FAN_IN_ARBITRATION → NEXT_GATE
 ```
 
+### 行動信頼性ゲート
+
+`FREEZE_PACKET` と実行段階では、次の制約を保持します：
+
+- 前提、トレードオフ、最も単純な実行可能案を明示します。不確実性が実装、ルート、受け入れ基準を変える場合は、推測せず質問します。
+- 成功基準を満たす最小変更を選びます。投機的機能や一回限りコードの抽象化は追加しません。
+- 手術的変更：すべての変更行はユーザー目標、受け入れチェック、または検証修正に追跡可能であるべきです。隣接コード、コメント、フォーマットをついでに整えません。
+- 書く前に読む：コード変更前に対象ファイルの public surface/exports、直接 caller/callee、明らかな共有ユーティリティやローカルパターンを読みます。
+- 成功基準、制約、検証、停止条件で実行を駆動します。依存関係、安全性、検証上必要な場合だけ手順を指定します。複数ステップ作業では重要ステップごとに checkpoint を残します。
+
 ### ステージ 1: Init ゲート（必須プリフライト）
 
-ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.5.0"` と一致するか確認します。
+ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.5.1"` と一致するか確認します。
 
 ```
 repo-init-gate
@@ -298,7 +308,7 @@ PM は意図を標準の **6ブロックディスパッチパケット**（PM Di
 1. task_intent     — 目標、ユーザーパス、意図要約、期待結果、task_type、work_mode
 2. frozen_scope    — 範囲、非目標、関連ファイル、変更ファイル、優先/既読ファイル、依存関係
 3. fact_packet     — 権威あるリポジトリ事実、出典参照、参照ファイル
-4. execution_contract — 制約、受容チェック、検証予算、コンテキスト予算、停止条件、禁止メソッド
+4. execution_contract — 前提、トレードオフ、最も単純な案、制約、受容チェック、検証/コンテキスト予算、停止条件、禁止メソッド、書く前に読む対象
 5. review_state    — 後続範囲、検証済項目、レビューレーン、準備済成果物
 6. output_contract — 必要スキル、ロールチェックリスト代替、必要成果物、次のステージ
 ```
@@ -336,7 +346,7 @@ PM は意図を標準の **6ブロックディスパッチパケット**（PM Di
      - Developer: 境界のあるスライス
      - Frontend Designer: UI 所有のスライス
      - Root Cause Fixer: 確認済みの失敗
-  3. 実装証拠を要求：変更ファイル、実行テスト/チェック、キー出力、リスク
+  3. 実装証拠を要求：変更ファイル、書く前に読んだ証拠、実行テスト/チェック、キー出力、リスク
   4. Stage 1 レビュー：スペック/タスク準拠（要件、非目標、ファイル境界、受容チェック）
   5. Stage 2 レビュー：コード品質とリリースリスク（保守性、結合度、セキュリティ/パフォーマンスリスク、デッドコード、テスト十分性）
   6. 発見が修正サイクルに入ることを確認
@@ -463,7 +473,7 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 │   ├── must.instructions.md       ← コアルール
 │   └── skills-index.instructions.md ← スキルルーティング
 │
-└── best-copilot.md               ← Init sentinel（version: "0.5.0"）
+└── best-copilot.md               ← Init sentinel（version: "0.5.1"）
 ```
 
 ### Spec vs Memory の分担
@@ -532,7 +542,7 @@ memories/repo/INDEX.md                           ← 復帰インデックスル
 memories/repo/current-workstreams.md             ← 現在のアクティブな作業
 spec/INDEX.md                                    ← スペックルーティングテーブル
 spec/templates/                                  ← 再利用可能なテンプレート
-best-copilot.md                                  ← Init sentinel（version: "0.5.0"）
+best-copilot.md                                  ← Init sentinel（version: "0.5.1"）
 ```
 
 必要な事実やスキャフォールドを作成できない場合、推測に基づく継続ではなく `BLOCKED first_use_gate_incomplete` として停止します——完全な説明は[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト)を参照してください。

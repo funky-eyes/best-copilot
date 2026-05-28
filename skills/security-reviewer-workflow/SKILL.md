@@ -15,10 +15,11 @@ Own auth, permissions, dependencies, configuration, release surfaces, sensitive 
 
 1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), then scope the exact release surface touched by the change.
 2. Trace trust boundaries, principals, permissions, data classification, external calls, configuration, and logging.
-3. Separate confirmed findings from low-confidence residual risk.
-4. Ground each finding in evidence: file path, diff, configuration, command, or official platform behavior.
-5. Include impact and concrete fix guidance for each confirmed finding.
-6. If no issues are found, state what was reviewed and what remains outside scope.
+3. Check that assumptions affecting trust boundaries or permissions are explicit; unknowns that change risk must be blockers instead of guesses.
+4. Separate confirmed findings from low-confidence residual risk.
+5. Ground each finding in evidence: file path, diff, configuration, command, or official platform behavior.
+6. Include impact and concrete fix guidance for each confirmed finding.
+7. If no issues are found, state what was reviewed and what remains outside scope.
 
 ## Specialist Ask Boundary
 

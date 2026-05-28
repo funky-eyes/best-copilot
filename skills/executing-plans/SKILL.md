@@ -11,7 +11,7 @@ Use this skill to turn an approved plan into a checkpointed execution loop. The 
 ## Preconditions
 
 - If the input packet is part of a PM orchestration flow, `execution_confirmed` must be present and must match the current `plan_revision`.
-- The plan must list concrete tasks, dependencies, `files_involved`, acceptance checks, and verification commands or checks.
+- The plan must list concrete tasks, dependencies, `files_involved`, assumptions or explicit unknowns, acceptance checks, and verification commands or checks.
 - The plan must not contain placeholders such as `TBD`, `TODO`, or `to be decided`.
 - User-provided paths, current editor files, attachments, and priority files must be consumed before broad search.
 
@@ -21,14 +21,15 @@ If any precondition fails, return `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCK
 
 For each ready task, follow this exact order:
 
-1. `PICK`: identify task id, target files, dependencies, and success criteria.
-2. `EXECUTE`: make the smallest diff inside the frozen file set.
-3. `VERIFY`: run the minimal sufficient command or static/browser check.
-4. `REVIEW_STAGE_1`: check spec/task compliance first. Confirm that the task did exactly the requested work, no more and no less.
-5. `REVIEW_STAGE_2`: check code quality, maintainability, release risk, dead code, and test adequacy.
-6. `RECORD`: write task status, verification result, verification coverage, command/check evidence, and residual risk.
-7. `SNAPSHOT`: update the ready-artifact list with changed files, verification command, review outputs, blocked items, and next resume action.
-8. `DECIDE`: proceed, fix, return to spec, or block with evidence.
+1. `PICK`: identify task id, target files, dependencies, success criteria, assumptions, tradeoffs, and the simplest viable approach.
+2. `READ`: before code edits, inspect the target file's public surface/exports, the immediate caller or callee, and obvious shared utilities or local patterns.
+3. `EXECUTE`: make the smallest diff inside the frozen file set. Do not add speculative features, single-use abstractions, or adjacent cleanup.
+4. `VERIFY`: run the minimal sufficient command or static/browser check.
+5. `REVIEW_STAGE_1`: check spec/task compliance first. Confirm that the task did exactly the requested work, no more and no less.
+6. `REVIEW_STAGE_2`: check code quality, maintainability, release risk, dead code, and test adequacy.
+7. `RECORD`: write task status, verification result, verification coverage, command/check evidence, and residual risk.
+8. `SNAPSHOT`: update the ready-artifact list with changed files, verification command, review outputs, blocked items, next resume action, and a done/verified/left checkpoint summary.
+9. `DECIDE`: proceed, fix, return to spec, or block with evidence.
 
 Do not invert the two review stages. A task that fails spec compliance is not ready for code-quality signoff.
 
@@ -62,3 +63,4 @@ Never use a test result as the task status. Never claim `DONE` without real evid
 - Do not modify files outside the current task boundary.
 - Do not skip spec compliance review because tests pass.
 - Do not close a task before both review stages and verification evidence are recorded.
+- Do not continue from a checkpoint you cannot summarize as done, verified, and left.

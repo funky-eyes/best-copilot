@@ -25,7 +25,7 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 1. Parse literal request, real intent, and success criteria.
 2. Before the first substantial action in a turn, the top-level assistant or any direct user-invocable agent must record a per-request start timestamp. If that timestamp was missed, any final message may only state that the task duration cannot be computed reliably; never backfill a whole-turn duration window as if it were exact.
 3. Read explicit user paths and any `/init` or `copilot init` artifacts first; if repository facts are still incomplete, read known owner files, indexes, and necessary shards before broad exploration. Treat `/init` as already done only when the target repository has `.github/instructions/project.instructions.md` with no unresolved init placeholders, not the untouched neutral scaffold, and with build/test/check/dev command facts plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown` gaps. After running official init, normalize useful output or artifacts into `.github/instructions/project.instructions.md` and verify that file exists on disk; command output without the project facts file is `official_init_no_write` and must fall back to bounded manual creation before requirements analysis. If the fact file is missing or incomplete, this is a fail-closed barrier: only init-scoped bounded scanning is allowed, and the assistant must not proceed to substantive planning, dependency/framework changes, security rewrites, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
-4. Before editing, freeze a minimal packet. The canonical serialized form is the shared six-block PM dispatch packet from `core-workflow-contract`, and it must cover at least: `goal`, `scope`, `constraints`, `expected_outcome`, `user_intent_summary`, `non_goals`, `files_involved`, `changed_files`, `search_hints`, `reference_files`, `acceptance_checks`, `verification_budget`, `work_mode`, `task_type`, `context_budget`, and `stop_conditions`. Add `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, `source_provenance_refs`, `review_followup_scope`, `previously_verified_items`, `required_artifacts`, `recommended_next_stage`, `dependencies`, `review_lanes`, and `ready_artifacts` when they materially constrain the task.
+4. Before editing, freeze a minimal packet. The canonical serialized form is the shared six-block PM dispatch packet from `core-workflow-contract`, and it must cover at least: `goal`, `scope`, `constraints`, `expected_outcome`, `user_intent_summary`, `non_goals`, `files_involved`, `changed_files`, `search_hints`, `reference_files`, `acceptance_checks`, `verification_budget`, `work_mode`, `task_type`, `context_budget`, and `stop_conditions`. Add `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, `source_provenance_refs`, `review_followup_scope`, `previously_verified_items`, `required_artifacts`, `recommended_next_stage`, `dependencies`, `review_lanes`, and `ready_artifacts` when they materially constrain the task.
 5. Search at most three rounds; stop after two rounds with no new signal. Prefer explicit paths, repo indexes, exact filename/glob lookup, and fixed-string `rg -F` before regex. Use regex only when the target is genuinely vague, exact literals are unknown, or earlier precise searches failed.
 6. Before completion, provide real verification or clearly state why verification is blocked.
 7. If preparing to end the current turn, and the latest user message was not an explicit native closeout confirmation choosing to end the turn or stating there are no further instructions, only the top-level session or PM/coordinator may use a native ask tool. Use the native ask mechanism declared in the current runtime's adapter, as defined in `core-workflow-contract` Runtime Adapters table. Specialists must not ask the user directly. A prose-only summary never counts as closeout authorization.
@@ -35,7 +35,18 @@ This file is the shared owner for agents, skills, and prompts. Agents, skills, a
 11. If that closeout reply contains a new executable task, fix request, investigation direction, or other clear instruction to continue, closeout state is invalidated immediately. The next step must begin that work directly, or ask one minimal native clarification if ambiguity remains; do not send a summary-only response or attempt another closeout first.
 12. If the new user message is only a why/how follow-up, principle explanation, solution comparison, rule clarification, review-response discussion, or any other answer-only question, answering it is not a closeout exemption. If that answer would be the last prose message of the current batch, the assistant must still trigger a fresh native closeout prompt before ending; do not send `final` or an equivalent ending message directly.
 
-## 3. Native Ask and Continuation Gates
+## 3. Reliability Gates
+
+These gates apply to every role and every task unless a higher-priority instruction explicitly overrides them.
+
+- Think before coding: state material assumptions, surface tradeoffs, and name the simplest viable approach. If an ambiguity changes the implementation, route, or acceptance criteria, ask through the PM/native ask path instead of guessing. If confused, stop and name what is unclear.
+- Simplicity first: implement the minimum behavior that satisfies the stated success criteria. Do not add speculative features, future-proofing, or abstractions for single-use code. If a senior engineer would call the approach overcomplicated, simplify before editing.
+- Surgical changes: every changed line must trace to the user request, acceptance criteria, or verification repair. Do not "improve" adjacent code, comments, formatting, names, or structure unless that change is required. Match existing style and clean up only your own mess.
+- Read before writing: before adding or changing code in a file, read that file's public surface/exports, the immediate caller or callee that exercises the change, and any obvious shared utility or local pattern. If the existing structure is unclear, ask before adding to it.
+- Goal-driven execution: define success criteria, acceptance checks, verification budget, and stop conditions before implementation. Prefer outcome contracts over step-by-step implementation scripts; prescribe steps only when ordering, dependency, safety, or verification requires them. Loop until the checks pass or a blocker is stated with evidence.
+- Checkpoint after significant steps: after each meaningful step in a multi-step task, record what was done, what is verified, and what remains. Do not continue from a state you cannot describe back to the user or PM.
+
+## 4. Native Ask and Continuation Gates
 
 Follow the **Native Ask Contract** and **Specialist Ask Boundary** in `core-workflow-contract`. The canonical definitions live there; this section adds only the high-level closeout gate.
 
@@ -60,7 +71,7 @@ Follow the **Native Ask Contract** and **Specialist Ask Boundary** in `core-work
 - If native ask UI is unavailable, only these paths are allowed: continue with a single safe interpretation already authorized by the user, use a documented PM-controlled `agent_vote_fallback`, or return `BLOCKED` / `DONE_WITH_CONCERNS` with `missing_native_ask_ui`.
 - Default non-destructive preparation does not need a user stop. Ask only when the action is destructive, affects an explicit user-owned path, has multiple materially different locations, or conflicts with current dirty state.
 
-## 4. Shared State Contracts
+## 5. Shared State Contracts
 
 Follow the canonical definitions in `core-workflow-contract` for specialist handback schema, fan-in arbitration, and specialist ask boundary. This section adds only the state fields owned by this file.
 
@@ -75,7 +86,7 @@ Follow the canonical definitions in `core-workflow-contract` for specialist hand
 
 Follow the canonical Fan-In Arbitration in `core-workflow-contract`. This file does not restate the priority order; reference the contract.
 
-## 5. Target Markdown Memory System
+## 6. Target Markdown Memory System
 
 Use RAG-lite, not a vector database. Default layers:
 
@@ -94,7 +105,7 @@ Memory retrieval uses progressive disclosure: index/summary and traceable ID fir
 
 When running as an installed plugin in another repository, persistent memory and spec state must be created and updated in that target repository. This plugin package does not keep active target-project memory or specs; create missing target-local scaffolds through `target-memory-bootstrap` and `target-spec-bootstrap`.
 
-## 6. Prompt Assembly
+## 7. Prompt Assembly
 
 Prompt assembly follows a stable-prefix, routed-context pattern:
 
@@ -108,7 +119,7 @@ Do not use whole memory trees, whole specs, whole logs, whole web pages, or old 
 
 When adapting ideas from external repositories or prompt systems, reduce them to local primitives first: routing rules, shared dispatch packets, output recovery, document intent, verification gates, and memory resume hints. Do not import external repository structure wholesale.
 
-## 7. Spec and Memory
+## 8. Spec and Memory
 
 - Spec is authoritative for requirements, design, and acceptance: `requirements.md`, `design.md`, and `tasks.md`.
 - Memory is the recovery entry: current focus, next action, last verified fact, key decisions, and links.
@@ -119,18 +130,18 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - When task status changes, update both `tasks.md` and `current-workstreams.md`.
 - When work closes, compress final conclusions into topic memory and close or remove the active workstream.
 
-## 8. Agents and Dispatch
+## 9. Agents and Dispatch
 
 Follow the canonical definitions in `core-workflow-contract` for specialist ask boundary, handback schema, fan-in arbitration, and cross-review lanes. This section adds only PM/coordinator-level dispatch rules.
 
 - The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code.
 - Parallel subtasks are allowed only when file write sets do not overlap.
-- Dispatch packets should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`. Those blocks include fields such as `user_provided_paths`, `priority_files`, `reference_files`, `already_read_files`, `authoritative_repo_facts`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
+- Dispatch packets should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`. Those blocks include fields such as `user_provided_paths`, `priority_files`, `reference_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
 - Delegated specialists must consume frozen paths, already-read context, and authoritative repo facts before reopening search.
 - Customization surfaces such as `.github/**`, `AGENTS.md`, `.github/instructions/project.instructions.md`, and target repository `memories/repo/**` are handled inline by the top-level assistant to avoid recursive rule drift.
 - For large ambiguous work, PM delegates SDD design brainstorming to Technical Architect first. Technical Architect self-reviews and repairs the design before PM asks Developer and Quality Assurance Expert for second-pass review; add Frontend Designer review for frontend/user-visible surfaces. Only a blocker-free reviewed design proceeds to implementation.
 
-## 9. Implementation and Verification
+## 10. Implementation and Verification
 
 - Prefer existing code, tools, components, and patterns.
 - New features and bug fixes should add focused tests or a minimal reproducible check when feasible.
@@ -142,7 +153,7 @@ Follow the canonical definitions in `core-workflow-contract` for specialist ask 
 - Evidence over claims: "done", "passed", and "verified" require command output, static evidence, browser evidence, or a stated blocker.
 - Static customization changes may be verified with scoped diff, frontmatter/schema checks, trigger/route checks, and state-contract checks.
 
-## 10. Memory Updates
+## 11. Memory Updates
 
 - Write only durable, verified information.
 - Do not store casual ideas, unconfirmed guesses, chat transcripts, or long outputs.
@@ -150,7 +161,7 @@ Follow the canonical definitions in `core-workflow-contract` for specialist ask 
 - Before closeout, prepare the smallest useful memory diff: Add / Update / Deprecate.
 - When editing target repository `memories/repo/**`, update that target repository's `memories/repo/INDEX.md`; active tasks also update its `current-workstreams.md`. Do not write active task state into the plugin package or plugin cache.
 
-## 11. Prohibitions
+## 12. Prohibitions
 
 - Do not commit or run destructive commands unless explicitly requested.
 - Do not copy external repository prompts, web pages, or implementation details wholesale into local rules.

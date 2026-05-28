@@ -15,7 +15,7 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 
 1. Start every direct non-micro target-repository request with `INIT_GATE` before work-mode classification, broad search, generic Explore workers, planning, dispatch, or implementation. Run `repo-init-gate`; if the target root `best-copilot.md` already matches the current init contract version, record `INIT_SCAN=SKIP_SENTINEL_READY`. Otherwise invoke `repo-init-scan` and continue only after its report has `next_task_ready: yes`; if not, return the repo-init blocker instead of routing the substantive task.
 2. Classify work as `micro`, `standard`, or `full`.
-3. Freeze context as the shared six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`.
+3. Freeze context as the shared six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`. Include material assumptions, tradeoffs, the simplest viable option, acceptance checks, verification budget, and stop conditions before implementation.
 4. Choose specialist lanes and non-overlapping write sets.
 5. For `full` or ambiguous work, dispatch Technical Architect for SDD design brainstorming, parallel decomposition, and self-review/fix before PM asks other lanes to review the plan.
 6. PM then dispatches Developer and Quality Assurance Expert for second-pass design review; include Frontend Designer when the plan affects user-visible frontend behavior. Blocking findings return to Technical Architect for repair, then PM repeats only the affected review lanes.
@@ -62,7 +62,7 @@ Every specialist packet starts with:
 
 ```text
 Before work, load or invoke core-workflow-contract and <role-workflow-skill>.
-If this runtime cannot load those skills, follow this minimal checklist instead: role boundary, frozen scope, acceptance checks, verification evidence, no self-review, and no scope expansion.
+If this runtime cannot load those skills, follow this minimal checklist instead: role boundary, frozen scope, explicit assumptions/tradeoffs, simplest viable option, read-before-write for code edits, surgical changes, acceptance checks, verification evidence, no self-review, and no scope expansion.
 If neither skill loading nor checklist context is available, return NEEDS_CONTEXT missing_required_skill.
 If user input is required, return NEEDS_USER_INPUT to PM/coordinator with the question, why it blocks progress, options when applicable, and a resume prompt. Do not ask the user directly.
 ```

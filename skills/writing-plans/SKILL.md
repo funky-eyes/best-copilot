@@ -13,18 +13,21 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 
 - **task_intent**: `goal`
 - **frozen_scope**: `non_goals`, `files_involved`, `write_set`, `dependencies`, `owner_lane`, `reviewer_lanes`, `parallel_group`, `parallel_ready`
-- **execution_contract**: `acceptance_checks`, `tdd_or_check`, `verification_command`, `stop_conditions`, `context_budget`
+- **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check`, `verification_command`, `stop_conditions`, `context_budget`, `read_before_write_targets`
 - **output_contract**: `ready_artifacts`, `implementation_steps`
 
 ## Decomposition Rules
 
 - Tasks should be independently understandable in 2-5 minutes.
+- Prefer success criteria, constraints, and verification over micro-prescribed implementation steps. Include concrete steps only when dependency order, safety, or verification makes them necessary.
 - Plan SDD first, then TDD: each task consumes reviewed design context and includes either a failing test target or a minimal reproducible check before implementation.
 - Split by file ownership, dependency order, and review lane, not by vague phases.
 - Mark parallel only when write sets do not overlap.
 - Prefer parallel groups that let Technical Architect and Developer work independently; add Frontend Designer as owner or reviewer for frontend surfaces.
 - Assign cross-review lanes per the Cross-Review Lanes from `core-workflow-contract`.
 - Give each task a small `ready_artifacts` list so fan-in can check outputs without rereading the whole conversation.
+- Include material assumptions, meaningful tradeoffs, and the simplest viable option for each task or batch; if an unresolved question changes implementation or acceptance, mark it as a blocker instead of planning from a guess.
+- Include `read_before_write_targets` for code-editing tasks: target file public surface/exports, immediate caller/callee, and obvious shared utility or local pattern to inspect.
 - Include `stop_conditions` for tasks that might otherwise expand into broad discovery.
 - Public API, data model, auth, dependency, CI, or runtime config changes require blast radius notes.
 - Avoid placeholders such as TODO, TBD, “add proper validation”, or “similar to previous task”.
