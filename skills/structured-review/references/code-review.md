@@ -13,7 +13,7 @@ Checklist:
 - Check for under-building: missing scenarios or states.
 - Check whether the implementation solves the user's real intent, not only the literal text.
 - Prioritize `user_provided_paths`, `priority_files`, attachments, and currently edited files over repository-wide rediscovery.
-- Block on unfinished placeholders: `TBD`, `TODO`, `待实现`, template skeletons, dummy implementations.
+- Block on unfinished placeholders: `TBD`, `TODO`, `pending implementation`, template skeletons, dummy implementations.
 - Check boundary cases: null, empty, extreme values, concurrency, re-entry, duplicate submission.
 - Check that key branches, loops, and returns map to confirmed requirements.
 
@@ -70,7 +70,7 @@ When business logic changes, verify:
 - if RED/GREEN evidence is provided, the test failed before implementation and passed after implementation
 - claimed coverage matches actual test names, assertions, and output
 
-Do not accept `理论上已覆盖` as evidence.
+Do not accept `theoretically covered` as evidence.
 
 ### Developer experience
 
@@ -90,7 +90,7 @@ Apply when the change affects workflows, scaffolding, agents, skills, generated 
 ## findings
 - [Critical|Important|Minor][confidence=NN][origin=...] file:line | issue | impact | evidence | fix
 
-## concerns / risks / 未验证项
+## concerns / risks / unverified items
 - ...
 
 ## required section results
@@ -110,4 +110,4 @@ Apply when the change affects workflows, scaffolding, agents, skills, generated 
 - exact command or manual check, if known
 ```
 
-If no blocking issue is found, explicitly write `未发现阻塞问题` and list remaining risk or evidence gaps.
+If no blocking issue is found, explicitly write `no blocking issues found` and list remaining risk or evidence gaps.

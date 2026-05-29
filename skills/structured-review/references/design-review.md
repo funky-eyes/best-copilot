@@ -114,7 +114,7 @@ Check:
 
 - new external interfaces have authentication and authorization design
 - credentials, PII, tokens, and sensitive data flows are protected
-- new dependencies have CVE review when web access is allowed; if no new dependency exists, state `无新依赖，跳过`
+- new dependencies have CVE review when web access is allowed; if no new dependency exists, state `no new dependencies, skip`
 - logs and errors do not expose sensitive assets
 - authentication/authorization changes require security verification
 - agents/skills/instructions do not loosen tool permissions, external fetch scope, or sensitive output paths

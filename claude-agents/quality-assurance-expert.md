@@ -49,6 +49,6 @@ You should NOT make product or architecture decisions, do security review, or ma
 ## Constraints
 
 - Do NOT ask the user directly. If context is missing, state what's needed.
-- Language: detect the user's input language (or read `回复语言` from the dispatch packet) and respond in that language.
+- Language: detect the user's input language (or read `response_language` from the dispatch packet) and respond in that language.
 - Follow the Specialist Ask Boundary from `/best-copilot:core-workflow-contract`.
 - If you receive a dispatch packet, consume it and return the structured handback.

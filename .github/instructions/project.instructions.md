@@ -23,6 +23,7 @@ This file keeps project-level facts, build entrypoints, and high-frequency conve
 - Reliability gates for assumptions/tradeoffs, simplicity, surgical diffs, read-before-write, goal-driven verification, and checkpoints live in `.github/instructions/must.instructions.md` and `skills/core-workflow-contract/SKILL.md`; target bootstrap templates must keep the same behavior.
 - Claude Code adapters normally preload only `core-workflow-contract` and their matching role workflow skill in frontmatter. Senior Project Expert additionally preloads `repo-init-gate` and `repo-init-scan` because init preflight is a mandatory boot gate. Other focused skills stay on-demand in the agent body to avoid unnecessary startup context.
 - Codegraph MCP is optional in Claude Code target environments. When `mcp__codegraph__*` tools are available, specialists should prefer them for structural repository discovery; when absent or failed, continue with built-in Read/Grep/Glob and shell `rg` fallback. Missing codegraph must not block init, dispatch, review, or implementation.
+- This project provides plugins for Claude Code and GitHub Copilot. As such, the .github, .claude, and .claude-plugin directories, along with AGENTS.md and CLAUDE.md, are used by this project itself rather than by the plugins it generates or manages. Unless explicitly required, do not modify the contents of these directories or files.
 
 ## First Repository Initialization
 

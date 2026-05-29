@@ -11,7 +11,7 @@ Every conclusion needs evidence from at least one of:
 - official documentation or platform behavior
 - established project convention found in nearby code or higher-level instructions
 
-Avoid unsupported language such as `应该没问题`, `理论上可以`, or `看起来没影响`.
+Avoid unsupported language such as `should be fine`, `should work in theory`, or `looks inconsequential`.
 
 ## Origin classification
 
@@ -35,7 +35,7 @@ Default final filtering:
 
 - final findings: `confidence >= 80`
 - concerns/risks: `confidence < 80`, missing context, or uncertain origin
-- never hide major unknowns; mark them as `未验证项` instead of presenting them as findings
+- never hide major unknowns; mark them as `unverified items` instead of presenting them as findings
 
 ## Severity
 
