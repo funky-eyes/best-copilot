@@ -40,6 +40,9 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 >
 > **Codegraph availability:**
 > Codegraph is optional. Treat it as available only when `mcp__codegraph__*` tools are present in the current Claude tool inventory; a local `codegraph` binary or plugin inventory entry is not enough by itself. If those tools are absent or the MCP server failed to start, do not call codegraph and do not block; dispatch with `codegraph_status: unavailable` and require built-in Read/Grep/Glob plus shell `rg` fallback.
+>
+> **Provider compatibility (cc-switch/new-api):**
+> Claude Code protocol compatibility is not the same as Claude model behavior. The plugin hook gate blocks business-source tools until target `best-copilot.md` is current; if a hook denies a tool call, restart at `INIT_GATE` instead of retrying the blocked read/search/codegraph action. If the session is routed through `cc-switch`, `new-api`, DeepSeek, Qwen, or any non-Claude or unknown backend, set `provider_compatibility: hook_enforced|unverified` in the PM packet and run a visible smoke check before target-repository work: output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION` and name the required specialist lanes for the current work mode. If you cannot do that, return `BLOCKED provider_instruction_following_unverified` instead of continuing. Do not treat successful API responses, model aliases, or tool availability as workflow compatibility.
 
 1. **INIT_GATE**: Run `/best-copilot:repo-init-gate`. If sentinel missing/mismatched → run `/best-copilot:repo-init-scan`. Wait for `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes` before proceeding. If blocked, report the blocker and stop. A Claude transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` only proves the instructions were loaded; it is not init evidence.
 
@@ -57,7 +60,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
    | `best-copilot:root-cause-fixer` | Bug root cause, failing tests, targeted repairs |
    | `best-copilot:specification-writer` | Requirements, tasks, ADRs, design docs, memory/spec |
 
-4. **COMMON PATTERNS**: For protocol/auth/upgrade tasks (`full` + `design_review`): `technical-architect` → SDD design → `security-reviewer` → auth review → `developer` → implementation → `quality-assurance-expert` → verification. For standard backend: `developer` → implement → `quality-assurance-expert` → verify.
+4. **COMMON PATTERNS**: For protocol/auth/upgrade tasks classified as `full` + `design_review`: `technical-architect` → SDD design + self-review → `developer` implementability review + `quality-assurance-expert` testability/regression review + `security-reviewer` auth/security review → PM fan-in. Security review is additive for auth surfaces; it must not replace Developer or QA second-pass design review. Only after blocker-free fan-in may PM move to implementation planning. For standard backend implementation: `developer` → implement → `quality-assurance-expert` → verify.
 
 Then load `/best-copilot:core-workflow-contract` and `/best-copilot:senior-project-expert-workflow` for the full orchestration protocol.
 
@@ -164,13 +167,14 @@ For implementation tasks that might conflict, prefer sequential dispatch or isol
 2. Parse intent, classify work mode, freeze the dispatch packet.
 3. For `full`/ambiguous/high-risk work: dispatch `best-copilot:technical-architect` for SDD design brainstorming and self-review first.
 4. Before implementation, invoke `/best-copilot:workspace-isolation` or record the Claude Code worktree policy in the PM packet, including whether worktree base should follow current `HEAD`.
-5. After design is reviewed, dispatch implementation to the right specialist(s), foreground by default for writes and background only for safe read-only lanes.
-6. Run `best-copilot:quality-assurance-expert` and `best-copilot:security-reviewer` in parallel after implementation when their required permissions are available.
-7. If verification fails, dispatch `best-copilot:root-cause-fixer`.
-8. If any isolated worktree has changes, fan in its path/branch/diff/verification and run `/best-copilot:development-branch-closeout` before claiming the change landed.
-9. Synthesize: what changed, open risks, verification result, next action.
-10. Invoke `/best-copilot:verification-before-completion` before final response.
-11. Use `AskUserQuestion` for closeout/continuation when available.
+5. For `task_type=design_review`, dispatch the required second-pass review lanes before PM synthesis: Developer and Quality Assurance Expert are mandatory for full design reviews; Security Reviewer is mandatory for auth/security-sensitive surfaces; Frontend Designer is included only for user-visible frontend surfaces.
+6. After a blocker-free design fan-in and explicit implementation gate, dispatch implementation to the right specialist(s), foreground by default for writes and background only for safe read-only lanes.
+7. Run `best-copilot:quality-assurance-expert` and `best-copilot:security-reviewer` in parallel after implementation when their required permissions are available.
+8. If verification fails, dispatch `best-copilot:root-cause-fixer`.
+9. If any isolated worktree has changes, fan in its path/branch/diff/verification and run `/best-copilot:development-branch-closeout` before claiming the change landed.
+10. Synthesize: what changed, open risks, verification result, next action.
+11. Invoke `/best-copilot:verification-before-completion` before final response.
+12. Use `AskUserQuestion` for closeout/continuation when available.
 
 ## Fan-In Arbitration
 

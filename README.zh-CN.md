@@ -134,7 +134,7 @@ PM（`senior-project-expert`）作为主会话接收用户需求后：
 
 Claude Code 中可用的插件子 agent 会以 scoped 形式显示：`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:specification-writer`、`best-copilot:root-cause-fixer`。
 
-Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4 对应 `opus`，Gemini 对应 `haiku`，Claude Sonnet 对应 `sonnet`。Claude Code 仍只能运行 Claude 模型；这个映射用来保留 Copilot 侧的角色档位。
+Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4 对应 `opus`，Gemini 对应 `haiku`，Claude Sonnet 对应 `sonnet`。在原生 Claude Code 中，这些别名会在 Claude 模型族内保留 Copilot 侧的角色档位。如果 `cc-switch`、`new-api` 或其他 Anthropic-compatible proxy 把这些别名路由到 DeepSeek、Qwen 或其他非 Claude 后端，应视为降级运行，除非 hook gate 和 workflow smoke check 都通过。插件提供首轮 `UserPromptSubmit`、`UserPromptExpansion` 和 `PreToolUse` hooks：注入 init-gate 上下文，在 slash command 展开前阻断非 init 的 best-copilot 命令，并在目标 `best-copilot.md` 未就绪前阻断业务源码工具；target bootstrap 也可以生成已提交的 `.claude/hooks/best-copilot-init-gate.sh` fallback，但只能在 bootstrap 已开始后生效。PM 随后必须输出 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`，并在读取源码或实现前列出所需 specialist lanes。
 
 ## 运行时适配架构
 
@@ -562,7 +562,7 @@ best-copilot.md                                  ← Init sentinel（version: "0
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code 只能运行 Claude 模型。`claude-agents/*.md` 中的 Claude 适配器保留角色分工，并把 Copilot 档位映射为 Claude 别名：GPT-5.4 -> `opus`，Gemini 3.1 Pro (Preview) -> `haiku`，Claude Sonnet 4.6 -> `sonnet`。
+原生 Claude Code 使用 Claude 模型别名。`claude-agents/*.md` 中的 Claude 适配器保留角色分工，并把 Copilot 档位映射为 Claude 别名：GPT-5.4 -> `opus`，Gemini 3.1 Pro (Preview) -> `haiku`，Claude Sonnet 4.6 -> `sonnet`。`cc-switch` 或 `new-api` 等 proxy route 可能把这些别名映射到非 Claude 模型；这只是 API 兼容，不代表 workflow 兼容。Claude plugin 包含 hook-level enforcement：在目标 sentinel 就绪前，`PreToolUse` 会阻断业务源码工具和 codegraph/MCP 工具，同时允许 sentinel 读取、init bootstrap 写入和有界根目录探测。这个 plugin hook 是首轮 guard；target bootstrap 之后可以再添加 `.claude/settings.json` hook entries 和 `.claude/hooks/best-copilot-init-gate.sh` 作为已提交的 fallback policy，但 target-local hooks 不能自举自己。对 DeepSeek、Qwen 或未知后端，真实工作前仍要运行非破坏性的 workflow smoke check。期望行为是：PM 输出 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`，然后为请求 dispatch 所需 lanes。如果它在 hook feedback 后仍开始编码或跳过 lanes，请改用能通过 smoke check 的模型/provider。
 
 ## 搜索纪律
 
@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-Claude inventory 应包含 `Agents (8)`。在 `/agents` Library 和 `@` 选择器里，插件 agents 应以 scoped 形式显示为 `best-copilot:senior-project-expert`、`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:root-cause-fixer` 和 `best-copilot:specification-writer`。
+Claude inventory 应包含 `Agents (8)` 和 `Hooks (3)`。在 `/agents` Library 和 `@` 选择器里，插件 agents 应以 scoped 形式显示为 `best-copilot:senior-project-expert`、`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:root-cause-fixer` 和 `best-copilot:specification-writer`。
 
 ## 自进化机制（Evolution Loop）
 
