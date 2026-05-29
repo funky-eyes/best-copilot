@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.6.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -261,7 +261,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELE
 
 ### 阶段一：Init 门禁（强制预检）
 
-在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.5.1"`。
+在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.6.0"`。
 
 ```
 repo-init-gate
@@ -473,7 +473,7 @@ PM 按优先级裁决所有专员返回的结果。仲裁优先级：
 │   ├── must.instructions.md       ← 核心规则
 │   └── skills-index.instructions.md ← 技能路由
 │
-└── best-copilot.md               ← Init sentinel（version: "0.5.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.6.0"）
 ```
 
 ### Spec vs Memory 的分工
@@ -542,7 +542,7 @@ memories/repo/INDEX.md                           ← 恢复索引路由表
 memories/repo/current-workstreams.md             ← 当前活跃工作
 spec/INDEX.md                                    ← Spec 路由表
 spec/templates/                                  ← 可复用模板
-best-copilot.md                                  ← Init sentinel（version: "0.5.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.6.0"）
 ```
 
 如果必需的事实或脚手架无法创建，工作会以 `BLOCKED first_use_gate_incomplete` 停止——参见 [核心工作流 Stage 1](#阶段一init-门禁强制预检) 的完整说明。

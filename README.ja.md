@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.6.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -261,7 +261,7 @@ INIT_GATE → [必要に応じて INIT_SCAN] → CLASSIFY → FREEZE_PACKET → 
 
 ### ステージ 1: Init ゲート（必須プリフライト）
 
-ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.5.1"` と一致するか確認します。
+ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.6.0"` と一致するか確認します。
 
 ```
 repo-init-gate
@@ -473,7 +473,7 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 │   ├── must.instructions.md       ← コアルール
 │   └── skills-index.instructions.md ← スキルルーティング
 │
-└── best-copilot.md               ← Init sentinel（version: "0.5.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.6.0"）
 ```
 
 ### Spec vs Memory の分担
@@ -542,7 +542,7 @@ memories/repo/INDEX.md                           ← 復帰インデックスル
 memories/repo/current-workstreams.md             ← 現在のアクティブな作業
 spec/INDEX.md                                    ← スペックルーティングテーブル
 spec/templates/                                  ← 再利用可能なテンプレート
-best-copilot.md                                  ← Init sentinel（version: "0.5.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.6.0"）
 ```
 
 必要な事実やスキャフォールドを作成できない場合、推測に基づく継続ではなく `BLOCKED first_use_gate_incomplete` として停止します——完全な説明は[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト)を参照してください。

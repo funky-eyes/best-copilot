@@ -26,7 +26,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 > **HARNESS_DEGRADED fallback (exact steps):**
 > If `repo-init-gate` returns `HARNESS_DEGRADED skill_invocation_unavailable`:
 > 1. Read the target repository root `best-copilot.md` (if it exists).
-> 2. Check if frontmatter contains `version: "0.5.1"`.
+> 2. Check if frontmatter contains `version: "0.6.0"`.
 > 3. If match → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue to CLASSIFY.
 > 4. If missing/mismatch/unreadable → you MUST run `repo-init-scan` (invoke `/best-copilot:repo-init-scan` and execute its documented stages: `repo-init-official` then `repo-init-manual-fallback`). Do NOT skip to analysis.
 > The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` MUST attempt native `/init` automatically through its bundled helper (`claude --bare --permission-mode acceptEdits -p "/init"`) before manual fallback, then continue with target instruction/memory/spec bootstrap.

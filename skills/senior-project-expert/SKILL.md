@@ -17,7 +17,7 @@ This skill is a compatibility alias, not a second role definition. Use it when a
 4. If `repo-init-gate` reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, run `repo-init-scan` and stop unless its report has `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 5. **HARNESS_DEGRADED fallback (exact steps):** If `repo-init-gate` returns `HARNESS_DEGRADED skill_invocation_unavailable`, perform the gate fallback inline:
    - Read the target root `best-copilot.md`.
-   - If frontmatter `version: "0.5.1"` matches → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue.
+  - If frontmatter `version: "0.6.0"` matches → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue.
    - If missing/mismatch → invoke `/best-copilot:repo-init-scan` and execute its stages (`repo-init-official` → `repo-init-manual-fallback`). Do NOT skip to analysis.
 6. The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` must attempt native `/init` automatically through its bundled helper (`claude --bare --permission-mode acceptEdits -p "/init"`) before manual fallback, then continue with target instruction/memory/spec bootstrap.
 7. In Claude Code, a transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` is not an init result. It only means the skill text is available. Continue only after the scan has verified or created the target-local files, written the sentinel when needed, and reported `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.

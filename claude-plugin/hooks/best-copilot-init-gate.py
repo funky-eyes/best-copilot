@@ -11,7 +11,7 @@ import sys
 from typing import Any
 
 
-EXPECTED_VERSION = "0.5.1"
+EXPECTED_VERSION = "0.6.0"
 
 ALLOWED_EXACT_PATHS = {
     "best-copilot.md",
