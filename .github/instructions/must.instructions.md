@@ -135,6 +135,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 Follow the canonical definitions in `core-workflow-contract` for specialist ask boundary, handback schema, fan-in arbitration, and cross-review lanes. This section adds only PM/coordinator-level dispatch rules.
 
 - The PM/coordinator owns intent, scope, dispatch, adjudication, closeout, and evolution signals. It does not write production code.
+- For `standard` or `full` target-repository work, PM/coordinator must not use broad business-source exploration as a substitute for specialist lanes. Before init passes, PM may read only sentinel and init-scoped bounded evidence. After init passes, PM freezes scope from the user request and verified repo facts, then dispatches named specialists for business-code inspection.
 - Parallel subtasks are allowed only when file write sets do not overlap.
 - Dispatch packets should preserve the shared six-block contract: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`. Those blocks include fields such as `user_provided_paths`, `priority_files`, `reference_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
 - Delegated specialists must consume frozen paths, already-read context, and authoritative repo facts before reopening search.

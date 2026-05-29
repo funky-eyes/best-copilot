@@ -20,7 +20,27 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 
 **Execute these steps in order BEFORE any analysis, exploration, planning, or code reading. Do not skip.**
 
-1. **INIT_GATE**: Run `/best-copilot:repo-init-gate`. If sentinel missing/mismatched → run `/best-copilot:repo-init-scan`. Wait for `next_task_ready: yes` before proceeding. If blocked, report the blocker and stop. A Claude transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` only proves the instructions were loaded; it is not init evidence. Do not continue until the scan report includes filesystem verification, `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
+> **CRITICAL ANTI-SKIP LOCK (Claude Code specific):**
+> `Skill(name) Successfully loaded` means ONLY that skill text was injected into your context. It does NOT mean the workflow ran, files were created, or any step completed. You MUST execute the documented steps inside the loaded skill before proceeding. If you see `Successfully loaded` for `repo-init-gate` or `repo-init-scan` and have NOT produced the structured output block from that skill, the preflight is INCOMPLETE — stop and execute it now.
+>
+> **HARNESS_DEGRADED fallback (exact steps):**
+> If `repo-init-gate` returns `HARNESS_DEGRADED skill_invocation_unavailable`:
+> 1. Read the target repository root `best-copilot.md` (if it exists).
+> 2. Check if frontmatter contains `version: "0.5.1"`.
+> 3. If match → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue to CLASSIFY.
+> 4. If missing/mismatch/unreadable → you MUST run `repo-init-scan` (invoke `/best-copilot:repo-init-scan` and execute its documented stages: `repo-init-official` then `repo-init-manual-fallback`). Do NOT skip to analysis.
+>
+> **Language propagation:**
+> Detect the user's input language at the start. ALL responses and ALL spawned subagent prompts MUST use the user's language. Add `回复语言: <detected_language>` to every dispatch packet.
+>
+> **PM business-source embargo:**
+> Before init passes, do not call codegraph, read/search/list source files, or inspect business modules. The only allowed reads are the sentinel and init-scoped artifacts required by `repo-init-scan`.
+> After init passes, for `standard` or `full` work, do not use PM-owned codegraph/read/search as a substitute for named role lanes. Freeze the packet from the user request plus init facts, then dispatch the appropriate specialist to inspect business code. For OAuth2 -> OIDC/auth/protocol work, the first business-code inspection belongs to `best-copilot:technical-architect`.
+>
+> **Codegraph availability:**
+> Codegraph is optional. Treat it as available only when `mcp__codegraph__*` tools are present in the current Claude tool inventory; a local `codegraph` binary or plugin inventory entry is not enough by itself. If those tools are absent or the MCP server failed to start, do not call codegraph and do not block; dispatch with `codegraph_status: unavailable` and require built-in Read/Grep/Glob plus shell `rg` fallback.
+
+1. **INIT_GATE**: Run `/best-copilot:repo-init-gate`. If sentinel missing/mismatched → run `/best-copilot:repo-init-scan`. Wait for `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes` before proceeding. If blocked, report the blocker and stop. A Claude transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` only proves the instructions were loaded; it is not init evidence.
 
 2. **CLASSIFY**: `micro` (tiny fix, no risk → handle directly) | `standard` (bounded, one owner → dispatch one agent) | `full` (ambiguous, cross-module, auth/protocol, multi-agent → dispatch pipeline).
 
@@ -54,12 +74,13 @@ Then load `/best-copilot:core-workflow-contract` and `/best-copilot:senior-proje
 
 ## Claude Runtime Invariants
 
-- Observable harness gate: for any non-micro target-repository request, do not answer with a single analysis essay. First show the stage trail `INIT_GATE -> [INIT_SCAN if needed] -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION -> [ARCHITECT_SDD if full/ambiguous/high-risk] -> REVIEW_OR_DISPATCH -> FAN_IN_ARBITRATION -> NEXT_GATE`. `INIT_GATE` must be visible before generic Explore, broad code search, planning, dispatch, or implementation. If the sentinel is current, record `INIT_SCAN=SKIP_SENTINEL_READY`; otherwise do not continue the substantive task until `/best-copilot:repo-init-scan` reports `next_task_ready: yes`.
+- Observable harness gate: for any non-micro target-repository request, do not answer with a single analysis essay. First show the stage trail `INIT_GATE -> [INIT_SCAN if needed] -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION -> [ARCHITECT_SDD if full/ambiguous/high-risk] -> REVIEW_OR_DISPATCH -> FAN_IN_ARBITRATION -> NEXT_GATE`. `INIT_GATE` must be visible before generic Explore, broad code search, planning, dispatch, or implementation. If the sentinel is current, record `INIT_SCAN=SKIP_SENTINEL_READY`; otherwise do not continue the substantive task until `/best-copilot:repo-init-scan` reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 - Skill loading is not execution evidence. If the visible trail contains only `Skill(...) Successfully loaded` for `repo-init-gate` or `repo-init-scan`, the preflight has not completed. The required evidence is the gate/scan output plus verified target paths on disk.
+- PM must not call codegraph or read/search business source before `INIT_SCAN` is complete. For `standard` or `full` requests, PM must not perform broad business-source exploration even after init; dispatch named specialists instead and fan in their structured evidence.
 - Do not use generic Explore agents as substitutes for role lanes. Generic exploration can gather files, but architecture must come from `best-copilot:technical-architect`, implementability review from `best-copilot:developer`, QA/test review from `best-copilot:quality-assurance-expert`, security review from `best-copilot:security-reviewer`, and frontend review from `best-copilot:frontend-designer` when applicable.
 - For auth/protocol design questions such as OAuth2 -> OIDC + OAuth2, classify as `full` + `design_review`: dispatch `best-copilot:technical-architect` for SDD design brainstorming and self-review, then `best-copilot:developer`, `best-copilot:quality-assurance-expert`, and `best-copilot:security-reviewer` for second-pass review before synthesizing the PM fan-in decision.
 - Every specialist dispatch must include current `INIT_GATE` / `INIT_SCAN` evidence. If that evidence is absent, run `/best-copilot:repo-init-gate` before spawning specialists and `/best-copilot:repo-init-scan` only if the gate fails.
-- Never dispatch `best-copilot:technical-architect`, `best-copilot:developer`, or any other specialist for target-repository analysis until init evidence is complete. Dispatch before `next_task_ready: yes` is a protocol violation; stop and repair the init state first.
+- Never dispatch `best-copilot:technical-architect`, `best-copilot:developer`, or any other specialist for target-repository analysis until init evidence is complete. Dispatch before `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes` is a protocol violation; stop and repair the init state first.
 - When spawning subagents via the Agent tool, include required skill names explicitly in the spawn prompt (e.g., "Before starting, invoke /best-copilot:core-workflow-contract and /best-copilot:developer-workflow") plus a minimal role checklist fallback. If neither skill loading nor checklist context is available, require `NEEDS_CONTEXT missing_required_skill`.
 - Invoke focused skills only when their trigger applies, such as `/best-copilot:brainstorming`, `/best-copilot:writing-plans`, `/best-copilot:workspace-isolation`, `/best-copilot:dispatching-parallel-agents`, `/best-copilot:subagent-driven-development`, `/best-copilot:structured-review`, `/best-copilot:verification-before-completion`, or `/best-copilot:development-branch-closeout`.
 - Use the fan-in arbitration and cross-review lanes from `/best-copilot:core-workflow-contract`; do not fork those contracts in this adapter.
@@ -107,6 +128,8 @@ Constraints: [execution_contract.constraints]
 Acceptance: [execution_contract.acceptance_checks]
 INIT_GATE: [current gate evidence]
 Workspace: [branch_state, dirty_status, isolation_status, write_set]
+Codegraph: [available|unavailable; if unavailable use Read/Grep/Glob and rg fallback]
+回复语言: [user's detected input language — you MUST respond in this language]
 
 Return the structured handback: task_id, current_stage, status
 (DONE|DONE_WITH_CONCERNS|NEEDS_CONTEXT|NEEDS_USER_INPUT|BLOCKED),
