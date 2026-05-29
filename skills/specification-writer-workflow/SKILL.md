@@ -26,6 +26,29 @@ Write persistent state into the target repository, not the plugin package or cac
 6. Do not store secrets, PII, raw long logs, or unverified guesses.
 7. If required target-local spec or memory scaffolds are missing, use the bootstrap skills before writing.
 
+## Spec Authoring Quality Contract
+
+Specs must be rich enough for another fresh-context agent to implement or review without reconstructing the whole conversation, but dense enough that every section changes behavior, risk, verification, or routing.
+
+- Requirements use stable IDs (`FR-001`, `NFR-001`, `AC-001`) and one verifiable behavior per item. Avoid paragraphs that only restate the goal.
+- Requirements record current-system evidence, source provenance, compatibility expectations, security/privacy implications, and open questions that affect behavior.
+- Design records concrete decisions (`DD-001`), ownership boundaries, API/data/config contracts, error paths, migration/rollback, blast radius, alternatives rejected, and verification strategy.
+- Tasks map back to requirement and design IDs. Each task includes owner lane, reviewer lanes, write set, dependencies, parallel group, read-before-write targets, acceptance checks, TDD or minimal check, verification command, ready artifacts, and stop conditions.
+- Traceability is mandatory for MEDIUM/LARGE work: every P0/P1 requirement maps to design, task, and verification evidence before implementation starts.
+- Use tables when they improve scanability; use short prose for rationale. Do not add generic filler such as "improve robustness", "add proper validation", or "handle edge cases" without exact behavior.
+- If evidence is missing, mark it as an assumption or open question. Do not silently convert uncertainty into a requirement.
+
+## External Capability Translation For Specs
+
+Use external systems only as patterns translated into best-copilot primitives:
+
+- Spec Kit -> gate-oriented requirements/design/tasks with explicit dependencies and status.
+- Superpowers and oh-my-openagent -> fresh-context review loops, explicit reviewer lanes, and fan-in evidence.
+- gstack -> plan/review separation and security/release-risk labels.
+- claude-mem and Memento-Skills -> compact linked memory and recovery hints, not raw transcript storage.
+- Open Design and UI UX Pro Max Skill -> evidence-first design artifacts for UI work only, with reusable base plus task-specific override where helpful.
+- fetch-skill -> bounded skill discovery and ranking signals, not broad skill preloading.
+
 ## Specialist Ask Boundary
 
 Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users directly.
@@ -41,8 +64,9 @@ Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users
 Spec-kit style implementation tasks map to the six-block PM dispatch packet from `core-workflow-contract`:
 
 - **task_intent**: `task_id`, `goal`
-- **frozen_scope**: `owner_lane` (`technical-architect | developer | frontend-designer | root-cause-fixer`), `reviewer_lanes`, `files_involved`, `write_set`, `dependencies`, `parallel_group` or `parallel_ready: false`
+- **frozen_scope**: `requirement_refs`, `design_refs`, `owner_lane` (`technical-architect | developer | frontend-designer | root-cause-fixer`), `reviewer_lanes`, `files_involved`, `write_set`, `dependencies`, `parallel_group` or `parallel_ready: false`
 - **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check` (failing test target or minimal reproducible check), `verification_command`, `stop_conditions`, `read_before_write_targets`
+- **output_contract**: `ready_artifacts`, traceability updates, and memory updates when persistent recovery is active
 
 Default decomposition should expose parallel work for Technical Architect and Developer when write sets do not overlap; add Frontend Designer as an owner or reviewer when frontend surfaces are present.
 

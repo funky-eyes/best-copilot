@@ -29,12 +29,18 @@ Check these dimensions before implementation:
 - `scope_discipline`: file boundaries, non-goals, and forbidden approaches are explicit.
 - `existing_code_leverage`: the plan reuses existing modules, helpers, tests, and ownership boundaries.
 - `traceability`: each requirement maps to implementation tasks, tests/checks, and review lanes.
+- `spec_density`: each section contains evidence, decision, constraint, risk, verification, or task routing; remove filler that does not affect implementation.
+- `requirement_quality`: requirements have stable IDs, priority, source, acceptance signal, and one verifiable behavior per item.
+- `design_quality`: design has decision IDs, ownership boundaries, API/data/config contracts, error behavior, compatibility, migration/rollback, and alternatives.
+- `task_traceability`: each task references requirement/design IDs and includes owner lane, reviewer lanes, write set, dependencies, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
 - `tdd_testability`: new behavior or bug fixes can be proven with a failing test or minimal reproducible check.
 - `task_granularity`: tasks are small enough to execute and review independently.
 - `blast_radius`: public APIs, message formats, schemas, auth, dependencies, and release surfaces have explicit risk handling.
 - `handoff_readiness`: each task includes complete text, `files_involved`, dependencies, acceptance checks, verification budget, and context hints.
 
 For customization files, also check trigger surface, frontmatter/schema risk, tool availability, context bloat, route conflicts, and closeout/confirmation semantics.
+
+Reject specs that only contain phase names, broad bullet lists, or implementation wishes without source evidence and observable acceptance checks.
 
 ## Multi-Lane Design Review
 
@@ -67,4 +73,5 @@ Return:
 - blocking findings and non-blocking concerns
 - required spec/plan edits, if any
 - implementation gates satisfied or missing
+- traceability gaps by requirement/task ID
 - recommended next stage: `implementation | revise_spec | clarify | split_scope`

@@ -2,7 +2,7 @@
 
 English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.6.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -134,7 +134,7 @@ The PM (`senior-project-expert`) as the main session receives user requirements 
 
 Available plugin subagents appear scoped in Claude Code: `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, `best-copilot:root-cause-fixer`.
 
-Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. In native Claude Code these aliases preserve the Copilot role tiers inside Claude's model families. If `cc-switch`, `new-api`, or another Anthropic-compatible proxy routes those aliases to DeepSeek, Qwen, or another non-Claude backend, treat it as degraded unless the hook gate and workflow smoke check both pass. The plugin ships the first-run `UserPromptSubmit`, `UserPromptExpansion`, and `PreToolUse` hooks that inject init-gate context, block non-init best-copilot slash commands before expansion, and deny business-source tools until target `best-copilot.md` is current; target bootstrap can also generate a committed `.claude/hooks/best-copilot-init-gate.sh` fallback, but only after bootstrap has started. The PM must then output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION` and name the required specialist lanes before source reading or implementation.
+Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. In native Claude Code these aliases preserve the Copilot role tiers inside Claude's model families. If `cc-switch`, `new-api`, or another Anthropic-compatible proxy routes those aliases to DeepSeek, Qwen, or another non-Claude backend, first verify the plugin is enabled in that routed session. `/plugin list` should show `best-copilot@best-copilot`, `/agents` should show scoped agents such as `best-copilot:senior-project-expert`, and proxy allowlists must include `"enabledPlugins": {"best-copilot@best-copilot": true}` when required. Then treat the backend as degraded until the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, names the required specialist lanes, and reaches `repo-init-gate` / `repo-init-scan` before source reading or implementation.
 
 ## Runtime Adapter Architecture
 
@@ -261,7 +261,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELE
 
 ### Stage 1: Init Gate (Mandatory Preflight)
 
-Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.5.1"`.
+Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.6.0"`.
 
 ```
 repo-init-gate
@@ -473,7 +473,7 @@ Target Repository
 │   ├── must.instructions.md       ← Core rules
 │   └── skills-index.instructions.md ← Skill routing
 │
-└── best-copilot.md               ← Init sentinel (version: "0.5.1")
+└── best-copilot.md               ← Init sentinel (version: "0.6.0")
 ```
 
 ### Spec vs Memory Division
@@ -542,7 +542,7 @@ memories/repo/INDEX.md                           ← Resume index routing table
 memories/repo/current-workstreams.md             ← Currently active work
 spec/INDEX.md                                    ← Spec routing table
 spec/templates/                                  ← Reusable templates
-best-copilot.md                                  ← Init sentinel (version: "0.5.1")
+best-copilot.md                                  ← Init sentinel (version: "0.6.0")
 ```
 
 If required facts or scaffolds cannot be created, the workflow stops as `BLOCKED first_use_gate_incomplete` — see [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) for the full explanation.
@@ -562,7 +562,7 @@ Each agent declares a model in `agents/*.agent.md`, and the routing policy is pa
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Native Claude Code uses Claude model aliases. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`. Proxy routes such as `cc-switch` or `new-api` may map those aliases to non-Claude models; that is API compatibility only. The Claude plugin includes hook-level enforcement: before the target sentinel is current, `PreToolUse` denies business-source tools and codegraph/MCP tools while allowing sentinel reads, init bootstrap writes, and bounded root discovery. This plugin hook is the first-run guard; target bootstrap can later add `.claude/settings.json` hook entries plus `.claude/hooks/best-copilot-init-gate.sh` as committed fallback policy, but target-local hooks cannot bootstrap themselves. For DeepSeek, Qwen, or unknown backends, still run a non-destructive workflow smoke check before real work. Expected behavior: the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, then dispatches the required lanes for the request. If it starts coding or skips lanes after hook feedback, use a model/provider that passes the smoke check.
+Native Claude Code uses Claude model aliases. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`. Proxy routes such as `cc-switch` or `new-api` may map those aliases to non-Claude models; that is API compatibility only. For DeepSeek, Qwen, or unknown backends, verify plugin enablement first: `/plugin list` should include `best-copilot@best-copilot`, `/agents` should show scoped plugin agents, and `cc-switch` / `new-api` allowlists should contain `"enabledPlugins": {"best-copilot@best-copilot": true}` when that setting is used. Then run a non-destructive workflow smoke check before real work. Expected behavior: the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, then dispatches the required lanes for the request. If it starts coding, skips init, or skips lanes even with the plugin enabled, use a model/provider that passes the smoke check.
 
 ## Search Discipline
 

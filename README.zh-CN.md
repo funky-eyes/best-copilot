@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.5.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.6.0-1d9bf0)](plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -134,7 +134,7 @@ PM（`senior-project-expert`）作为主会话接收用户需求后：
 
 Claude Code 中可用的插件子 agent 会以 scoped 形式显示：`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:specification-writer`、`best-copilot:root-cause-fixer`。
 
-Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4 对应 `opus`，Gemini 对应 `haiku`，Claude Sonnet 对应 `sonnet`。在原生 Claude Code 中，这些别名会在 Claude 模型族内保留 Copilot 侧的角色档位。如果 `cc-switch`、`new-api` 或其他 Anthropic-compatible proxy 把这些别名路由到 DeepSeek、Qwen 或其他非 Claude 后端，应视为降级运行，除非 hook gate 和 workflow smoke check 都通过。插件提供首轮 `UserPromptSubmit`、`UserPromptExpansion` 和 `PreToolUse` hooks：注入 init-gate 上下文，在 slash command 展开前阻断非 init 的 best-copilot 命令，并在目标 `best-copilot.md` 未就绪前阻断业务源码工具；target bootstrap 也可以生成已提交的 `.claude/hooks/best-copilot-init-gate.sh` fallback，但只能在 bootstrap 已开始后生效。PM 随后必须输出 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`，并在读取源码或实现前列出所需 specialist lanes。
+Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4 对应 `opus`，Gemini 对应 `haiku`，Claude Sonnet 对应 `sonnet`。在原生 Claude Code 中，这些别名会在 Claude 模型族内保留 Copilot 侧的角色档位。如果 `cc-switch`、`new-api` 或其他 Anthropic-compatible proxy 把这些别名路由到 DeepSeek、Qwen 或其他非 Claude 后端，先确认该路由会话里插件真的已启用。`/plugin list` 应显示 `best-copilot@best-copilot`，`/agents` 应显示 `best-copilot:senior-project-expert` 等 scoped agent；如果 proxy allowlist 需要显式配置，应包含 `"enabledPlugins": {"best-copilot@best-copilot": true}`。之后仍按降级模型处理，直到 PM 在读取源码或实现前输出 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`，列出所需 specialist lanes，并进入 `repo-init-gate` / `repo-init-scan` 流程。
 
 ## 运行时适配架构
 
@@ -261,7 +261,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELE
 
 ### 阶段一：Init 门禁（强制预检）
 
-在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.5.1"`。
+在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.6.0"`。
 
 ```
 repo-init-gate
@@ -473,7 +473,7 @@ PM 按优先级裁决所有专员返回的结果。仲裁优先级：
 │   ├── must.instructions.md       ← 核心规则
 │   └── skills-index.instructions.md ← 技能路由
 │
-└── best-copilot.md               ← Init sentinel（version: "0.5.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.6.0"）
 ```
 
 ### Spec vs Memory 的分工
@@ -542,7 +542,7 @@ memories/repo/INDEX.md                           ← 恢复索引路由表
 memories/repo/current-workstreams.md             ← 当前活跃工作
 spec/INDEX.md                                    ← Spec 路由表
 spec/templates/                                  ← 可复用模板
-best-copilot.md                                  ← Init sentinel（version: "0.5.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.6.0"）
 ```
 
 如果必需的事实或脚手架无法创建，工作会以 `BLOCKED first_use_gate_incomplete` 停止——参见 [核心工作流 Stage 1](#阶段一init-门禁强制预检) 的完整说明。
@@ -562,7 +562,7 @@ best-copilot.md                                  ← Init sentinel（version: "0
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-原生 Claude Code 使用 Claude 模型别名。`claude-agents/*.md` 中的 Claude 适配器保留角色分工，并把 Copilot 档位映射为 Claude 别名：GPT-5.4 -> `opus`，Gemini 3.1 Pro (Preview) -> `haiku`，Claude Sonnet 4.6 -> `sonnet`。`cc-switch` 或 `new-api` 等 proxy route 可能把这些别名映射到非 Claude 模型；这只是 API 兼容，不代表 workflow 兼容。Claude plugin 包含 hook-level enforcement：在目标 sentinel 就绪前，`PreToolUse` 会阻断业务源码工具和 codegraph/MCP 工具，同时允许 sentinel 读取、init bootstrap 写入和有界根目录探测。这个 plugin hook 是首轮 guard；target bootstrap 之后可以再添加 `.claude/settings.json` hook entries 和 `.claude/hooks/best-copilot-init-gate.sh` 作为已提交的 fallback policy，但 target-local hooks 不能自举自己。对 DeepSeek、Qwen 或未知后端，真实工作前仍要运行非破坏性的 workflow smoke check。期望行为是：PM 输出 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`，然后为请求 dispatch 所需 lanes。如果它在 hook feedback 后仍开始编码或跳过 lanes，请改用能通过 smoke check 的模型/provider。
+原生 Claude Code 使用 Claude 模型别名。`claude-agents/*.md` 中的 Claude 适配器保留角色分工，并把 Copilot 档位映射为 Claude 别名：GPT-5.4 -> `opus`，Gemini 3.1 Pro (Preview) -> `haiku`，Claude Sonnet 4.6 -> `sonnet`。`cc-switch` 或 `new-api` 等 proxy route 可能把这些别名映射到非 Claude 模型；这只是 API 兼容，不代表 workflow 兼容。对 DeepSeek、Qwen 或未知后端，先确认插件已启用：`/plugin list` 应包含 `best-copilot@best-copilot`，`/agents` 应显示 scoped plugin agents；如果 `cc-switch` / `new-api` 使用 allowlist，应包含 `"enabledPlugins": {"best-copilot@best-copilot": true}`。之后在真实工作前运行非破坏性的 workflow smoke check。期望行为是：PM 输出 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`，然后为请求 dispatch 所需 lanes。如果插件已启用但它仍开始编码、跳过 init 或跳过 lanes，请改用能通过 smoke check 的模型/provider。
 
 ## 搜索纪律
 

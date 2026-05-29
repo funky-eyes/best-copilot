@@ -16,7 +16,7 @@ Use this thin orchestrator when the repository needs full init or scaffold repai
 
 ## Boundary
 
-- This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.5.1`.
+- This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.6.0`.
 - Loading this skill is not execution. In Claude Code, `Skill(best-copilot:repo-init-scan) Successfully loaded` is only a preload trace. A valid `INIT_SCAN` requires running the stages below, creating or repairing target-local files when needed, checking them on disk, and returning the init summary.
 - Do not dispatch specialist agents, run broad code search, or produce architecture/implementation plans while `required_artifacts_verified` is not `yes`.
 - The next observable assistant action after loading this skill must be either the staged init work or a `BLOCKED` init report. A codegraph call, business-source read/search, architecture summary, or specialist dispatch before the init summary is invalid.
@@ -38,7 +38,7 @@ Use this thin orchestrator when the repository needs full init or scaffold repai
    - On official success, use it to verify scaffolds, repair any remaining gaps, and rewrite `best-copilot.md`.
    - On official unavailability, no-write, or incomplete output, use it to do the bounded manual repair and then rewrite `best-copilot.md`.
 4. In Claude Code, invoke the best-copilot stage skills when available, using the exact picker value such as `/repo-init-official (best-copilot)` or `/best-copilot:repo-init-official`, then `/repo-init-manual-fallback (best-copilot)` or `/best-copilot:repo-init-manual-fallback`. These plugin skills are different from the bare built-in `/init` command. If `Skill(...) Successfully loaded` appears but no actual init operations happen, that means the skill text loaded but was not executed — execute the documented steps inline now. If the runtime only loads the skill text or cannot invoke plugin slash commands, execute the documented fallback inline: apply the official stage rules, then read the bootstrap skill templates and create/repair the target files directly.
-5. Stop only when the target repository has a verified `.github/instructions/project.instructions.md`, all required scaffolds, and a rewritten `best-copilot.md` sentinel for version `0.5.1`.
+5. Stop only when the target repository has a verified `.github/instructions/project.instructions.md`, all required scaffolds, and a rewritten `best-copilot.md` sentinel for version `0.6.0`.
 6. If either stage cannot complete its verification barrier, return `BLOCKED` instead of continuing to the user's substantive task.
 
 ## Output

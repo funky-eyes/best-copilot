@@ -17,12 +17,13 @@ Use this tiny skill before loading `repo-init-scan`.
 
 ```md
 ---
-version: "0.5.1"
+version: "0.6.0"
 ---
 ```
 
 - Exact match: skip `repo-init-scan`.
 - Missing, unreadable, invalid frontmatter, missing `version`, or version mismatch: run `repo-init-scan`.
+- Any extra heading, prose, task summary, or project description in `best-copilot.md` makes it `invalid_sentinel`, even when a version string appears somewhere in the file.
 - Do not read `.github/instructions/**`, `memories/repo/**`, `spec/**`, or runtime adapters here.
 - Explicit reinitialize/repair requests bypass the gate and run `repo-init-scan` directly.
 - `best-copilot.md` is written only by `repo-init-scan` after full verification.

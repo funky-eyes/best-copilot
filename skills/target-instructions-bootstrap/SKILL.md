@@ -15,7 +15,7 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 - Do not overwrite project-specific rules, language policy, build commands, or existing `AGENTS.md` / `CLAUDE.md`.
 - Keep generated files short. They are routing and safety scaffolds, not a full manual.
 - Keep generated files runtime-neutral across Copilot CLI, Claude Code, VS Code Copilot, and Codex. If a runtime-specific command is mentioned, label it as runtime-specific.
-- Do not generate, require, or assume plugin hooks, local scripts, Python, Node, shell, or other interpreter-based closeout enforcement. The native-ask and closeout gates must be self-contained instruction text because target repositories may not have those runtimes installed. Claude Code init-gate hooks may be generated only as a target-local tool-use guard, never as a closeout/ask substitute.
+- Do not generate, require, or assume plugin hooks, local scripts, Python, Node, shell, or other interpreter-based enforcement. The native-ask, closeout, and init gates must be self-contained instruction text because target repositories may not have those runtimes installed.
 - Do not create `best-copilot.md` in this skill. That file is the verified-init sentinel and must be written only by `repo-init-scan` after the full initialization barrier passes.
 
 ## Verified Init Sentinel
@@ -24,7 +24,7 @@ Use this skill during `repo-init-scan` when target-local instruction entrypoints
 
 ```md
 ---
-version: "0.5.1"
+version: "0.6.0"
 ---
 ```
 
@@ -39,7 +39,6 @@ required runtime-neutral scaffold sections below:
 - `AGENTS.md` when the runtime includes Codex or the user wants Codex compatibility.
 - `CLAUDE.md` when the runtime is Claude Code or the user wants Claude Code compatibility.
 - `.claude/settings.json` when the runtime is Claude Code and the user wants a stable Senior Project Expert session entry plus current-branch worktree base.
-- `.claude/hooks/best-copilot-init-gate.sh` when the runtime is Claude Code and the user wants target-local hook enforcement in addition to the plugin hook. This file is created only after bootstrap logic is already running, so it must not be treated as the first-run guard.
 
 Existing target files must be handled as follows:
 
@@ -64,8 +63,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but lacks `## Implementation and Verification`, append that section from this skill after `## Agents and Dispatch` when that heading exists, otherwise append it after `## Runtime Notes` when that heading exists, or after `## Interaction`.
 - If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
 - If `CLAUDE.md` exists but lacks references to `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`, append the compatible import block from this skill instead of replacing existing Claude-specific rules.
-- If `.claude/settings.json` exists but lacks a top-level `agent` key and adding JSON safely is possible, add `"agent": "senior-project-expert"` while preserving existing keys. If it already has a different `agent`, do not overwrite it silently; stop with `BLOCKED target_instructions_bootstrap_conflict` unless the user explicitly asked to change the Claude default agent. If `.claude/settings.json` lacks `worktree.baseRef` and adding JSON safely is possible, add `"worktree": {"baseRef": "head"}` while preserving existing keys; if it already has a different worktree policy, preserve it and record the difference instead of overwriting. If Claude Code hook enforcement is requested and `.claude/settings.json` lacks the matching `UserPromptSubmit`, `UserPromptExpansion`, or `PreToolUse` hook entries, add only the missing entries while preserving existing hooks. If safe JSON repair is not possible, stop with `BLOCKED target_instructions_bootstrap_conflict` and list `.claude/settings.json`.
-- If `.claude/hooks/best-copilot-init-gate.sh` exists, do not replace it wholesale. If it is missing and Claude Code hook enforcement is requested, create it from this skill and make it executable.
+- If `.claude/settings.json` exists but lacks a top-level `agent` key and adding JSON safely is possible, add `"agent": "senior-project-expert"` while preserving existing keys. If it already has a different `agent`, do not overwrite it silently; stop with `BLOCKED target_instructions_bootstrap_conflict` unless the user explicitly asked to change the Claude default agent. If `.claude/settings.json` lacks `worktree.baseRef` and adding JSON safely is possible, add `"worktree": {"baseRef": "head"}` while preserving existing keys; if it already has a different worktree policy, preserve it and record the difference instead of overwriting. If safe JSON repair is not possible, stop with `BLOCKED target_instructions_bootstrap_conflict` and list `.claude/settings.json`.
 - If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
 ## `.github/instructions/project.instructions.md`
@@ -122,7 +120,7 @@ applyTo: "**"
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.5.1
+- Bootstrap contract version: 0.6.0
 - Last full verification: unknown
 - Reentry rule: best-copilot-version-sentinel-first
 ```
@@ -387,7 +385,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - A `Skill(...) Successfully loaded` line only confirms instruction loading. The first-use init gate is complete only after `repo-init-scan` verifies target-local files on disk and reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 - The PM coordinator must not inspect business source with codegraph/read/search before init completes. For standard or full work after init, PM dispatches named specialists for business-code inspection and fans in their structured evidence.
 - Codegraph MCP is optional. If `mcp__codegraph__*` tools are absent or failed in the current session, use built-in Read/Grep/Glob plus shell `rg`; if present, prefer codegraph for structural discovery.
-- If Claude Code is routed through `cc-switch`, `new-api`, DeepSeek, Qwen, or any non-Claude or unknown backend, treat provider workflow adherence as hook-enforced but model-unverified. The best-copilot plugin hook is the first-run guard and blocks business-source tools until target `best-copilot.md` is current; the target-local `.claude/hooks/best-copilot-init-gate.sh` fallback only helps after bootstrap has created it. PM must also output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, record `provider_compatibility: hook_enforced|verified_by_smoke|unverified`, and stop with `BLOCKED provider_instruction_following_unverified` if the model skips init, skips required specialist lanes, or starts implementation early after hook feedback.
+- If Claude Code is routed through `cc-switch`, `new-api`, DeepSeek, Qwen, or any non-Claude or unknown backend, first verify the plugin is actually enabled. `/plugin list` should show `best-copilot@best-copilot`, `/agents` should show scoped plugin agents, and proxy configurations that use allowlists must include `"enabledPlugins": {"best-copilot@best-copilot": true}`. If the plugin is not enabled, stop with `BLOCKED best_copilot_plugin_not_enabled`; do not continue as a plain model. When the plugin is enabled but the backend is non-Claude or unknown, PM must output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, record `provider_compatibility: plugin_enabled_unverified|verified_by_smoke|unverified`, and stop with `BLOCKED provider_instruction_following_unverified` if the model skips init, skips required specialist lanes, or starts implementation early.
 - Keep this file short. Add project facts to `.github/instructions/project.instructions.md`, durable recovery state to `memories/repo/**`, and task specs to `spec/**`.
 ```
 
@@ -400,95 +398,11 @@ Create this file only for Claude Code target compatibility when it is absent. If
   "agent": "senior-project-expert",
   "worktree": {
     "baseRef": "head"
-  },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/best-copilot-init-gate.sh"]
-          }
-        ]
-      }
-    ],
-    "UserPromptExpansion": [
-      {
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/best-copilot-init-gate.sh"]
-          }
-        ]
-      }
-    ],
-    "PreToolUse": [
-      {
-        "matcher": "^(Read|Grep|Glob|Bash|Write|Edit|MultiEdit|Agent|Task|mcp__.*)$",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "sh",
-            "args": ["${CLAUDE_PROJECT_DIR}/.claude/hooks/best-copilot-init-gate.sh"]
-          }
-        ]
-      }
-    ]
   }
 }
 ```
 
-This makes the PM coordinator (`senior-project-expert`) the default session entry, keeps Claude Code isolated worktrees aligned with the current branch `HEAD`, and installs a target-local hook fallback for init-gate enforcement. The PM then dispatches to specialist subagents via the Agent tool and owns worktree closeout. If the target already has hooks, preserve them and add only the missing `UserPromptSubmit` / `UserPromptExpansion` / `PreToolUse` best-copilot entries.
-
-## `.claude/hooks/best-copilot-init-gate.sh`
-
-Create this file only for Claude Code target compatibility when target-local hook enforcement is requested and the file is absent. It is a conservative persistent fallback for environments where a proxy model ignores prompt-only init gates after the first bootstrap has already begun. It cannot protect the pre-bootstrap first turn; that must be enforced by the plugin-level hook in `claude-plugin/hooks/`. It uses only POSIX shell plus `grep`; it does not replace native ask or closeout rules.
-
-```sh
-#!/bin/sh
-set -eu
-
-INPUT=$(cat)
-PROJECT_DIR=${CLAUDE_PROJECT_DIR:-$(pwd)}
-SENTINEL="$PROJECT_DIR/best-copilot.md"
-
-if [ -f "$SENTINEL" ] && grep -Eq '^version:[[:space:]]*"?0[.]5[.]1"?[[:space:]]*$' "$SENTINEL"; then
-  exit 0
-fi
-
-if printf '%s' "$INPUT" | grep -q '"hook_event_name"[[:space:]]*:[[:space:]]*"UserPromptSubmit"'; then
-  printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"UserPromptSubmit","additionalContext":"best-copilot init gate: target best-copilot.md is missing, invalid, or stale. Run INIT_GATE -> INIT_SCAN before business-source reads, codegraph, Agent dispatch, or implementation."}}'
-  exit 0
-fi
-
-if printf '%s' "$INPUT" | grep -q '"hook_event_name"[[:space:]]*:[[:space:]]*"UserPromptExpansion"'; then
-  if printf '%s' "$INPUT" | grep -Eq '"command_name"[[:space:]]*:[[:space:]]*"best-copilot:(repo-init|target-instructions-bootstrap|target-memory-bootstrap|target-spec-bootstrap|senior-project-expert)'; then
-    printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"UserPromptExpansion","additionalContext":"best-copilot init gate: continue only with repo init before business-source tool use."}}'
-  elif printf '%s' "$INPUT" | grep -q '"command_name"[[:space:]]*:[[:space:]]*"best-copilot:'; then
-    printf '%s\n' '{"decision":"block","reason":"best-copilot init gate blocked this slash command because target best-copilot.md is missing, invalid, or stale. Start with /best-copilot:repo-init-gate, /best-copilot:repo-init-scan, or senior-project-expert."}'
-  fi
-  exit 0
-fi
-
-if ! printf '%s' "$INPUT" | grep -q '"hook_event_name"[[:space:]]*:[[:space:]]*"PreToolUse"'; then
-  exit 0
-fi
-
-if printf '%s' "$INPUT" | grep -Eq 'best-copilot[.]md|repo-init|[.]github/instructions|memories/repo|spec/templates|CLAUDE[.]md|AGENTS[.]md|run-claude-native-init[.]sh|"/init"'; then
-  exit 0
-fi
-
-if printf '%s' "$INPUT" | grep -q '"tool_name"[[:space:]]*:[[:space:]]*"Bash"' && printf '%s' "$INPUT" | grep -Eq '"command"[[:space:]]*:[[:space:]]*"(pwd|ls|git status|git rev-parse|find [.] -maxdepth [123])'; then
-  exit 0
-fi
-
-printf '%s\n' '{"hookSpecificOutput":{"hookEventName":"PreToolUse","permissionDecision":"deny","permissionDecisionReason":"best-copilot init gate blocked this tool because target best-copilot.md is missing, invalid, or stale. Run repo-init-gate/repo-init-scan first; before init completes, only sentinel reads, init bootstrap writes, and bounded root discovery are allowed."}}'
-exit 0
-```
-
-After creating this file, run `chmod +x .claude/hooks/best-copilot-init-gate.sh` when the runtime supports executable bits.
+This makes the PM coordinator (`senior-project-expert`) the default session entry and keeps Claude Code isolated worktrees aligned with the current branch `HEAD`. The PM then dispatches to specialist subagents via the Agent tool and owns worktree closeout. This bootstrap intentionally does not install hook enforcement; first-use reliability comes from enabling the plugin and starting the Senior Project Expert agent.
 
 ## Verification
 
@@ -506,8 +420,7 @@ After creating this file, run `chmod +x .claude/hooks/best-copilot-init-gate.sh`
 - Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, cross-review lanes, Technical Architect-led SDD design review, and `## Implementation and Verification`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
 - When Claude Code compatibility is required, confirm `CLAUDE.md` exists and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
-- When Claude Code compatibility is required, confirm `CLAUDE.md` mentions the PM coordinator dispatch model (Agent tool for specialist subagents), foreground/background dispatch policy, isolated worktree closeout, namespaced plugin skill commands, scoped `/agents` / `@` names for plugin subagents, the unscoped `--agent senior-project-expert` first-use path with scoped fallback for collisions, that `Skill(...) Successfully loaded` is not completion evidence, that PM-owned business-source exploration is forbidden before init and not a substitute for named specialist lanes after init, that codegraph is optional with Read/Grep/Glob plus `rg` fallback, and that `cc-switch` / `new-api` / non-Claude providers rely on hook gates plus provider smoke check before target-repository work.
-- When a stable Claude Code PM entry is required, confirm `.claude/settings.json` exists, is valid JSON, contains `"agent": "senior-project-expert"`, contains `"worktree": {"baseRef": "head"}` unless an existing explicit worktree policy was preserved, and includes the best-copilot `UserPromptSubmit` / `UserPromptExpansion` / `PreToolUse` hook entries when target-local hook enforcement was requested.
-- When target-local Claude Code hook enforcement is requested, confirm `.claude/hooks/best-copilot-init-gate.sh` exists, is executable when the file system supports executable bits, passes `sh -n`, returns `permissionDecision: deny` for a source `Read` while `best-copilot.md` is missing, and blocks a non-init best-copilot slash command through `UserPromptExpansion` while allowing repo-init commands to expand with additional context.
+- When Claude Code compatibility is required, confirm `CLAUDE.md` mentions the PM coordinator dispatch model (Agent tool for specialist subagents), foreground/background dispatch policy, isolated worktree closeout, namespaced plugin skill commands, scoped `/agents` / `@` names for plugin subagents, the unscoped `--agent senior-project-expert` first-use path with scoped fallback for collisions, that `Skill(...) Successfully loaded` is not completion evidence, that PM-owned business-source exploration is forbidden before init and not a substitute for named specialist lanes after init, that codegraph is optional with Read/Grep/Glob plus `rg` fallback, and that `cc-switch` / `new-api` / non-Claude providers require plugin enablement plus a provider smoke check before target-repository work.
+- When a stable Claude Code PM entry is required, confirm `.claude/settings.json` exists, is valid JSON, contains `"agent": "senior-project-expert"`, and contains `"worktree": {"baseRef": "head"}` unless an existing explicit worktree policy was preserved.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
 - If this skill was invoked because `.github/instructions/**` or a required runtime adapter was missing and the required files still do not exist after the attempt, return `BLOCKED target_instructions_bootstrap_incomplete` with the missing paths. Do not let the caller continue the substantive task as if initialization succeeded.
