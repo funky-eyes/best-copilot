@@ -38,6 +38,8 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 
 `best-copilot.md` is not a neutral scaffold. It is the verified-init sentinel for contract version `0.6.0` and must be written only after the other required artifacts and content checks pass.
 
+Never write project descriptions, task summaries, or markdown headings into `best-copilot.md`. A file like `# Best Copilot Sentinel` plus a project summary is invalid, even if it mentions the right version. The only valid sentinel content is the exact frontmatter block shown below.
+
 ## Required Content Checks
 
 - `.github/instructions/must.instructions.md` contains `## Request Flow`, `## Per-Request Hard Gates`, `### PM Native Ask Trigger Gate`, `## Shared State Contracts`, `## Search Precision`, `## Command Output Budget`, `## Memory And Spec`, `## Agents and Dispatch`, and `## Implementation and Verification`.
