@@ -19,8 +19,9 @@ This skill is a compatibility alias, not a second role definition. Use it when a
    - Read the target root `best-copilot.md`.
    - If frontmatter `version: "0.5.1"` matches → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue.
    - If missing/mismatch → invoke `/best-copilot:repo-init-scan` and execute its stages (`repo-init-official` → `repo-init-manual-fallback`). Do NOT skip to analysis.
-6. In Claude Code, a transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` is not an init result. It only means the skill text is available. Continue only after the scan has verified or created the target-local files, written the sentinel when needed, and reported `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
-7. Do not treat an unknown-agent, unknown-skill, or skill-load-only path as permission to continue without the init gate.
+6. The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` must attempt native `/init` automatically through its bundled helper (`claude --bare --permission-mode acceptEdits -p "/init"`) before manual fallback, then continue with target instruction/memory/spec bootstrap.
+7. In Claude Code, a transcript line such as `Skill(best-copilot:repo-init-scan) Successfully loaded` is not an init result. It only means the skill text is available. Continue only after the scan has verified or created the target-local files, written the sentinel when needed, and reported `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
+8. Do not treat an unknown-agent, unknown-skill, or skill-load-only path as permission to continue without the init gate.
 
 ## Observable Output
 

@@ -51,6 +51,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
    - Reuse that file as the primary fact packet.
    - Scan only the missing fact categories, missing scaffold surfaces, or unresolved `unknown` gaps that still block verification.
 2. Otherwise do a bounded manual scan:
+   - Read `CLAUDE.md` first when `repo-init-official` created or updated it through Claude native `/init`; treat it as official initializer evidence, but still verify facts against repository files before recording them.
    - Read `README*`, package/build files, CI files, app entrypoints, test directories, and existing `.github/instructions/project.instructions.md`.
    - Search only for build/test/dev entrypoints and major module boundaries.
    - Record unresolved facts as `unknown` instead of guessing.

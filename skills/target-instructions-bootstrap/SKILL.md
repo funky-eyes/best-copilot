@@ -144,7 +144,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 1. Parse literal request, real intent, and success criteria.
 2. Before the first substantial action in a turn, record a per-request start timestamp. If that timestamp was missed, do not backfill a fake duration later.
-3. Read explicit user paths and any `/init` or `copilot init` artifacts first. If repository facts are incomplete, normalize official init output into `.github/instructions/project.instructions.md`; command output without that file is `official_init_no_write`, and substantive work stays blocked until the file exists and is verified.
+3. Read explicit user paths and any `/init` or `copilot init` artifacts first. If repository facts are incomplete, normalize official init output into `.github/instructions/project.instructions.md`; command output without a project facts file or Claude-native `CLAUDE.md` artifact is `official_init_no_write`, and substantive work stays blocked until the project facts file exists and is verified. In Claude Code, `repo-init-official` attempts native `/init` through its bundled helper before manual fallback, and any resulting `CLAUDE.md` must be preserved and normalized as official evidence.
 4. Before editing, freeze a minimal packet with at least `goal`, `scope`, `constraints`, `expected_outcome`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `verification_budget`, `work_mode`, and `task_type`. When multi-agent dispatch is used, preserve the shared six-block packet from `core-workflow-contract`.
 5. Search at most three rounds and stop after two rounds with no new signal. Prefer explicit paths, filename/glob lookup, and fixed-string `rg -F` before regex.
 6. Before completion, provide real verification evidence or state the blocker explicitly.
@@ -192,7 +192,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 - Read `.github/instructions/project.instructions.md` before non-trivial work.
 - Treat `.github/instructions/project.instructions.md` as initialized only when it is not the untouched neutral scaffold, contains concrete build/test/check/dev command facts or bounded-scan `unknown`, plus runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
-- If facts are missing, run the active runtime's repository init flow before real requirements analysis. Use `/init` when available in Copilot CLI, VS Code Copilot, or Claude Code; use `copilot init` only when the Copilot CLI command exists. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
+- If facts are missing, run the active runtime's repository init flow before real requirements analysis. Use `copilot init` when the Copilot CLI command exists. In Claude Code, `repo-init-official` attempts native `/init` automatically through its bundled helper (`claude --bare --permission-mode acceptEdits -p "/init"`), then preserves and normalizes the resulting `CLAUDE.md`. This is a fail-closed gate: do not continue to dependency/framework changes, security rewrites, planning, or implementation until `.github/instructions/project.instructions.md` exists and is verified.
 - Do not guess project stack, module ownership, security boundaries, or build commands.
 
 ## Shared State Contracts
@@ -293,8 +293,8 @@ Read only the selected skill, not the whole skill tree.
 - `repo-init-gate`: read only the target root `best-copilot.md` and decide whether full init is needed.
 - `repo-init-scan`: use only after `repo-init-gate` fails; typical triggers are first substantial task, missing scaffolds, missing or placeholder `.github/instructions/project.instructions.md`, missing or mismatched `best-copilot.md`, or incomplete `/init` output.
 - Skill loading is not completion evidence. Continue past init only after the gate/scan report verifies target-local files on disk and records `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
-- `repo-init-official`: try official `/init` or `copilot init` and normalize the resulting project facts file.
-- `repo-init-manual-fallback`: do the bounded manual scan, bootstrap missing scaffolds, verify required artifacts, and write `best-copilot.md`.
+- `repo-init-official`: try official `/init` or `copilot init` and normalize the resulting project facts file; in Claude Code it attempts native `/init` through the bundled helper script before manual scan.
+- `repo-init-manual-fallback`: do the bounded manual scan, bootstrap missing scaffolds, verify required artifacts, and write `best-copilot.md` when official init is unavailable, no-write, incomplete, or needs scaffold completion after success.
 - `target-instructions-bootstrap`: create missing `.github/instructions/**`, optional `AGENTS.md`, and Claude Code `CLAUDE.md` when applicable.
 - `target-memory-bootstrap`: create missing `memories/repo/**` skeleton.
 - `target-spec-bootstrap`: create missing `spec/**` skeleton and spec templates.
@@ -381,7 +381,7 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - The PM coordinator dispatches work to specialist subagents via the Agent tool. Plugin specialists appear in `/agents` with scoped names such as `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, and `best-copilot:root-cause-fixer`; use the exact displayed name for dispatch or manual `@` mention.
 - Background execution is a PM dispatch choice for independent read-only research/review with pre-granted permissions. Implementation, fixes, spec/memory writes, and permission-gated verification run foreground by default.
 - Isolated worktree implementation must return worktree path, branch, changed files, and verification evidence to PM; PM performs keep / merge / PR / discard closeout before claiming the change landed.
-- Use plugin skills as namespaced slash commands such as `/best-copilot:repo-init-gate`, `/best-copilot:structured-review`, `/best-copilot:verification-before-completion`, unless the picker inserts another displayed plugin form.
+- Use plugin skills as namespaced slash commands such as `/best-copilot:repo-init-gate`, `/best-copilot:structured-review`, `/best-copilot:verification-before-completion`, unless the picker inserts another displayed plugin form. These plugin skills are distinct from Claude Code's bare built-in `/init` command.
 - A `Skill(...) Successfully loaded` line only confirms instruction loading. The first-use init gate is complete only after `repo-init-scan` verifies target-local files on disk and reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 - The PM coordinator must not inspect business source with codegraph/read/search before init completes. For standard or full work after init, PM dispatches named specialists for business-code inspection and fans in their structured evidence.
 - Codegraph MCP is optional. If `mcp__codegraph__*` tools are absent or failed in the current session, use built-in Read/Grep/Glob plus shell `rg`; if present, prefer codegraph for structural discovery.

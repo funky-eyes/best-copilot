@@ -29,6 +29,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 > 2. Check if frontmatter contains `version: "0.5.1"`.
 > 3. If match → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue to CLASSIFY.
 > 4. If missing/mismatch/unreadable → you MUST run `repo-init-scan` (invoke `/best-copilot:repo-init-scan` and execute its documented stages: `repo-init-official` then `repo-init-manual-fallback`). Do NOT skip to analysis.
+> The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` MUST attempt native `/init` automatically through its bundled helper (`claude --bare --permission-mode acceptEdits -p "/init"`) before manual fallback, then continue with target instruction/memory/spec bootstrap.
 >
 > **Language propagation:**
 > Detect the user's input language at the start. ALL responses and ALL spawned subagent prompts MUST use the user's language. Add `response_language: <detected_language>` to every dispatch packet.
