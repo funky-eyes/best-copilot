@@ -134,7 +134,7 @@ PM(`senior-project-expert`)이 메인 세션으로서 사용자 요구사항을 
 
 Claude Code에서 plugin subagent는 scoped 형식으로 표시됩니다: `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, `best-copilot:root-cause-fixer`.
 
-Claude 어댑터는 `claude-agents/*.md`에서 Claude 모델 alias를 사용합니다. GPT-5.4에 대응하는 역할은 `opus`, Gemini에 대응하는 역할은 `haiku`, Claude Sonnet 역할은 `sonnet`을 사용합니다. Claude Code는 Claude 모델만 실행하며, 이 대응은 Copilot 쪽 역할 등급을 Claude 모델군 안에 보존합니다.
+Claude 어댑터는 `claude-agents/*.md`에서 Claude 모델 alias를 사용합니다. GPT-5.4에 대응하는 역할은 `opus`, Gemini에 대응하는 역할은 `haiku`, Claude Sonnet 역할은 `sonnet`을 사용합니다. 네이티브 Claude Code에서는 이 alias가 Copilot 쪽 역할 등급을 Claude 모델군 안에 보존합니다. `cc-switch`, `new-api` 또는 다른 Anthropic-compatible proxy가 이 alias를 DeepSeek, Qwen 또는 다른 비 Claude backend로 라우팅하는 경우, hook gate와 workflow smoke check를 모두 통과하기 전까지 degraded로 취급하세요. plugin은 first-run `UserPromptSubmit`, `UserPromptExpansion`, `PreToolUse` hooks를 제공하여 init-gate context를 주입하고, 확장 전에 non-init best-copilot slash command를 차단하며, target `best-copilot.md`가 current가 될 때까지 business-source tools를 거부합니다. target bootstrap도 커밋 가능한 `.claude/hooks/best-copilot-init-gate.sh` fallback을 생성할 수 있지만, bootstrap이 시작된 뒤에만 유효합니다. PM은 이후 source reading이나 implementation 전에 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`을 출력하고 필요한 specialist lanes를 명시해야 합니다.
 
 ## 런타임 어댑터 아키텍처
 
@@ -562,7 +562,7 @@ best-copilot.md                                  ← Init sentinel (version: "0.
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code는 Claude 모델만 실행합니다. `claude-agents/*.md`의 Claude 어댑터는 역할 분리를 유지하고 Copilot 등급을 Claude alias로 대응합니다: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, Claude Sonnet 4.6 -> `sonnet`.
+네이티브 Claude Code는 Claude 모델 alias를 사용합니다. `claude-agents/*.md`의 Claude 어댑터는 역할 분리를 유지하고 Copilot 등급을 Claude alias로 대응합니다: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, Claude Sonnet 4.6 -> `sonnet`. `cc-switch`나 `new-api` 같은 proxy route는 이 alias를 비 Claude 모델에 매핑할 수 있습니다. 이는 API 호환일 뿐 workflow 호환을 의미하지 않습니다. Claude plugin에는 hook-level enforcement가 포함됩니다. target sentinel이 current가 되기 전에는 `PreToolUse`가 business-source tools와 codegraph/MCP tools를 거부하고 sentinel read, init bootstrap write, bounded root discovery만 허용합니다. 이 plugin hook이 first-run guard입니다. target bootstrap은 이후 `.claude/settings.json` hook entries와 `.claude/hooks/best-copilot-init-gate.sh`를 committed fallback policy로 추가할 수 있지만, target-local hooks는 스스로 bootstrap할 수 없습니다. DeepSeek, Qwen 또는 unknown backend에서는 실제 작업 전에 비파괴 workflow smoke check를 실행하세요. 기대 동작은 PM이 `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`을 출력한 뒤 요청에 필요한 lanes를 dispatch하는 것입니다. hook feedback 이후에도 coding을 시작하거나 lanes를 건너뛰면 smoke check를 통과하는 model/provider를 사용하세요.
 
 ## 검색 규율
 
@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-Claude 인벤토리에는 `Agents (8)`이 표시되어야 합니다. `/agents` Library와 `@` typeahead에서 plugin agents는 `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, `best-copilot:specification-writer` 같은 scoped 형식으로 표시됩니다.
+Claude inventory에는 `Agents (8)`과 `Hooks (3)`이 표시되어야 합니다. `/agents` Library와 `@` typeahead에서 plugin agents는 `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, `best-copilot:specification-writer` 같은 scoped 형식으로 표시됩니다.
 
 ## 자가 진화 메커니즘 (Evolution Loop)
 

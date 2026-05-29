@@ -134,7 +134,7 @@ The PM (`senior-project-expert`) as the main session receives user requirements 
 
 Available plugin subagents appear scoped in Claude Code: `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, `best-copilot:root-cause-fixer`.
 
-Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. Claude Code still only runs Claude models; this preserves the Copilot role tiers inside Claude's model families.
+Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. In native Claude Code these aliases preserve the Copilot role tiers inside Claude's model families. If `cc-switch`, `new-api`, or another Anthropic-compatible proxy routes those aliases to DeepSeek, Qwen, or another non-Claude backend, treat it as degraded unless the hook gate and workflow smoke check both pass. The plugin ships the first-run `UserPromptSubmit`, `UserPromptExpansion`, and `PreToolUse` hooks that inject init-gate context, block non-init best-copilot slash commands before expansion, and deny business-source tools until target `best-copilot.md` is current; target bootstrap can also generate a committed `.claude/hooks/best-copilot-init-gate.sh` fallback, but only after bootstrap has started. The PM must then output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION` and name the required specialist lanes before source reading or implementation.
 
 ## Runtime Adapter Architecture
 
@@ -562,7 +562,7 @@ Each agent declares a model in `agents/*.agent.md`, and the routing policy is pa
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Claude Code only runs Claude models. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`.
+Native Claude Code uses Claude model aliases. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`. Proxy routes such as `cc-switch` or `new-api` may map those aliases to non-Claude models; that is API compatibility only. The Claude plugin includes hook-level enforcement: before the target sentinel is current, `PreToolUse` denies business-source tools and codegraph/MCP tools while allowing sentinel reads, init bootstrap writes, and bounded root discovery. This plugin hook is the first-run guard; target bootstrap can later add `.claude/settings.json` hook entries plus `.claude/hooks/best-copilot-init-gate.sh` as committed fallback policy, but target-local hooks cannot bootstrap themselves. For DeepSeek, Qwen, or unknown backends, still run a non-destructive workflow smoke check before real work. Expected behavior: the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, then dispatches the required lanes for the request. If it starts coding or skips lanes after hook feedback, use a model/provider that passes the smoke check.
 
 ## Search Discipline
 
@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-The Claude inventory should include `Agents (8)`. In `/agents` Library and `@` typeahead, the plugin agents should appear scoped as `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, and `best-copilot:specification-writer`.
+The Claude inventory should include `Agents (8)` and `Hooks (3)`. In `/agents` Library and `@` typeahead, the plugin agents should appear scoped as `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, and `best-copilot:specification-writer`.
 
 ## Self-Evolution Mechanism (Evolution Loop)
 

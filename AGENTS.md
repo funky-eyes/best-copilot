@@ -1,6 +1,7 @@
 # Repository Entry
 
 This file is the local repository entry for this checkout. The plugin package supports Copilot CLI and Claude Code: Copilot installable agents live in root `agents/`, Claude Code agent adapters live in root `claude-agents/`, shared installable skills live in root `skills/`, role-specific workflow skills live in `skills/*-workflow/`, and repository instructions live in `.github/instructions/**`. Platform, system, and explicit user instructions have higher priority than repository files; when there is no conflict, read the entries below.
+This project provides plugins for Claude Code and GitHub Copilot. As such, the .github, .claude, and .claude-plugin directories, along with AGENTS.md and CLAUDE.md, are used by this project itself rather than by the plugins it generates or manages. Unless explicitly required, do not modify the contents of these directories or files.
 
 ## Required Entries
 
