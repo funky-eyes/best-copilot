@@ -44,7 +44,11 @@ Senior Project Expert owns orchestration (intent, scope, dispatch, fan-in, close
 - Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate` and `repo-init-scan`.
 - Focused skills (e.g., `structured-review`, `test-driven-development`) are on-demand via namespaced slash commands such as `/best-copilot:skill-name` when installed as a plugin.
 - In agent teams, teammate `skills:` frontmatter is ignored — spawn prompts must name skills explicitly or the teammate returns `NEEDS_CONTEXT missing_required_skill`.
-- A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and `repo-init-scan` reports `next_task_ready: yes`.
+- A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and `repo-init-scan` reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
+
+### Codegraph MCP
+
+Codegraph is optional. Treat it as available only when Claude exposes `mcp__codegraph__*` tools in the current session; a local `codegraph` binary or plugin inventory entry is not enough by itself. If the MCP server is unavailable or the command is not installed, do not call it and do not block; use built-in Read/Grep/Glob plus shell `rg` fallback.
 
 ### Init Gate (mandatory preflight)
 

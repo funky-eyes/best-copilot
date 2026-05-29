@@ -11,6 +11,7 @@ Use this tiny skill before loading `repo-init-scan`.
 
 - This is the mandatory first observable preflight for Senior Project Expert target-repository requests. Run it before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
 - Loading this skill is not the gate result. The gate result exists only after the target root `best-copilot.md` has been read or found missing and the output block below is produced.
+- In Claude Code, if invoking this skill only prints `Skill(...) Successfully loaded`, execute the gate inline immediately: read only target-root `best-copilot.md`, compare the frontmatter to the expected content below, and emit the output block.
 - Read only the target root `best-copilot.md`.
 - Expected file content is exactly:
 
@@ -33,4 +34,5 @@ version: "0.5.1"
 ## Repo Init Gate
 - gate_result: ready|needs_init|version_mismatch|invalid_sentinel
 - next_action: skip_repo_init_scan|run_repo_init_scan
+- evidence: target_root_best_copilot_md=present|missing|unreadable, observed_version=<version-or-none>
 ```
