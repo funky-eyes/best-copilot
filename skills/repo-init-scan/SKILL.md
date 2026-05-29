@@ -7,6 +7,16 @@ description: "Use after repo-init-gate fails, or when explicit reinitialization/
 
 Use this thin orchestrator when the repository needs full init or scaffold repair.
 
+## Immediate Execution Rule
+
+When this skill has just been loaded after `repo-init-gate` failed, the very next assistant action must be staged init work or a `BLOCKED` init report:
+
+1. Run `repo-init-official` first, or execute its documented official-init fallback inline when slash skill execution is unavailable.
+2. Run `repo-init-manual-fallback`, or execute its documented scaffold verification and repair inline.
+3. Verify required artifacts on disk, rewrite the exact `best-copilot.md` sentinel when needed, and emit `## Init Summary`.
+
+Do not search/read business source, inspect modules such as `core`, call codegraph, plan, dispatch, or summarize implementation after a `Skill(...repo-init-scan...) Successfully loaded` line and before `## Init Summary`. That transcript is invalid; recover by ignoring the premature source context and executing the staged init flow now.
+
 ## Entry Contract
 
 - Default path: invoke `repo-init-gate` first, then load this skill only when the gate reports `needs_init`, `version_mismatch`, or `invalid_sentinel`.
