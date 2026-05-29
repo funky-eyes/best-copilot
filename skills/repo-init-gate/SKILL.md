@@ -7,6 +7,17 @@ description: "Use before repo-init-scan to cheaply decide whether a target repos
 
 Use this tiny skill before loading `repo-init-scan`.
 
+## Immediate Execution Rule
+
+When this skill has just been loaded, the very next assistant action must be the gate itself:
+
+1. Read only the target root `best-copilot.md`, or determine that it is missing or unreadable.
+2. Compare the full file content with the expected sentinel block below.
+3. Emit the `## Repo Init Gate` output block below.
+4. Only after that block exists, decide whether to skip or run `repo-init-scan`.
+
+Do not search, grep, glob, list business source, inspect modules such as `core`, call codegraph, plan, dispatch, or summarize implementation before this block is emitted. A transcript that shows `Skill(...repo-init-gate...) Successfully loaded` followed by `Searched`, source `Read`, codegraph, project-structure exploration, or planning before `## Repo Init Gate` is invalid. Recovery is to discard that premature source context and run this rule inline immediately.
+
 ## Contract
 
 - This is the mandatory first observable preflight for Senior Project Expert target-repository requests. Run it before classification, broad search, generic Explore workers, planning, dispatch, or implementation.

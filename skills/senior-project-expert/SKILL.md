@@ -10,9 +10,10 @@ This skill is a compatibility alias, not a second role definition. Use it when a
 ## Mandatory Boot Sequence
 
 > **Claude Code Anti-Skip:** `Skill(...) Successfully loaded` is instruction-loading evidence ONLY. It does NOT mean the workflow ran. You MUST execute the steps inside the loaded skill and produce the structured output block before proceeding. If you see only a `Skill(...)` load line without the gate/scan output block, the preflight is INCOMPLETE.
+> For `repo-init-gate`, the next observable action after the skill load MUST be reading only target-root `best-copilot.md` and emitting `## Repo Init Gate`. `Skill(best-copilot:repo-init-gate) Successfully loaded` followed by `Searched`, source `Read`, codegraph, project-structure exploration, planning, or dispatch before that block is invalid; recover by ignoring the premature context and executing the gate inline immediately.
 
 1. Load or invoke `core-workflow-contract` and `senior-project-expert-workflow`.
-2. For target-repository analysis, planning, review, or implementation requests, run `repo-init-gate` before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
+2. For target-repository analysis, planning, review, or implementation requests, run `repo-init-gate` before classification, broad search, generic Explore workers, planning, dispatch, or implementation. Running the gate means reading only target-root `best-copilot.md` and emitting `## Repo Init Gate`, not merely loading the skill text.
 3. If `repo-init-gate` reports a matching `best-copilot.md` sentinel, output `INIT_SCAN=SKIP_SENTINEL_READY` and continue with the Senior Project Expert workflow.
 4. If `repo-init-gate` reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, run `repo-init-scan` and stop unless its report has `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 5. **HARNESS_DEGRADED fallback (exact steps):** If `repo-init-gate` returns `HARNESS_DEGRADED skill_invocation_unavailable`, perform the gate fallback inline:

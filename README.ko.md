@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-Claude inventory에는 `Agents (8)`과 `Hooks (3)`이 표시되어야 합니다. `/agents` Library와 `@` typeahead에서 plugin agents는 `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, `best-copilot:specification-writer` 같은 scoped 형식으로 표시됩니다.
+Claude inventory에는 `Agents (8)`, `Skills (39)`, `Hooks (0)`이 표시되어야 합니다. `/agents` Library와 `@` typeahead에서 plugin agents는 `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, `best-copilot:specification-writer` 같은 scoped 형식으로 표시됩니다.
 
 ## 자가 진화 메커니즘 (Evolution Loop)
 

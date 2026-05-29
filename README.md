@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-The Claude inventory should include `Agents (8)` and `Hooks (3)`. In `/agents` Library and `@` typeahead, the plugin agents should appear scoped as `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, and `best-copilot:specification-writer`.
+The Claude inventory should include `Agents (8)`, `Skills (39)`, and `Hooks (0)`. In `/agents` Library and `@` typeahead, the plugin agents should appear scoped as `best-copilot:senior-project-expert`, `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:root-cause-fixer`, and `best-copilot:specification-writer`.
 
 ## Self-Evolution Mechanism (Evolution Loop)
 
