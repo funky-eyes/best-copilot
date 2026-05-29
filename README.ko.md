@@ -274,7 +274,7 @@ repo-init-gate
                     repo-init-scan
                       │
                       ├── Stage 1: repo-init-official
-                      │     /init 또는 copilot init 시도
+                      │     copilot init 또는 Claude native /init helper 실행
                       │     출력 → project.instructions.md
                       │
                       └── Stage 2: repo-init-manual-fallback
@@ -523,7 +523,7 @@ PM/코디네이터만 Native Ask 메커니즘(Copilot: `vscode_askQuestions` / `
 
 ## 초기 사용
 
-초기화는 **자동으로** 수행됩니다 — 수동으로 `/init`이나 `copilot init`을 실행할 필요가 없습니다. PM agent가 시작되면 [핵심 워크플로 Stage 1](#단계-1-init-게이트-필수-프리체크)이 자동으로 `repo-init-gate` → `repo-init-scan`을 실행하여 저장소 사실 수집과 스캐폴드 생성을 완료합니다.
+초기화는 **자동으로** 수행됩니다 — 수동으로 `/init`이나 `copilot init`을 실행할 필요가 없습니다. PM agent가 시작되면 [핵심 워크플로 Stage 1](#단계-1-init-게이트-필수-프리체크)이 자동으로 `repo-init-gate` → `repo-init-scan`을 실행합니다. Claude Code에서는 공식 단계가 bundled helper를 통해 native `/init`을 먼저 시도한 뒤 best-copilot target instructions, memory, spec scaffold와 sentinel을 생성합니다.
 
 Claude Code에서 바로 PM을 시작하세요:
 

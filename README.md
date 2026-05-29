@@ -274,7 +274,7 @@ repo-init-gate
                     repo-init-scan
                       │
                       ├── Stage 1: repo-init-official
-                      │     Attempts /init or copilot init
+                      │     Runs copilot init or Claude native /init helper
                       │     Output → project.instructions.md
                       │
                       └── Stage 2: repo-init-manual-fallback
@@ -523,7 +523,7 @@ Medium-to-large work establishes bidirectional links between spec and memory:
 
 ## First Use In A Target Repository
 
-Initialization is **automatic** — there is no need to manually run `/init` or `copilot init`. When the PM agent starts, [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) automatically executes `repo-init-gate` → `repo-init-scan`, completing repo fact collection and scaffold creation.
+Initialization is **automatic** — there is no need to manually run `/init` or `copilot init`. When the PM agent starts, [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) automatically executes `repo-init-gate` → `repo-init-scan`; in Claude Code the official stage attempts native `/init` through the bundled helper before best-copilot creates target instructions, memory, spec scaffolds, and the sentinel.
 
 Just start the PM in Claude Code:
 
