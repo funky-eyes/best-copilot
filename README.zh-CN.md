@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-Claude inventory 应包含 `Agents (8)` 和 `Hooks (3)`。在 `/agents` Library 和 `@` 选择器里，插件 agents 应以 scoped 形式显示为 `best-copilot:senior-project-expert`、`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:root-cause-fixer` 和 `best-copilot:specification-writer`。
+Claude inventory 应包含 `Agents (8)`、`Skills (39)` 和 `Hooks (0)`。在 `/agents` Library 和 `@` 选择器里，插件 agents 应以 scoped 形式显示为 `best-copilot:senior-project-expert`、`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:root-cause-fixer` 和 `best-copilot:specification-writer`。
 
 ## 自进化机制（Evolution Loop）
 

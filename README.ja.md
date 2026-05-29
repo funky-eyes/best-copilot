@@ -607,7 +607,7 @@ claude --plugin-dir /absolute/path/to/best-copilot/claude-plugin plugin details 
 git diff --check
 ```
 
-Claude inventory には `Agents (8)` と `Hooks (3)` が表示される必要があります。`/agents` Library と `@` typeahead では、plugin agents は `best-copilot:senior-project-expert`、`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:root-cause-fixer`、`best-copilot:specification-writer` のような scoped 形式で表示されます。
+Claude inventory には `Agents (8)`、`Skills (39)`、`Hooks (0)` が表示される必要があります。`/agents` Library と `@` typeahead では、plugin agents は `best-copilot:senior-project-expert`、`best-copilot:technical-architect`、`best-copilot:developer`、`best-copilot:frontend-designer`、`best-copilot:quality-assurance-expert`、`best-copilot:security-reviewer`、`best-copilot:root-cause-fixer`、`best-copilot:specification-writer` のような scoped 形式で表示されます。
 
 ## 自己進化メカニズム（Evolution Loop）
 
