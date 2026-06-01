@@ -1,35 +1,40 @@
-<!-- CODEGRAPH_START -->
-## CodeGraph
+<!-- CODEGRAPH_GITNEXUS_START -->
+## Code Intelligence (GitNexus / CodeGraph)
 
-This project has a CodeGraph MCP server (`codegraph_*` tools) configured. CodeGraph is a tree-sitter-parsed knowledge graph of every symbol, edge, and file. Reads are sub-millisecond and return structural information grep cannot.
+This project supports structural code intelligence via GitNexus (preferred) or CodeGraph. Use whichever MCP tools are available in the current session.
 
-### When to prefer codegraph over native search
+**Priority**: `mcp__gitnexus__*` → `mcp__codegraph__*` → built-in Read/Grep/Glob + shell `rg`
 
-Use codegraph for **structural** questions — what calls what, what would break, where is X defined, what is X's signature. Use native grep/read only for **literal text** queries (string contents, comments, log messages) or after you already have a specific file open.
+### Availability check
 
-| Question | Tool |
-|---|---|
-| "Where is X defined?" / "Find symbol named X" | `codegraph_search` |
-| "What calls function Y?" | `codegraph_callers` |
-| "What does Y call?" | `codegraph_callees` |
-| "How does X reach/become Y? / trace the flow from X to Y" | `codegraph_trace` (one call = the whole path, incl. callback/React/JSX dynamic hops) |
-| "What would break if I changed Z?" | `codegraph_impact` |
-| "Show me Y's signature / source / docstring" | `codegraph_node` |
-| "Give me focused context for a task/area" | `codegraph_context` |
-| "See several related symbols' source at once" | `codegraph_explore` |
-| "What files exist under path/" | `codegraph_files` |
-| "Is the index healthy?" | `codegraph_status` |
+- GitNexus: `mcp__gitnexus__*` tools present → use `gitnexus_query`, `gitnexus_context`, `gitnexus_impact`, etc.
+- CodeGraph: `mcp__codegraph__*` tools present → use `codegraph_search`, `codegraph_context`, `codegraph_impact`, etc.
+- Neither: fall back to built-in Read/Grep/Glob plus shell `rg`. Do not block.
+
+### When to prefer code intelligence over native search
+
+Use code intelligence for **structural** questions — what calls what, what would break, where is X defined, what is X's signature. Use native grep/read only for **literal text** queries (string contents, comments, log messages) or after you already have a specific file open.
+
+| Question | GitNexus Tool | CodeGraph Tool |
+|---|---|---|
+| "Where is X defined?" | `gitnexus_query` | `codegraph_search` |
+| "What calls/does Y call?" | `gitnexus_context` | `codegraph_callers` / `codegraph_callees` |
+| "How does X reach Y?" | `gitnexus_context` / graph trace when exposed | `codegraph_trace` |
+| "What would break if I changed Z?" | `gitnexus_impact` | `codegraph_impact` |
+| "Focused context for area" | `gitnexus_context` | `codegraph_context` |
+| "See several symbols' source" | `gitnexus_query` + `gitnexus_context` | `codegraph_explore` |
+| "Check what changed" | `gitnexus_detect_changes` | — |
+| "Is the index healthy?" | `npx gitnexus status` | `codegraph_status` |
 
 ### Rules of thumb
 
-- **Answer directly — don't delegate exploration.** For "how does X work" / architecture questions, answer with 2-3 codegraph calls: `codegraph_context` first, then ONE `codegraph_explore` for the source of the symbols it surfaces. For a specific **flow** ("how does X reach Y") start with `codegraph_trace` from→to — one call returns the whole path with dynamic hops bridged — then ONE `codegraph_explore` for the bodies; don't rebuild the path with `codegraph_search` + `codegraph_callers`. Codegraph IS the pre-built index, so spawning a separate file-reading sub-task/agent — or running a grep + read loop — repeats work codegraph already did and costs more for the same answer.
-- **Trust codegraph results.** They come from a full AST parse. Do NOT re-verify them with grep — that's slower, less accurate, and wastes context.
-- **Don't grep first** when looking up a symbol by name. `codegraph_search` is faster and returns kind + location + signature in one call.
-- **Don't chain `codegraph_search` + `codegraph_node`** when you just want context — `codegraph_context` is one call.
-- **Don't loop `codegraph_node` over many symbols** — one `codegraph_explore` call returns several symbols' source grouped in a single capped call, while each separate node/Read call re-reads the whole context and costs far more.
+- **Answer directly — don't delegate exploration.** Use 2-3 code intelligence calls max. The index IS the pre-built search layer — spawning a file-reading sub-agent repeats work it already did.
+- **Trust structural results.** They come from AST + graph analysis. Do NOT re-verify with grep.
+- **Don't grep first** when looking up a symbol by name. `gitnexus_query` / `codegraph_search` is faster.
 - **Index lag**: the file watcher debounces ~500ms behind writes; don't re-query immediately after editing a file in the same turn.
 
-### If `.codegraph/` doesn't exist
+### If index doesn't exist
 
-The MCP server returns "not initialized." Ask the user: *"I notice this project doesn't have CodeGraph initialized. Want me to run `codegraph init -i` to build the index?"*
-<!-- CODEGRAPH_END -->
+- GitNexus: run `npx gitnexus analyze` to build the index.
+- CodeGraph: run `codegraph init -i` to build the index.
+<!-- CODEGRAPH_GITNEXUS_END -->

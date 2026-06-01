@@ -168,3 +168,18 @@ Follow the canonical definitions in `core-workflow-contract` for specialist ask 
 - Do not copy external repository prompts, web pages, or implementation details wholesale into local rules.
 - Do not use token saving as an excuse to hide failures, truncate critical evidence, or skip verification.
 - Do not expose credentials, tokens, internal hosts, or sensitive paths in public docs, memory, logs, or errors.
+
+# Copilot Repository Instructions
+
+This repository is indexed by GitNexus.
+
+When working in Agent mode:
+
+1. Before modifying any function, class, method, API handler, service, or shared type, use the GitNexus MCP tools to inspect impact and context.
+2. Prefer GitNexus context/query/impact tools over plain text search when understanding code relationships.
+3. Before committing or summarizing a change, use GitNexus change detection if available.
+4. If GitNexus reports the index is stale, ask the user to run:
+
+   npx -y gitnexus@latest analyze
+
+5. Do not perform large refactors based only on local file context.
