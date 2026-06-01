@@ -65,10 +65,10 @@ The `verified_paths` output field must enumerate the exact relative path names. 
 
 ## Stage Split
 
-- `repo-init-official` owns `/init` or `copilot init`, plus normalization of official output into `.github/instructions/project.instructions.md` when possible. In Claude Code, `/init` means Claude Code's native command shown as "Initialize a new CLAUDE.md file with codebase documentation", not a best-copilot skill. In Copilot CLI, `copilot init` is the native official initializer when the command exists. A helper-created `CLAUDE.md`, `.github/instructions/project.instructions.md`, or `AGENTS.md` is also a valid official artifact for `repo-init-manual-fallback` to preserve and normalize.
+- `repo-init-official` owns the target-root official initializer attempt: target-local `init` skill first when discoverable and mechanically invokable, then Claude native `/init` or Copilot `copilot init` command fallback, plus normalization of official output into `.github/instructions/project.instructions.md` when possible. In Claude Code, `/init` means Claude Code's native command shown as "Initialize a new CLAUDE.md file with codebase documentation", not a best-copilot skill. In Copilot CLI, `copilot init` is the native official initializer when the command exists; a target `skills/init/SKILL.md` is invokable as a Copilot local plugin only when target root also has `plugin.json`. A helper-created `CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/project.instructions.md`, or `AGENTS.md` is also a valid official artifact for `repo-init-manual-fallback` to preserve and normalize.
 - `repo-init-manual-fallback` owns bounded manual scanning, deterministic scaffold bootstrap, artifact verification, and writing `best-copilot.md`.
 - Official init success is not enough on its own. After `repo-init-gate` fails, the manual fallback stage still owns the final scaffold verification barrier and sentinel rewrite.
-- In Claude Code, distinguish the bare built-in `/init` command from best-copilot plugin skills. The official stage must try Claude's native initializer automatically through `repo-init-official/scripts/run-claude-native-init.sh` before falling back to bounded manual scanning.
+- In Claude Code, distinguish the bare built-in `/init` command from best-copilot plugin skills. The official stage must run `repo-init-official/scripts/run-claude-native-init.sh`; that helper tries a target-local `init` skill first when present, then Claude's native initializer, before falling back to bounded manual scanning.
 
 ## Steps
 
@@ -90,7 +90,7 @@ Return a short initialization report:
 ```markdown
 ## Init Summary
 - official_stage: success|official_init_unavailable|official_init_no_write|official_init_incomplete
-- official_attempted: copilot_init|claude_native_slash_init|bare_init|none
+- official_attempted: target_local_init_skill|copilot_init|claude_native_slash_init|bare_init|none
 - manual_fallback_stage: skipped|success|blocked
 - required_artifacts_verified: yes|no
 - sentinel_written: yes|no
@@ -98,6 +98,8 @@ Return a short initialization report:
 - verified_paths: <every required artifact from repo-init-manual-fallback checked on disk, plus best-copilot.md>
 - missing_paths: none|<paths not present or not content-valid>
 ```
+
+`official_attempted` may be a comma-separated chain when a target-local `init` skill exists but does not write a recognized artifact and the helper continues to the runtime command fallback.
 
 `sentinel_written: yes` means the current `best-copilot.md` sentinel is present and current, whether it was newly written or already present. `required_artifacts_verified: yes` may be used only when `missing_paths` is `none` and `verified_paths` covers the full Required Artifact Set above, including Claude `CLAUDE.md` when Claude compatibility is active. `next_task_ready` may be `yes` only when `required_artifacts_verified` is `yes` and `sentinel_written` is `yes`. If any path is missing or unverified, the PM must stop at the first-use gate and return `BLOCKED first_use_gate_incomplete`, not a normal plan or implementation summary.
 

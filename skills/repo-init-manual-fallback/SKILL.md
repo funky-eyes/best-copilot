@@ -20,6 +20,10 @@ When this stage has just been loaded inside `repo-init-scan`, the next assistant
 - In shell-capable runtimes, first run the bundled deterministic helper when its path is discoverable from `CLAUDE_SKILL_DIR`, the active plugin directory, or the current skill directory. Treat the helper's `verified_paths` / `missing_paths` output as the primary evidence. If the helper cannot be located, perform the documented create-or-repair fallback inline instead of blocking solely on helper discovery.
 - If `target-instructions-bootstrap`, `target-memory-bootstrap`, or `target-spec-bootstrap` cannot be invoked mechanically, read their `SKILL.md` templates and perform the documented create-only repair inline. Do not skip a missing scaffold because skill invocation was unavailable.
 
+## Sentinel Ownership
+
+This skill owns constructing target-root `best-copilot.md`. The companion `repo-init-gate` skill owns validating it, and `repo-init-scan` owns orchestrating when this stage may write it. Do not define the sentinel format in the plugin repository's own `.github/instructions/project.instructions.md`; that file is only project-level guidance for developing this plugin.
+
 ## Required First-Use Artifacts
 
 Before `next_task_ready: yes`, verify these paths in the target repository:
@@ -58,7 +62,7 @@ Never write project descriptions, task summaries, or markdown headings into `bes
    - Reuse that file as the primary fact packet.
    - Scan only the missing fact categories, missing scaffold surfaces, or unresolved `unknown` gaps that still block verification.
 2. Otherwise do a bounded manual scan:
-   - Read `CLAUDE.md` first when `repo-init-official` created or updated it through Claude native `/init`; treat it as official initializer evidence, but still verify facts against repository files before recording them.
+   - Read `CLAUDE.md`, `.github/copilot-instructions.md`, or `AGENTS.md` first when `repo-init-official` created or updated one through a target-local `init` skill, Claude native `/init`, or Copilot `copilot init`; treat it as official initializer evidence, but still verify facts against repository files before recording them.
    - Read `README*`, package/build files, CI files, app entrypoints, test directories, and existing `.github/instructions/project.instructions.md`.
    - Search only for build/test/dev entrypoints and major module boundaries.
    - Record unresolved facts as `unknown` instead of guessing.

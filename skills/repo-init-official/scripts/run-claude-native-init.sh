@@ -2,6 +2,7 @@
 set -u
 
 target_dir="${1:-$PWD}"
+timeout_seconds="${BEST_COPILOT_CLAUDE_NATIVE_INIT_TIMEOUT_SECONDS:-45}"
 
 if [ ! -d "$target_dir" ]; then
   echo "status=invalid_target_dir"
@@ -23,49 +24,100 @@ cd "$target_dir" || exit 64
 
 export BEST_COPILOT_CLAUDE_NATIVE_INIT_RUNNING=1
 
-echo "attempted=claude_native_slash_init"
-echo "native_command=/init"
-echo "runner=claude --bare --permission-mode acceptEdits -p /init"
-
-output_file="$(mktemp "${TMPDIR:-/tmp}/best-copilot-claude-init.XXXXXX")"
-timeout_seconds="${BEST_COPILOT_CLAUDE_NATIVE_INIT_TIMEOUT_SECONDS:-45}"
-
 case "$timeout_seconds" in
   ''|*[!0-9]*) timeout_seconds=45 ;;
 esac
 
-if command -v perl >/dev/null 2>&1; then
-  perl -e 'use POSIX ":sys_wait_h"; $timeout = shift @ARGV; $pid = fork(); die "fork failed: $!\n" unless defined $pid; if ($pid == 0) { exec @ARGV; die "exec failed: $!\n"; } $deadline = time + $timeout; while (1) { $done = waitpid($pid, WNOHANG); if ($done == $pid) { exit($? >> 8); } if (time >= $deadline) { kill "TERM", $pid; select undef, undef, undef, 0.2; kill "KILL", $pid; exit 124; } select undef, undef, undef, 0.1; }' "$timeout_seconds" claude --bare --permission-mode acceptEdits -p "/init" >"$output_file" 2>&1
-else
-  claude --bare --permission-mode acceptEdits -p "/init" >"$output_file" 2>&1
-fi
-status=$?
+find_local_init_skill() {
+  for rel_path in "skills/init/SKILL.md" ".claude/skills/init/SKILL.md"; do
+    if [ -f "$rel_path" ]; then
+      printf '%s\n' "$rel_path"
+      return 0
+    fi
+  done
+  return 1
+}
 
-head -c 6000 "$output_file"
-rm -f "$output_file"
+run_with_timeout() {
+  output_file="$1"
+  shift
+  if command -v perl >/dev/null 2>&1; then
+    perl -e 'use POSIX ":sys_wait_h"; $timeout = shift @ARGV; $pid = fork(); die "fork failed: $!\n" unless defined $pid; if ($pid == 0) { exec @ARGV; die "exec failed: $!\n"; } $deadline = time + $timeout; while (1) { $done = waitpid($pid, WNOHANG); if ($done == $pid) { exit($? >> 8); } if (time >= $deadline) { kill "TERM", $pid; select undef, undef, undef, 0.2; kill "KILL", $pid; exit 124; } select undef, undef, undef, 0.1; }' "$timeout_seconds" "$@" >"$output_file" 2>&1
+  else
+    "$@" >"$output_file" 2>&1
+  fi
+}
 
-if [ "$status" -eq 124 ] || [ "$status" -eq 142 ]; then
+emit_success_if_artifact_exists() {
+  if [ -f ".github/instructions/project.instructions.md" ]; then
+    echo "status=success"
+    echo "artifact=.github/instructions/project.instructions.md"
+    return 0
+  fi
+  if [ -f "CLAUDE.md" ]; then
+    echo "status=success"
+    echo "artifact=CLAUDE.md"
+    return 0
+  fi
+  if [ -f "AGENTS.md" ]; then
+    echo "status=success"
+    echo "artifact=AGENTS.md"
+    return 0
+  fi
+  return 1
+}
+
+run_claude_init_attempt() {
+  attempt_name="$1"
+  runner_label="$2"
+  shift 2
+
+  echo "attempted=$attempt_name"
+  echo "native_command=/init"
+  echo "runner=$runner_label"
+
+  output_file="$(mktemp "${TMPDIR:-/tmp}/best-copilot-claude-init.XXXXXX")"
+  run_with_timeout "$output_file" "$@"
+  command_status=$?
+
+  head -c 6000 "$output_file"
+  rm -f "$output_file"
+
+  if [ "$command_status" -eq 124 ] || [ "$command_status" -eq 142 ]; then
+    echo
+    echo "status=claude_init_timeout"
+    echo "timeout_seconds=$timeout_seconds"
+    return 70
+  fi
+
+  if [ "$command_status" -ne 0 ]; then
+    echo
+    echo "status=claude_init_failed"
+    echo "exit_code=$command_status"
+    return "$command_status"
+  fi
+
   echo
-  echo "status=claude_init_timeout"
-  echo "timeout_seconds=$timeout_seconds"
-  exit 70
-fi
+  if emit_success_if_artifact_exists; then
+    return 0
+  fi
 
-if [ "$status" -ne 0 ]; then
+  echo "status=no_write"
+  echo "missing=.github/instructions/project.instructions.md|CLAUDE.md|AGENTS.md"
+  return 70
+}
+
+local_init_skill_path="$(find_local_init_skill || true)"
+if [ -n "$local_init_skill_path" ]; then
+  echo "local_init_skill=$local_init_skill_path"
+  run_claude_init_attempt "target_local_init_skill" "claude --bare --permission-mode acceptEdits -p /init" claude --bare --permission-mode acceptEdits -p "/init"
+  local_status=$?
+  if [ "$local_status" -eq 0 ]; then
+    exit 0
+  fi
   echo
-  echo "status=claude_init_failed"
-  echo "exit_code=$status"
-  exit "$status"
+  echo "local_init_skill_status=fallback_to_claude_native_slash_init"
 fi
 
-if [ -f "CLAUDE.md" ]; then
-  echo
-  echo "status=success"
-  echo "artifact=CLAUDE.md"
-  exit 0
-fi
-
-echo
-echo "status=no_write"
-echo "missing=CLAUDE.md"
-exit 70
+run_claude_init_attempt "claude_native_slash_init" "claude --bare --permission-mode acceptEdits -p /init" claude --bare --permission-mode acceptEdits -p "/init"
+exit $?

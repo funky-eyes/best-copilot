@@ -2,6 +2,7 @@
 set -u
 
 target_dir="${1:-$PWD}"
+timeout_seconds="${BEST_COPILOT_NATIVE_INIT_TIMEOUT_SECONDS:-45}"
 
 if [ ! -d "$target_dir" ]; then
   echo "status=invalid_target_dir"
@@ -9,72 +10,135 @@ if [ ! -d "$target_dir" ]; then
   exit 64
 fi
 
+cd "$target_dir" || exit 64
+
+case "$timeout_seconds" in
+  ''|*[!0-9]*) timeout_seconds=45 ;;
+esac
+
+find_local_init_skill() {
+  if [ -f "skills/init/SKILL.md" ] && [ -f "plugin.json" ]; then
+    printf '%s\n' "skills/init/SKILL.md"
+    return 0
+  fi
+  return 1
+}
+
+uninvokable_local_init_skill() {
+  if [ -f "skills/init/SKILL.md" ] && [ ! -f "plugin.json" ]; then
+    echo "local_init_skill=skills/init/SKILL.md"
+    echo "local_init_skill_status=uninvokable_missing_plugin_json"
+  fi
+}
+
 if ! command -v copilot >/dev/null 2>&1; then
+  uninvokable_local_init_skill
   echo "attempted=copilot_init"
   echo "native_command=copilot init"
   echo "status=copilot_cli_missing"
   exit 69
 fi
 
-cd "$target_dir" || exit 64
-
-echo "attempted=copilot_init"
-echo "native_command=copilot init"
-echo "runner=copilot init"
-
-output_file="$(mktemp "${TMPDIR:-/tmp}/best-copilot-copilot-init.XXXXXX")"
-timeout_seconds="${BEST_COPILOT_NATIVE_INIT_TIMEOUT_SECONDS:-45}"
-
-case "$timeout_seconds" in
-  ''|*[!0-9]*) timeout_seconds=45 ;;
-esac
-
-if command -v perl >/dev/null 2>&1; then
-  perl -e 'use POSIX ":sys_wait_h"; $timeout = shift @ARGV; $pid = fork(); die "fork failed: $!\n" unless defined $pid; if ($pid == 0) { exec @ARGV; die "exec failed: $!\n"; } $deadline = time + $timeout; while (1) { $done = waitpid($pid, WNOHANG); if ($done == $pid) { exit($? >> 8); } if (time >= $deadline) { kill "TERM", $pid; select undef, undef, undef, 0.2; kill "KILL", $pid; exit 124; } select undef, undef, undef, 0.1; }' "$timeout_seconds" copilot init >"$output_file" 2>&1
-else
-  copilot init >"$output_file" 2>&1
-fi
-status=$?
-
-head -c 6000 "$output_file"
-
-if grep -Fq "No authentication information found" "$output_file"; then
-  rm -f "$output_file"
-  echo
-  echo "status=copilot_auth_missing"
-  exit 69
-fi
-
-rm -f "$output_file"
-
-if [ "$status" -eq 124 ] || [ "$status" -eq 142 ]; then
-  echo
-  echo "status=copilot_init_timeout"
-  echo "timeout_seconds=$timeout_seconds"
-  exit 70
-fi
-
-if [ "$status" -ne 0 ]; then
-  echo
-  echo "status=copilot_init_failed"
-  echo "exit_code=$status"
-  exit "$status"
-fi
-
-if [ -f ".github/instructions/project.instructions.md" ] || [ -f "AGENTS.md" ] || [ -f "CLAUDE.md" ]; then
-  echo
-  echo "status=success"
-  if [ -f ".github/instructions/project.instructions.md" ]; then
-    echo "artifact=.github/instructions/project.instructions.md"
-  elif [ -f "AGENTS.md" ]; then
-    echo "artifact=AGENTS.md"
+run_with_timeout() {
+  output_file="$1"
+  shift
+  if command -v perl >/dev/null 2>&1; then
+    perl -e 'use POSIX ":sys_wait_h"; $timeout = shift @ARGV; $pid = fork(); die "fork failed: $!\n" unless defined $pid; if ($pid == 0) { exec @ARGV; die "exec failed: $!\n"; } $deadline = time + $timeout; while (1) { $done = waitpid($pid, WNOHANG); if ($done == $pid) { exit($? >> 8); } if (time >= $deadline) { kill "TERM", $pid; select undef, undef, undef, 0.2; kill "KILL", $pid; exit 124; } select undef, undef, undef, 0.1; }' "$timeout_seconds" "$@" >"$output_file" 2>&1
   else
-    echo "artifact=CLAUDE.md"
+    "$@" >"$output_file" 2>&1
   fi
+}
+
+emit_success_if_artifact_exists() {
+  if [ -f ".github/instructions/project.instructions.md" ]; then
+    echo "status=success"
+    echo "artifact=.github/instructions/project.instructions.md"
+    return 0
+  fi
+  if [ -f ".github/copilot-instructions.md" ]; then
+    echo "status=success"
+    echo "artifact=.github/copilot-instructions.md"
+    return 0
+  fi
+  if [ -f "AGENTS.md" ]; then
+    echo "status=success"
+    echo "artifact=AGENTS.md"
+    return 0
+  fi
+  if [ -f "CLAUDE.md" ]; then
+    echo "status=success"
+    echo "artifact=CLAUDE.md"
+    return 0
+  fi
+  return 1
+}
+
+run_copilot_init_attempt() {
+  attempt_name="$1"
+  native_command_label="$2"
+  runner_label="$3"
+  shift 3
+
+  echo "attempted=$attempt_name"
+  echo "native_command=$native_command_label"
+  echo "runner=$runner_label"
+
+  output_file="$(mktemp "${TMPDIR:-/tmp}/best-copilot-copilot-init.XXXXXX")"
+  run_with_timeout "$output_file" "$@"
+  command_status=$?
+
+  head -c 6000 "$output_file"
+
+  if grep -Fq "No authentication information found" "$output_file"; then
+    rm -f "$output_file"
+    echo
+    echo "status=copilot_auth_missing"
+    return 69
+  fi
+
+  rm -f "$output_file"
+
+  if [ "$command_status" -eq 124 ] || [ "$command_status" -eq 142 ]; then
+    echo
+    echo "status=copilot_init_timeout"
+    echo "timeout_seconds=$timeout_seconds"
+    return 70
+  fi
+
+  if [ "$command_status" -ne 0 ]; then
+    echo
+    echo "status=copilot_init_failed"
+    echo "exit_code=$command_status"
+    return "$command_status"
+  fi
+
+  echo
+  if emit_success_if_artifact_exists; then
+    return 0
+  fi
+
+  echo "status=no_write"
+  echo "missing=.github/instructions/project.instructions.md|.github/copilot-instructions.md|AGENTS.md|CLAUDE.md"
+  return 70
+}
+
+local_init_skill_path="$(find_local_init_skill || true)"
+if [ -n "$local_init_skill_path" ]; then
+  echo "local_init_skill=$local_init_skill_path"
+  run_copilot_init_attempt "target_local_init_skill" "/init" "copilot --plugin-dir <target> -p /init --allow-all-tools" copilot --plugin-dir "$target_dir" -p "/init" --allow-all-tools
+  local_status=$?
+  if [ "$local_status" -eq 0 ]; then
+    exit 0
+  fi
+  echo
+  echo "local_init_skill_status=fallback_to_copilot_init"
+else
+  uninvokable_local_init_skill
+fi
+
+run_copilot_init_attempt "copilot_init" "copilot init" "copilot init" copilot init
+exit_code=$?
+if [ "$exit_code" -eq 0 ]; then
   exit 0
 fi
-
-echo
-echo "status=no_write"
-echo "missing=.github/instructions/project.instructions.md"
-exit 70
+exit "$exit_code"
