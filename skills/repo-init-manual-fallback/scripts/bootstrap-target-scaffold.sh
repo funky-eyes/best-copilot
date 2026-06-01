@@ -671,6 +671,10 @@ if [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]; then
   write_missing "CLAUDE.md" <<'EOF'
 # Claude Code Project Entry
 
+## Best Copilot Instruction Imports
+
+The standalone `@path` lines below are Claude Code import directives. Keep them unindented and outside code fences so Claude Code loads these target-local best-copilot instruction files into project context.
+
 @.github/instructions/project.instructions.md
 @.github/instructions/must.instructions.md
 @.github/instructions/skills-index.instructions.md
@@ -697,6 +701,12 @@ EOF
 "
   fi
 fi
+
+append_if_missing "CLAUDE.md" "## Best Copilot Instruction Imports" <<'EOF'
+## Best Copilot Instruction Imports
+
+The standalone `@path` lines in this file are Claude Code import directives. Keep them unindented and outside code fences so Claude Code loads these target-local best-copilot instruction files into project context.
+EOF
 
 append_if_missing "CLAUDE.md" "@.github/instructions/project.instructions.md" <<'EOF'
 @.github/instructions/project.instructions.md
@@ -958,6 +968,7 @@ check_contains ".github/instructions/skills-index.instructions.md" "target-memor
 check_contains ".github/instructions/skills-index.instructions.md" "## Claude Code Skill Names"
 
 if [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]; then
+  check_contains "CLAUDE.md" "## Best Copilot Instruction Imports"
   check_contains "CLAUDE.md" "@.github/instructions/project.instructions.md"
   check_contains "CLAUDE.md" "@.github/instructions/must.instructions.md"
   check_contains "CLAUDE.md" "@.github/instructions/skills-index.instructions.md"

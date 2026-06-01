@@ -62,7 +62,7 @@ Existing target files must be handled as follows:
 - If `.github/instructions/must.instructions.md` exists but lacks `## Agents and Dispatch`, append that section from this skill after `## Runtime Notes` when that heading exists, otherwise append it after `## Memory And Spec`.
 - If `.github/instructions/must.instructions.md` exists but lacks `## Implementation and Verification`, append that section from this skill after `## Agents and Dispatch` when that heading exists, otherwise append it after `## Runtime Notes` when that heading exists, or after `## Interaction`.
 - If `.github/instructions/skills-index.instructions.md` exists but lacks the Claude Code skill-name note, append `## Claude Code Skill Names` from this skill.
-- If `CLAUDE.md` exists but lacks references to `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`, append the compatible import block from this skill instead of replacing existing Claude-specific rules.
+- If `CLAUDE.md` exists but lacks references to `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`, append the compatible import block from this skill instead of replacing existing Claude-specific rules. The import block must explain that standalone unindented `@path` lines are Claude Code import directives and must stay outside code fences.
 - If `.claude/settings.json` exists but lacks a top-level `agent` key and adding JSON safely is possible, add `"agent": "senior-project-expert"` while preserving existing keys. If it already has a different `agent`, do not overwrite it silently; stop with `BLOCKED target_instructions_bootstrap_conflict` unless the user explicitly asked to change the Claude default agent. If `.claude/settings.json` lacks `worktree.baseRef` and adding JSON safely is possible, add `"worktree": {"baseRef": "head"}` while preserving existing keys; if it already has a different worktree policy, preserve it and record the difference instead of overwriting. If safe JSON repair is not possible, stop with `BLOCKED target_instructions_bootstrap_conflict` and list `.claude/settings.json`.
 - If a required section cannot be inserted without overwriting project-specific rules, stop with `BLOCKED target_instructions_bootstrap_conflict` and list the conflicting file.
 
@@ -369,6 +369,10 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 ```markdown
 # Claude Code Project Entry
 
+## Best Copilot Instruction Imports
+
+The standalone `@path` lines below are Claude Code import directives. Keep them unindented and outside code fences so Claude Code loads these target-local best-copilot instruction files into project context.
+
 @.github/instructions/project.instructions.md
 @.github/instructions/must.instructions.md
 @.github/instructions/skills-index.instructions.md
@@ -422,7 +426,7 @@ This makes the PM coordinator (`senior-project-expert`) the default session entr
 - Confirm `.github/instructions/must.instructions.md` contains the first-use scaffold gate that names `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`.
 - Confirm `.github/instructions/must.instructions.md` contains the progressive-disclosure memory rule, the mixed-language rule, `## Agents and Dispatch`, cross-review lanes, Technical Architect-led SDD design review, and `## Implementation and Verification`.
 - Confirm `.github/instructions/skills-index.instructions.md` contains the Claude Code skill-name note when that file exists.
-- When Claude Code compatibility is required, confirm `CLAUDE.md` exists and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
+- When Claude Code compatibility is required, confirm `CLAUDE.md` exists, contains `## Best Copilot Instruction Imports`, and references `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md` through standalone unindented `@path` lines outside code fences.
 - When Claude Code compatibility is required, confirm `CLAUDE.md` mentions the PM coordinator dispatch model (Agent tool for specialist subagents), foreground/background dispatch policy, isolated worktree closeout, namespaced plugin skill commands, scoped `/agents` / `@` names for plugin subagents, the unscoped `--agent senior-project-expert` first-use path with scoped fallback for collisions, that `Skill(...) Successfully loaded` is not completion evidence, that PM-owned business-source exploration is forbidden before init and not a substitute for named specialist lanes after init, that code intelligence (GitNexus or CodeGraph) is optional with Read/Grep/Glob plus `rg` fallback, and that `cc-switch` / `new-api` / non-Claude providers require plugin enablement plus a provider smoke check before target-repository work.
 - When a stable Claude Code PM entry is required, confirm `.claude/settings.json` exists, is valid JSON, contains `"agent": "senior-project-expert"`, and contains `"worktree": {"baseRef": "head"}` unless an existing explicit worktree policy was preserved.
 - Confirm no generated file contains unresolved project-specific claims, secrets, or plugin-cache paths.
