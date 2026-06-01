@@ -5,26 +5,22 @@ description: "Use before repo-init-scan to cheaply decide whether a target repos
 
 # Repo Init Gate
 
-Use this tiny skill before loading `repo-init-scan`.
+Use this tiny skill before loading `repo-init-scan`. It is the repeat-request fast path.
 
 ## Immediate Execution Rule
 
-When this skill has just been loaded, the very next assistant action must be the gate itself:
+When loaded, the next assistant action must be only this gate:
 
 1. Read only the target root `best-copilot.md`, or determine that it is missing or unreadable.
-2. Compare the full file content with the expected sentinel block below.
+2. Compare the full file content to the exact sentinel below.
 3. Emit the `## Repo Init Gate` output block below.
-4. Only after that block exists, decide whether to skip or run `repo-init-scan`.
+4. If it matches, skip `repo-init-scan`; otherwise run `repo-init-scan`.
 
-Do not search, grep, glob, list business source, inspect modules such as `core`, call code intelligence, plan, dispatch, or summarize implementation before this block is emitted. A transcript that shows `Skill(...repo-init-gate...) Successfully loaded` followed by `Searched`, source `Read`, code intelligence, project-structure exploration, or planning before `## Repo Init Gate` is invalid. Recovery is to discard that premature source context and run this rule inline immediately.
+Forbidden before this block: search, grep, glob, source reads, project structure exploration, code intelligence, planning, dispatch, implementation summaries, scaffold writes, or reading `.github/instructions/**`, `memories/**`, `spec/**`, `AGENTS.md`, or `CLAUDE.md`.
 
 ## Contract
 
-- This is the mandatory first observable preflight for Senior Project Expert target-repository requests. Run it before classification, broad search, generic Explore workers, planning, dispatch, or implementation.
-- Loading this skill is not the gate result. The gate result exists only after the target root `best-copilot.md` has been read or found missing and the output block below is produced.
-- In Claude Code, if invoking this skill only prints `Skill(...) Successfully loaded`, execute the gate inline immediately: read only target-root `best-copilot.md`, compare the frontmatter to the expected content below, and emit the output block.
-- Read only the target root `best-copilot.md`.
-- Expected file content is exactly:
+Expected `best-copilot.md` content:
 
 ```md
 ---
@@ -32,15 +28,11 @@ version: "0.6.0"
 ---
 ```
 
-- Exact match: skip `repo-init-scan`.
-- Missing, unreadable, invalid frontmatter, missing `version`, or version mismatch: run `repo-init-scan`.
-- Do not create, write, or edit `best-copilot.md`. This gate is read-only. If the sentinel is missing or mismatched, report the gate result and hand off to `repo-init-scan` which owns creating it.
-- Do not create, write, or edit any scaffold files during this gate. Gate is a single-file read operation.
-- Any extra heading, prose, task summary, or project description in `best-copilot.md` makes it `invalid_sentinel`, even when a version string appears somewhere in the file.
-- Do not read `.github/instructions/**`, `memories/repo/**`, `spec/**`, or runtime adapters here.
-- Explicit reinitialize/repair requests bypass the gate and run `repo-init-scan` directly.
-- `best-copilot.md` is written only by `repo-init-scan` after full verification.
-- If a runtime cannot mechanically invoke this skill, use the same shallow sentinel read as a degraded fallback and report `HARNESS_DEGRADED skill_invocation_unavailable`.
+- Exact full-file match: `ready` + `skip_repo_init_scan`.
+- Missing, unreadable, extra content, invalid frontmatter, missing version, or version mismatch: report the corresponding gate result and run `repo-init-scan`.
+- Explicit reinitialize/repair requests bypass this gate and run `repo-init-scan`.
+- This gate is read-only; `repo-init-scan` owns sentinel creation/repair.
+- If skill invocation fails, do the same single-file read inline and report `HARNESS_DEGRADED skill_invocation_unavailable`.
 
 ## Output
 
