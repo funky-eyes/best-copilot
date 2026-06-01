@@ -34,10 +34,10 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 > **HARNESS_DEGRADED fallback (exact steps):**
 > If `repo-init-gate` returns `HARNESS_DEGRADED skill_invocation_unavailable`:
 > 1. Read the target repository root `best-copilot.md` (if it exists).
-> 2. Check if frontmatter contains `version: "0.6.0"`.
-> 3. If match → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue to CLASSIFY.
+> 2. Compare the full file content to the exact three-line sentinel from `repo-init-gate`.
+> 3. If it is an exact match → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue to CLASSIFY.
 > 4. If missing/mismatch/unreadable → you MUST run `repo-init-scan` (invoke `/best-copilot:repo-init-scan` and execute its documented stages: `repo-init-official` then `repo-init-manual-fallback`). Do NOT skip to analysis.
-> The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` MUST attempt native `/init` automatically through its bundled helper (`claude --bare --permission-mode acceptEdits -p "/init"`) before manual fallback, then continue with target instruction/memory/spec bootstrap.
+> The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` MUST run the bundled helper from the target root; that helper first invokes a target-local `init` skill when `skills/init/SKILL.md` or `.claude/skills/init/SKILL.md` exists, then falls back to native `/init` through `claude --bare --permission-mode acceptEdits -p "/init"` before manual fallback. After either attempt, continue with target instruction/memory/spec bootstrap.
 >
 > **Language propagation:**
 > Detect the user's input language at the start. ALL responses and ALL spawned subagent prompts MUST use the user's language. Add `response_language: <detected_language>` to every dispatch packet.

@@ -63,7 +63,224 @@ check_contains() {
   fi
 }
 
-write_missing ".github/instructions/project.instructions.md" <<'EOF'
+sentinel_is_current() {
+  [ -f "best-copilot.md" ] && cmp -s "best-copilot.md" - <<EOF
+---
+version: "$contract_version"
+---
+EOF
+}
+
+mark_project_init_ready() {
+  rel_path=".github/instructions/project.instructions.md"
+  tmp_file="$(mktemp "${TMPDIR:-/tmp}/best-copilot-project.XXXXXX")" || return 1
+  awk -v ts="$init_timestamp" '
+    /^- Init ready:/ {
+      print "- Init ready: yes"
+      next
+    }
+    /^- Required artifacts verified:/ {
+      print "- Required artifacts verified: yes"
+      next
+    }
+    /^- Last verified:/ {
+      print "- Last verified: " ts
+      next
+    }
+    /^- Last full verification:/ {
+      print "- Last full verification: " ts
+      next
+    }
+    { print }
+  ' "$rel_path" >"$tmp_file" && mv "$tmp_file" "$rel_path"
+}
+
+append_fact() {
+  current="$1"
+  value="$2"
+  if [ -n "$current" ]; then
+    printf '%s; %s' "$current" "$value"
+  else
+    printf '%s' "$value"
+  fi
+}
+
+inline_list() {
+  limit="${1:-8}"
+  sed 's#^\./##' | sed '/^$/d' | head -n "$limit" | awk '
+    BEGIN { first = 1 }
+    {
+      gsub(/\|/, "\\|")
+      if (!first) {
+        printf ", "
+      }
+      printf "%s", $0
+      first = 0
+    }
+    END {
+      if (first) {
+        printf "unknown"
+      }
+    }
+  '
+}
+
+if command -v date >/dev/null 2>&1; then
+  init_timestamp="$(date -u '+%Y-%m-%dT%H:%M:%SZ')"
+else
+  init_timestamp="bounded first-use bootstrap"
+fi
+
+project_name="$(basename "$PWD")"
+if [ -z "$project_name" ]; then
+  project_name="unknown"
+fi
+
+readme_path="$(find . -maxdepth 1 -type f \( -iname 'README' -o -iname 'README.*' \) -print 2>/dev/null | head -n 1)"
+purpose="unknown"
+if [ -n "$readme_path" ] && [ -f "$readme_path" ]; then
+  readme_heading="$(sed -n 's/^# \{1,\}//p' "$readme_path" | head -n 1)"
+  if [ -n "$readme_heading" ]; then
+    purpose="README heading: $readme_heading"
+  fi
+fi
+
+build_files_raw="$(find . -maxdepth 3 \( -path './.git' -o -path './node_modules' -o -path './target' -o -path './build' -o -path './.gradle' \) -prune -o \( -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' -o -name 'package.json' -o -name 'go.mod' -o -name 'pyproject.toml' \) -print 2>/dev/null | sort)"
+build_files_md="$(printf '%s\n' "$build_files_raw" | inline_list 10)"
+
+has_maven="no"
+has_gradle="no"
+has_node="no"
+has_go="no"
+has_python="no"
+printf '%s\n' "$build_files_raw" | grep -Eq '(^|/)pom\.xml$' && has_maven="yes"
+printf '%s\n' "$build_files_raw" | grep -Eq '(^|/)build\.gradle(\.kts)?$' && has_gradle="yes"
+printf '%s\n' "$build_files_raw" | grep -Eq '(^|/)package\.json$' && has_node="yes"
+printf '%s\n' "$build_files_raw" | grep -Eq '(^|/)go\.mod$' && has_go="yes"
+printf '%s\n' "$build_files_raw" | grep -Eq '(^|/)pyproject\.toml$' && has_python="yes"
+
+package_system="unknown"
+package_system_accum=""
+if [ "$has_maven" = "yes" ]; then
+  package_system_accum="$(append_fact "$package_system_accum" "Maven")"
+fi
+if [ "$has_gradle" = "yes" ]; then
+  package_system_accum="$(append_fact "$package_system_accum" "Gradle")"
+fi
+if [ "$has_node" = "yes" ]; then
+  package_system_accum="$(append_fact "$package_system_accum" "Node package manager")"
+fi
+if [ "$has_go" = "yes" ]; then
+  package_system_accum="$(append_fact "$package_system_accum" "Go modules")"
+fi
+if [ "$has_python" = "yes" ]; then
+  package_system_accum="$(append_fact "$package_system_accum" "Python pyproject")"
+fi
+if [ -n "$package_system_accum" ]; then
+  package_system="$package_system_accum"
+fi
+
+primary_stack=""
+if find . -maxdepth 6 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o -type d -path '*/src/main/java' -print 2>/dev/null | head -n 1 | grep -q .; then
+  primary_stack="$(append_fact "$primary_stack" "Java")"
+fi
+if find . -maxdepth 6 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o -type d -path '*/src/main/kotlin' -print 2>/dev/null | head -n 1 | grep -q .; then
+  primary_stack="$(append_fact "$primary_stack" "Kotlin")"
+fi
+if [ "$has_node" = "yes" ]; then
+  primary_stack="$(append_fact "$primary_stack" "JavaScript/TypeScript")"
+fi
+if [ "$has_go" = "yes" ]; then
+  primary_stack="$(append_fact "$primary_stack" "Go")"
+fi
+if [ "$has_python" = "yes" ]; then
+  primary_stack="$(append_fact "$primary_stack" "Python")"
+fi
+
+has_spring="no"
+if find . -maxdepth 4 \( -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' \) -exec grep -E 'spring-boot|org\.springframework\.boot' {} \; 2>/dev/null | grep -q .; then
+  has_spring="yes"
+fi
+if [ "$has_spring" = "no" ] && find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o -name '*.java' -exec grep -F '@SpringBootApplication' {} \; 2>/dev/null | grep -q .; then
+  has_spring="yes"
+fi
+if [ "$has_spring" = "yes" ]; then
+  primary_stack="$(append_fact "$primary_stack" "Spring Boot")"
+fi
+if [ -z "$primary_stack" ]; then
+  primary_stack="unknown"
+fi
+
+maven_cmd="mvn"
+if [ -x "./mvnw" ]; then
+  maven_cmd="./mvnw"
+fi
+gradle_cmd="gradle"
+if [ -x "./gradlew" ]; then
+  gradle_cmd="./gradlew"
+fi
+node_cmd="npm"
+if [ -f "pnpm-lock.yaml" ]; then
+  node_cmd="pnpm"
+elif [ -f "yarn.lock" ]; then
+  node_cmd="yarn"
+fi
+
+install_cmd="unknown"
+test_cmd="unknown"
+check_cmd="unknown"
+dev_cmd="unknown"
+command_note="Bounded scan inferred this from build files; command was not executed during init."
+if [ "$has_maven" = "yes" ]; then
+  install_cmd="$maven_cmd -DskipTests package"
+  test_cmd="$maven_cmd test"
+  check_cmd="$maven_cmd verify"
+  if [ "$has_spring" = "yes" ]; then
+    dev_cmd="$maven_cmd spring-boot:run"
+  fi
+elif [ "$has_gradle" = "yes" ]; then
+  install_cmd="$gradle_cmd assemble"
+  test_cmd="$gradle_cmd test"
+  check_cmd="$gradle_cmd check"
+  if [ "$has_spring" = "yes" ]; then
+    dev_cmd="$gradle_cmd bootRun"
+  fi
+elif [ "$has_node" = "yes" ]; then
+  install_cmd="$node_cmd install"
+  test_cmd="$node_cmd test"
+  check_cmd="$node_cmd run lint"
+  dev_cmd="$node_cmd run dev"
+elif [ "$has_go" = "yes" ]; then
+  install_cmd="go mod download"
+  test_cmd="go test ./..."
+  check_cmd="go test ./..."
+elif [ "$has_python" = "yes" ]; then
+  install_cmd="python -m pip install -e ."
+  test_cmd="pytest"
+fi
+
+entrypoints_raw="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -name '*Application.java' -o -name '*Application.kt' -o -name 'main.go' -o -name 'app.py' -o -name 'main.py' \) -print 2>/dev/null | sort)"
+entrypoints_md="$(printf '%s\n' "$entrypoints_raw" | inline_list 8)"
+test_entrypoints_raw="$(find . -maxdepth 6 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o -type d \( -path '*/src/test' -o -name 'test' -o -name 'tests' \) -print 2>/dev/null | sort)"
+test_entrypoints_md="$(printf '%s\n' "$test_entrypoints_raw" | inline_list 8)"
+module_dirs_raw="$(find . -mindepth 2 -maxdepth 2 \( -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' -o -name 'package.json' \) -print 2>/dev/null | sed 's#/[^/]*$##' | sort -u)"
+source_modules_md="$(printf '%s\n' "$module_dirs_raw" | inline_list 8)"
+if [ "$source_modules_md" = "unknown" ] && [ -d "src" ]; then
+  source_modules_md="root project"
+fi
+security_auth_md="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -iname '*security*' -o -iname '*auth*' -o -iname '*oauth*' -o -iname '*oidc*' \) -print 2>/dev/null | sort | inline_list 8)"
+
+known_unknowns="- Commands were inferred from build files and were not executed during init."
+if [ "$entrypoints_md" = "unknown" ]; then
+  known_unknowns="${known_unknowns}
+- Application entrypoints were not found by the bounded scan."
+fi
+if [ "$source_modules_md" = "unknown" ]; then
+  known_unknowns="${known_unknowns}
+- Module boundaries were not found by the bounded scan."
+fi
+
+write_missing ".github/instructions/project.instructions.md" <<EOF
 ---
 name: target-project-facts
 description: Repository facts, build and test commands, entrypoints, and module boundaries for this repository.
@@ -74,59 +291,60 @@ applyTo: "**"
 
 ## Project Facts
 
-- Project name: unknown
-- Purpose: unknown
-- Primary languages/frameworks: unknown
-- Package/build system: unknown
+- Project name: ${project_name}
+- Purpose: ${purpose}
+- Primary languages/frameworks: ${primary_stack}
+- Package/build system: ${package_system}
+- Bounded evidence files: ${build_files_md}
 
 ## Build and Test Commands
 
 | Purpose | Command | Notes |
 | --- | --- | --- |
-| Install dependencies | unknown | Bounded init helper did not infer this command. |
-| Run tests | unknown | Bounded init helper did not infer this command. |
-| Run lint/checks | unknown | Bounded init helper did not infer this command. |
-| Start dev/runtime | unknown | Bounded init helper did not infer this command. |
+| Install dependencies | ${install_cmd} | ${command_note} |
+| Run tests | ${test_cmd} | ${command_note} |
+| Run lint/checks | ${check_cmd} | ${command_note} |
+| Start dev/runtime | ${dev_cmd} | ${command_note} |
 
 ## Runtime and Entry Points
 
-- Application entrypoints: unknown
-- Test entrypoints: unknown
+- Application entrypoints: ${entrypoints_md}
+- Test entrypoints: ${test_entrypoints_md}
 - Local runtime requirements: unknown
 
 ## Module Boundaries
 
-- Source modules: unknown
+- Source modules: ${source_modules_md}
 - Public API surfaces: unknown
 - Data/schema ownership: unknown
 - UI ownership: unknown
-- Security/auth ownership: unknown
+- Security/auth ownership: ${security_auth_md}
 
 ## Known Unknowns
 
-- Bounded first-use bootstrap recorded unknowns instead of guessing.
+${known_unknowns}
 
 ## Verification Notes
 
 - Init source: manual_fallback
-- Last verified: bounded first-use bootstrap
+- Last verified: ${init_timestamp}
 
 ## Init Status
 
-- Init ready: yes
-- Required artifacts verified: yes
+- Init ready: no
+- Required artifacts verified: no
 - Bootstrap contract version: 0.6.0
-- Last full verification: bounded first-use bootstrap
+- Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
 
 append_if_missing ".github/instructions/project.instructions.md" "## Init Status" <<'EOF'
 ## Init Status
 
-- Init ready: yes
-- Required artifacts verified: yes
+- Init ready: no
+- Required artifacts verified: no
 - Bootstrap contract version: 0.6.0
-- Last full verification: bounded first-use bootstrap
+- Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
 
@@ -134,7 +352,7 @@ append_if_missing ".github/instructions/project.instructions.md" "Bootstrap cont
 ## Best Copilot Init Repair
 
 - Bootstrap contract version: 0.6.0
-- Last full verification: bounded first-use bootstrap
+- Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
 
@@ -320,7 +538,7 @@ Read only the selected skill, not the whole skill tree.
 
 - `repo-init-gate`: read only target-root `best-copilot.md` and decide whether full init is needed.
 - `repo-init-scan`: use after gate failure; completion requires disk-verified target-local files, `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
-- `repo-init-official`: try official `/init` or `copilot init`; in Claude Code it uses the bounded native `/init` helper before manual fallback.
+- `repo-init-official`: try target-local `init` skill first when discoverable and mechanically invokable, then Claude native `/init` or Copilot `copilot init`; in Claude Code it uses the bounded official helper before manual fallback.
 - `repo-init-manual-fallback`: create or repair scaffolds, verify required artifacts, and write `best-copilot.md`.
 - `target-instructions-bootstrap`: create `.github/instructions/**` plus runtime adapters.
 - `target-memory-bootstrap`: create `memories/repo/**` skeleton.
@@ -650,16 +868,27 @@ if [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]; then
 fi
 
 if [ -z "$missing_paths" ] && [ -z "$content_errors" ]; then
+  if ! mark_project_init_ready; then
+    content_errors="${content_errors}.github/instructions/project.instructions.md failed to mark init ready
+"
+  fi
+fi
+
+if [ -z "$missing_paths" ] && [ -z "$content_errors" ]; then
   cat >"best-copilot.md" <<EOF
 ---
 version: "$contract_version"
 ---
 EOF
-  check_file "best-copilot.md"
+fi
+
+if ! sentinel_is_current; then
+  missing_paths="${missing_paths}best-copilot.md
+"
 fi
 
 verified_paths=""
-if [ -z "$missing_paths" ] && [ -z "$content_errors" ] && [ -f "best-copilot.md" ]; then
+if [ -z "$missing_paths" ] && [ -z "$content_errors" ] && sentinel_is_current; then
   for rel_path in "${required_paths[@]}"; do
     verified_paths="${verified_paths}${rel_path}
 "
@@ -673,7 +902,7 @@ if [ -n "$content_errors" ]; then
 fi
 
 echo "## Repo Init Manual Fallback Helper"
-if [ -z "$missing_paths" ] && [ -f "best-copilot.md" ]; then
+if [ -z "$missing_paths" ] && sentinel_is_current; then
   echo "status=success"
   echo "required_artifacts_verified=yes"
   echo "sentinel_written=yes"
@@ -687,7 +916,11 @@ fi
 
 echo "status=blocked"
 echo "required_artifacts_verified=no"
-echo "sentinel_written=no"
+if sentinel_is_current; then
+  echo "sentinel_written=yes"
+else
+  echo "sentinel_written=no"
+fi
 echo "next_task_ready=no"
 echo "verified_paths=none"
 echo "missing_paths<<EOF"
