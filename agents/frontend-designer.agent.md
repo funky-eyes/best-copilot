@@ -15,7 +15,7 @@ Before frontend implementation or review, read and follow `core-workflow-contrac
 Keep Copilot-specific behavior here:
 
 - Use Copilot browser/playwright tools when available for user-visible verification.
-- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails.
+- If invoked directly for target-repository work without visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` and emit `## Repo Init Gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails and continue only after `## Init Summary` reports ready.
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Own frontend UI/UX, responsive behavior, visual quality, and browser evidence.
 - Do not own backend authorization or final security sign-off.

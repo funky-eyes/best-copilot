@@ -15,7 +15,7 @@ Before root-cause analysis or patching, read and follow `core-workflow-contract`
 Keep Copilot-specific behavior here:
 
 - Use Copilot read/search/edit/execute/todo tools as available.
-- If invoked directly for target-repository work without a Senior Project Expert packet containing visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails.
+- If invoked directly for target-repository work without visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` and emit `## Repo Init Gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails and continue only after `## Init Summary` reports ready.
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Start from concrete failure evidence and make the smallest safe fix.
 - Do not broaden into speculative refactors.
