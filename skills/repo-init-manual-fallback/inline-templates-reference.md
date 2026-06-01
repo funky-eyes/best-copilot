@@ -59,6 +59,9 @@ applyTo: "**"
 
 ```md
 # Claude Code Project Entry
+## Best Copilot Instruction Imports
+The standalone `@path` lines below are Claude Code import directives. Keep them unindented and outside code fences so Claude Code loads these target-local best-copilot instruction files into project context.
+
 @.github/instructions/project.instructions.md
 @.github/instructions/must.instructions.md
 @.github/instructions/skills-index.instructions.md
