@@ -63,6 +63,18 @@ Do not accept substitutes such as `memory/current-state.md`, `MEMORY.md`, `spec/
 
 The `verified_paths` output field must enumerate the exact relative path names. A phrase such as `all 17 required paths`, `created successfully`, or an absolute temp directory path is not valid evidence.
 
+## Inline Fallback: Exact Sentinel Content
+
+When performing the strict inline fallback (no shell helper available), the exact content for target-root `best-copilot.md` is:
+
+```md
+---
+version: "0.6.0"
+---
+```
+
+Do NOT add headings, project names, descriptions, dates, or any other prose. The file must contain only the YAML frontmatter block above — exactly 3 lines. This is the only valid sentinel format. A file with `# Best Copilot Sentinel`, a project description, or a `Last Updated` date is invalid even if it also contains the correct version string.
+
 ## Stage Split
 
 - `repo-init-official` owns the target-root official initializer attempt: target-local `init` skill first when discoverable and mechanically invokable, then Claude native `/init` or Copilot `copilot init` command fallback, plus normalization of official output into `.github/instructions/project.instructions.md` when possible. In Claude Code, `/init` means Claude Code's native command shown as "Initialize a new CLAUDE.md file with codebase documentation", not a best-copilot skill. In Copilot CLI, `copilot init` is the native official initializer when the command exists; a target `skills/init/SKILL.md` is invokable as a Copilot local plugin only when target root also has `plugin.json`. A helper-created `CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/project.instructions.md`, or `AGENTS.md` is also a valid official artifact for `repo-init-manual-fallback` to preserve and normalize.

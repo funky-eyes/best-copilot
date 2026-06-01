@@ -34,6 +34,8 @@ version: "0.6.0"
 
 - Exact match: skip `repo-init-scan`.
 - Missing, unreadable, invalid frontmatter, missing `version`, or version mismatch: run `repo-init-scan`.
+- Do not create, write, or edit `best-copilot.md`. This gate is read-only. If the sentinel is missing or mismatched, report the gate result and hand off to `repo-init-scan` which owns creating it.
+- Do not create, write, or edit any scaffold files during this gate. Gate is a single-file read operation.
 - Any extra heading, prose, task summary, or project description in `best-copilot.md` makes it `invalid_sentinel`, even when a version string appears somewhere in the file.
 - Do not read `.github/instructions/**`, `memories/repo/**`, `spec/**`, or runtime adapters here.
 - Explicit reinitialize/repair requests bypass the gate and run `repo-init-scan` directly.
