@@ -7,12 +7,17 @@ description: "Use inside repo-init-scan after the official stage whenever scaffo
 
 Use this stage inside `repo-init-scan` whenever scaffold verification, bounded repair, or `best-copilot.md` rewrite is still needed. After official init succeeds, this stage still owns the final scaffold verification barrier and sentinel rewrite.
 
+## Immediate Execution Rule
+
+When this stage has just been loaded inside `repo-init-scan`, the next assistant action must create/repair/verify the required init artifacts or return `BLOCKED`, then emit `## Repo Init Manual Fallback`. Do not stop at `Skill(...repo-init-manual-fallback...) Successfully loaded`, and do not inspect business source except the bounded evidence allowed below.
+
 ## Boundary
 
 - This stage is fail-closed. Do not continue to requirements analysis, planning, dependency/framework changes, security rewrites, or implementation until the required files have been created or a `BLOCKED` result has been returned.
 - Reading package/build files is allowed only as bounded evidence for creating `.github/instructions/project.instructions.md`.
 - Write persistent state into the target repository, never into the plugin installation/cache directory.
 - Loading this skill or the bootstrap skills is not enough. Success requires actual create/repair operations in the target repository followed by path and content checks on disk.
+- In shell-capable runtimes, first run the bundled deterministic helper when its path is discoverable from `CLAUDE_SKILL_DIR`, the active plugin directory, or the current skill directory. Treat the helper's `verified_paths` / `missing_paths` output as the primary evidence. If the helper cannot be located, perform the documented create-or-repair fallback inline instead of blocking solely on helper discovery.
 - If `target-instructions-bootstrap`, `target-memory-bootstrap`, or `target-spec-bootstrap` cannot be invoked mechanically, read their `SKILL.md` templates and perform the documented create-only repair inline. Do not skip a missing scaffold because skill invocation was unavailable.
 
 ## Required First-Use Artifacts
@@ -66,6 +71,7 @@ Never write project descriptions, task summaries, or markdown headings into `bes
    - `Last full verification: <timestamp-or-bounded-scan-note>`
    - `Reentry rule: best-copilot-version-sentinel-first`
 6. Initialize missing target-local scaffolds in this order:
+   - bundled `scripts/bootstrap-target-scaffold.sh` helper when shell access and the helper are available
    - `target-instructions-bootstrap`
    - `target-memory-bootstrap`
    - `target-spec-bootstrap`
@@ -85,6 +91,7 @@ version: "0.6.0"
    - The `## Init Status` block contains `Bootstrap contract version: 0.6.0`.
    - The target root `best-copilot.md` exists and exactly matches the expected frontmatter sentinel.
    - Any bootstrap-created files exist on disk and did not overwrite project-specific content.
+   - `verified_paths` covers every path under Required First-Use Artifacts, plus `best-copilot.md` after sentinel rewrite; otherwise report `missing_paths`, `required_artifacts_verified: no`, and `next_task_ready: no`.
 
 ## Output
 
@@ -94,4 +101,6 @@ version: "0.6.0"
 - required_artifacts_verified: yes|no
 - sentinel_written: yes|no
 - next_task_ready: yes|no
+- verified_paths: <every required artifact checked on disk, plus best-copilot.md>
+- missing_paths: none|<paths not present or not content-valid>
 ```
