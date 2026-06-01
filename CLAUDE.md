@@ -41,7 +41,7 @@ Senior Project Expert owns orchestration (intent, scope, dispatch, fan-in, close
 
 ### Skill Loading
 
-- Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate` and `repo-init-scan`.
+- Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate`; `repo-init-scan` is loaded only when the sentinel gate fails.
 - Focused skills (e.g., `structured-review`, `test-driven-development`) are on-demand via namespaced slash commands such as `/best-copilot:skill-name` when installed as a plugin.
 - In agent teams, teammate `skills:` frontmatter is ignored — spawn prompts must name skills explicitly or the teammate returns `NEEDS_CONTEXT missing_required_skill`.
 - A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and `repo-init-scan` reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.

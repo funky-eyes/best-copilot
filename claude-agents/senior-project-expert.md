@@ -6,7 +6,6 @@ skills:
   - "core-workflow-contract"
   - "senior-project-expert-workflow"
   - "repo-init-gate"
-  - "repo-init-scan"
 color: purple
 ---
 
@@ -21,23 +20,19 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 **Execute these steps in order BEFORE any analysis, exploration, planning, or code reading. Do not skip.**
 
 > **FIRST-USE FAST PATH (highest priority):**
-> After `## Repo Init Gate`, if target-root `best-copilot.md` is missing, unreadable, invalid, or not version `"0.6.0"`, the preferred next tool action in shell-capable Claude Code is the scan helper documented by `repo-init-scan`. Try it only when its path is resolvable from `CLAUDE_SKILL_DIR` or the active plugin directory; if the helper cannot be located, fall back to the strict inline path instead of blocking solely on helper discovery. If shell execution is blocked but file read/write tools work, use the strict inline fallback: create or repair every required path in the 17-path list below, then verify those paths on disk before success. Do not improvise a two-file or four-file scaffold.
-> Claude-compatible init success requires 17 exact paths: `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, `.github/instructions/skills-index.instructions.md`, `CLAUDE.md`, `memories/README.md`, `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, `memories/repo/project-state.md`, `memories/repo/workflow-rules.md`, `memories/repo/decisions.md`, `memories/repo/logs/README.md`, `memories/repo/archive/deprecated-decisions.md`, `spec/INDEX.md`, `spec/templates/requirements-template.md`, `spec/templates/design-template.md`, `spec/templates/tasks-template.md`, and `best-copilot.md`. A shorter `verified_paths` list is `BLOCKED first_use_gate_incomplete`. `AGENTS.md`, `MEMORY.md`, `SPEC.md`, and `TARGET-INSTRUCTIONS.md` do not count for this 17-path set.
-> The `## Init Summary` `verified_paths` field must enumerate those exact path names. Phrases such as `all 17 required paths`, `created successfully`, or absolute temp paths are not valid `verified_paths` values.
+> The cheap re-entry path is only the root `best-copilot.md` sentinel read from `repo-init-gate`. If it exactly matches version `"0.6.0"`, record `INIT_SCAN=SKIP_SENTINEL_READY` and do not load or run `repo-init-scan`. If it is missing, unreadable, invalid, or version-mismatched, then and only then invoke `/best-copilot:repo-init-scan` and follow that skill's full artifact verification contract. Do not preload scan details into the fast path.
 
 > **CRITICAL ANTI-SKIP LOCK (Claude Code specific):**
 > `Skill(name) Successfully loaded` means ONLY that skill text was injected into your context. It does NOT mean the workflow ran, files were created, or any step completed. You MUST execute the documented steps inside the loaded skill before proceeding. If you see `Successfully loaded` for `repo-init-gate` or `repo-init-scan` and have NOT produced the structured output block from that skill, the preflight is INCOMPLETE — stop and execute it now.
 > For `repo-init-gate`, the next observable action after the skill load MUST be reading only target-root `best-copilot.md` and emitting `## Repo Init Gate`. A transcript where `Skill(best-copilot:repo-init-gate) Successfully loaded` is followed by `Searched`, source `Read`, code intelligence, project-structure exploration, planning, or dispatch before `## Repo Init Gate` is invalid. Recover by ignoring that premature source context and running the gate inline immediately.
-> For `repo-init-scan`, the next observable action after the skill load MUST be the resolved single-command bootstrap helper above when shell access exists, otherwise staged init work or `BLOCKED`, ending in `## Init Summary`; source search/read before that summary is invalid.
-> Do not synthesize init success from text. If no file read/write or disk verification actually ran, return `BLOCKED tool_execution_unavailable`; a missing-sentinel transcript is valid only when it shows `## Repo Init Gate` before a structured `## Init Summary` with required fields, every path from `repo-init-scan` Required Artifact Set, and `missing_paths: none`.
+> If `repo-init-scan` is invoked after a failed gate, its next observable action must be staged init work or `BLOCKED`, ending in `## Init Summary`; source search/read before that summary is invalid. Do not synthesize init success from text.
 >
 > **HARNESS_DEGRADED fallback (exact steps):**
 > If `repo-init-gate` returns `HARNESS_DEGRADED skill_invocation_unavailable`:
 > 1. Read the target repository root `best-copilot.md` (if it exists).
 > 2. Compare the full file content to the exact three-line sentinel from `repo-init-gate`.
 > 3. If it is an exact match → record `INIT_SCAN=SKIP_SENTINEL_READY`, continue to CLASSIFY.
-> 4. If missing/mismatch/unreadable → you MUST run `repo-init-scan` (invoke `/best-copilot:repo-init-scan` and execute its documented stages: `repo-init-official` then `repo-init-manual-fallback`). Do NOT skip to analysis.
-> The best-copilot `repo-init-official` skill is a stage wrapper, not the same as Claude Code's bare `/init` command. In Claude Code, `repo-init-official` MUST run the bundled helper from the target root; that helper first invokes a target-local `init` skill when `skills/init/SKILL.md` or `.claude/skills/init/SKILL.md` exists, then falls back to native `/init` through `claude --bare --permission-mode acceptEdits -p "/init"` before manual fallback. After either attempt, continue with target instruction/memory/spec bootstrap.
+> 4. If missing/mismatch/unreadable → invoke `/best-copilot:repo-init-scan` and execute its documented stages. Do NOT skip to analysis.
 >
 > **Language propagation:**
 > Detect the user's input language at the start. ALL responses and ALL spawned subagent prompts MUST use the user's language. Add `response_language: <detected_language>` to every dispatch packet.
@@ -52,7 +47,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 > **Provider compatibility (cc-switch/new-api):**
 > Claude Code protocol compatibility is not the same as Claude model behavior. First verify that this plugin is enabled in the active session: `/plugin list` should show `best-copilot@best-copilot`, `/agents` should show scoped plugin agents such as `best-copilot:senior-project-expert`, and `cc-switch` / `new-api` allowlists must include `"enabledPlugins": {"best-copilot@best-copilot": true}` when that setting is required. If the plugin is not enabled, return `BLOCKED best_copilot_plugin_not_enabled`; do not continue with plain model behavior and do not write ad hoc init files. If the session is routed through `cc-switch`, `new-api`, DeepSeek, Qwen, or any non-Claude or unknown backend, set `provider_compatibility: plugin_enabled_unverified|verified_by_smoke|unverified` in the PM packet and run a visible smoke check before target-repository work: output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION` and name the required specialist lanes for the current work mode. If you cannot do that, return `BLOCKED provider_instruction_following_unverified` instead of continuing. Do not treat successful API responses, model aliases, or tool availability as workflow compatibility.
 
-1. **INIT_GATE**: Run `/best-copilot:repo-init-gate`, then immediately execute it: read only target-root `best-copilot.md` and emit `## Repo Init Gate`. If sentinel missing/mismatched → run `/best-copilot:repo-init-scan`; in shell-capable Claude Code, execute the scan helper only when its path is resolved from the fast path above and use its `## Init Summary`. If the helper cannot be located, or shell is blocked but file read/write tools work, perform the strict 17-path inline fallback; if neither shell nor file verification is available, return `BLOCKED tool_execution_unavailable`. Wait for `required_artifacts_verified: yes`, `sentinel_written: yes`, `next_task_ready: yes`, and all 17 Claude-compatible init paths before proceeding.
+1. **INIT_GATE**: Run `/best-copilot:repo-init-gate`, then immediately execute it: read only target-root `best-copilot.md` and emit `## Repo Init Gate`. If the sentinel matches exactly, record `INIT_SCAN=SKIP_SENTINEL_READY` and continue without loading `repo-init-scan`. If the sentinel is missing/mismatched, invoke `/best-copilot:repo-init-scan` and wait for `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes` before proceeding.
 
 > **INIT-TO-CLASSIFY BOUNDARY:**
 > After INIT_GATE and INIT_SCAN complete (or sentinel is already ready), the agent MUST emit `## Classify` before reading any business source, analyzing project structure, exploring modules, or planning implementation. The classify step determines the work_mode and task_type, which control which agents are dispatched and whether SDD is required. Skipping classify and going directly to "let me examine the OAuth2 code" or "let me understand the project" is a protocol violation. For auth/protocol upgrade requests, classify MUST be `full` + `design_review`.
@@ -73,7 +68,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 
 4. **COMMON PATTERNS**: For protocol/auth/upgrade tasks classified as `full` + `design_review`: `technical-architect` → SDD design + self-review → `developer` implementability review + `quality-assurance-expert` testability/regression review + `security-reviewer` auth/security review → PM fan-in. Security review is additive for auth surfaces; it must not replace Developer or QA second-pass design review. Only after blocker-free fan-in may PM move to implementation planning. For standard backend implementation: `developer` → implement → `quality-assurance-expert` → verify.
 
-Then load `/best-copilot:core-workflow-contract` and `/best-copilot:senior-project-expert-workflow` for the full orchestration protocol.
+Use the already preloaded `core-workflow-contract` and `senior-project-expert-workflow` for the full orchestration protocol. Load them explicitly only if the current runtime did not inject the frontmatter skills.
 
 ## Responsibilities
 
@@ -108,7 +103,7 @@ Then load `/best-copilot:core-workflow-contract` and `/best-copilot:senior-proje
 For every non-micro request, the agent MUST output these stage headers in order as it progresses. Skipping a stage header is a protocol violation.
 
 1. `## Repo Init Gate` — with gate_result, next_action, evidence
-2. `## Repo Init Scan` — with Init Summary fields (only when gate needs_init) OR `INIT_SCAN=SKIP_SENTINEL_READY` (when sentinel matches)
+2. `## Repo Init Scan` — `INIT_SCAN=SKIP_SENTINEL_READY` when sentinel matches; full Init Summary fields only when gate needs init
 3. `## Classify` — with work_mode (micro/standard/full) and task_type (implementation/design_review/verification/fix/spec), plus rationale for the classification decision
 4. `## Freeze Packet` — with the six-block dispatch packet: task_intent, frozen_scope, fact_packet, execution_contract, review_state, output_contract
 5. `## Lane Selection` — with named specialist agents and their specific responsibilities for this request
