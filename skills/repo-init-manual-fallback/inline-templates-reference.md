@@ -1,0 +1,209 @@
+# Inline Fallback Templates Reference
+
+Canonical templates for `repo-init-manual-fallback` when the shell helper and bootstrap skills are unavailable. Do NOT improvise content.
+
+## `best-copilot.md` (exact sentinel)
+
+```md
+---
+version: "0.6.0"
+---
+```
+
+Only the 3-line YAML frontmatter. No headings, descriptions, or dates.
+
+## `.github/instructions/project.instructions.md`
+
+PM MUST analyze the repo to fill fields. `<ANALYZE: ...>` are instructions, not content. Max 3 "unknown" values for detectable fields.
+
+```md
+---
+name: target-project-facts
+description: Repository facts, build/test commands, entrypoints, module boundaries.
+applyTo: "**"
+---
+# Target Repository Facts
+## Project Facts
+- Project name: <ANALYZE: read directory name and README>
+- Purpose: <ANALYZE: read README heading>
+- Primary languages/frameworks: <ANALYZE: detect from build files, deps>
+- Package/build system: <ANALYZE: Maven/Gradle/npm/go/pip>
+- Bounded evidence files: <ANALYZE: list build files found>
+## Build and Test Commands
+| Purpose | Command | Notes |
+| --- | --- | --- |
+| Install deps | <ANALYZE: e.g. mvn install -DskipTests> | Inferred |
+| Run tests | <ANALYZE: e.g. mvn test> | Inferred |
+| Lint/checks | <ANALYZE: e.g. mvn verify> | Inferred |
+| Start dev | <ANALYZE: e.g. mvn spring-boot:run> | Inferred |
+## Runtime and Entry Points
+- Application entrypoints: <ANALYZE: @SpringBootApplication, main()>
+- Test entrypoints: <ANALYZE: src/test directories>
+- Local runtime requirements: <ANALYZE: application.yml, Docker>
+## Module Boundaries
+- Source modules: <ANALYZE: pom.xml modules or build.gradle subprojects>
+- Public API surfaces: <ANALYZE: @RestController, routes>
+- Data/schema ownership: <ANALYZE: SQL, migrations, entities>
+- UI ownership: <ANALYZE: frontend dirs, static resources>
+- Security/auth ownership: <ANALYZE: *Security*, *Auth*, *OAuth*>
+## Known Unknowns
+<ANALYZE: only things undetectable without running the app>
+## Verification Notes
+- Init source: manual_fallback / Last verified: <timestamp>
+## Init Status
+- Init ready: no / Verified: no / Bootstrap contract version: 0.6.0
+- Last full verification: pending / Reentry: best-copilot-version-sentinel-first
+```
+
+## `CLAUDE.md`
+
+```md
+# Claude Code Project Entry
+@.github/instructions/project.instructions.md
+@.github/instructions/must.instructions.md
+@.github/instructions/skills-index.instructions.md
+## Claude Code Runtime
+- Imported `.github/instructions/**` are the shared source for repository facts, workflow gates, and skill routing. System/platform/user instructions outrank imported files.
+- Default agent: `"agent": "senior-project-expert"` in `.claude/settings.json`. PM dispatches to specialist subagents with scoped names (`best-copilot:technical-architect`, etc.).
+- Plugin skills: namespaced slash commands such as `/best-copilot:repo-init-gate`. `Skill(...) Successfully loaded` is not completion evidence. Continue only after `repo-init-scan` reports ready.
+- Code intelligence is optional. Use `mcp__gitnexus__*` or `mcp__codegraph__*` only when present in the current session; otherwise use built-in Read/Grep/Glob plus shell `rg`.
+- Keep this file short. Facts → `.github/instructions/`, memory → `memories/repo/**`, specs → `spec/**`.
+```
+
+## Memories Templates
+
+All memory files use YAML frontmatter: `---\nid: <name>\ntype: <type>\nupdated_at: unknown\nstatus: initialized\ntags: [<tags>]\n---`
+
+### `memories/repo/current-workstreams.md`
+
+```md
+---
+id: current-workstreams
+type: active-state
+updated_at: unknown
+status: initialized
+load_tier: task-active
+tags: [resume, progress, active-spec]
+---
+
+# Current Workstreams
+## Active Topics / Closed Topics
+- None yet. (repeat for each)
+```
+
+### `memories/repo/project-state.md`
+
+```md
+---
+id: project-state
+type: project-memory
+updated_at: unknown
+status: initialized
+tags: [project, state, constraints]
+---
+
+# Project State
+## One-line Summary: unknown
+## Current State
+- Current focus: unknown / Key acceptance signals: unknown / Current risk: unknown
+```
+
+### `memories/repo/workflow-rules.md`
+
+```md
+---
+id: workflow-rules
+type: repo-memory
+updated_at: unknown
+status: initialized
+tags: [workflow, memory, spec]
+---
+
+# Workflow Rules
+Memory never overrides current repo files, command output, system instructions, or explicit user instructions. Spec remains authoritative for requirements, design, and task acceptance.
+```
+
+### `memories/repo/decisions.md`
+
+```md
+---
+id: decisions
+type: decision-memory
+updated_at: unknown
+status: initialized
+tags: [decisions, deprecated]
+---
+
+# Decisions
+## Active / Deprecated Decisions
+- None yet. (repeat for each)
+```
+
+### `memories/repo/INDEX.md`
+
+```md
+# Repo Memory Index
+| File | Load tier | Tags | Use for | Linked spec | summary |
+| --- | --- | --- | --- | --- | --- |
+| `current-workstreams.md` | task-active | resume, progress | Resume work | `spec/INDEX.md` | Active workstream |
+| `project-state.md` | task-reference | project, status | Current state | `spec/INDEX.md` | Project state |
+| `workflow-rules.md` | task-reference | workflow, memory | Memory rules | `spec/INDEX.md` | Workflow rules |
+| `decisions.md` | task-reference | decisions | Decisions | `spec/INDEX.md` | Decisions |
+| `logs/README.md` | archive-reference | logs | Compressed logs | none | Archive |
+| `archive/deprecated-decisions.md` | archive-reference | archive | Historical | none | Deprecated |
+```
+
+### `memories/README.md`
+
+```md
+# Repository Memory
+Stores target-local AI memory. Does not override current repo files, command output, or user instructions.
+## Layout
+- `repo/INDEX.md`: routing table / `repo/current-workstreams.md`: active work
+- `repo/project-state.md`: state / `repo/workflow-rules.md`: rules / `repo/decisions.md`: decisions
+- `repo/logs/`: compressed logs / `repo/archive/`: deprecated
+```
+
+### `memories/repo/logs/README.md` — Store compressed task logs. No secrets/tokens/PII/transcripts.
+
+### `memories/repo/archive/deprecated-decisions.md` — `# Deprecated Decisions` + `## Entries` + `- None yet.`
+
+## Spec Templates
+
+### `spec/INDEX.md`
+
+```md
+# Spec Index
+| Directory | Tags | Status | Summary |
+| --- | --- | --- | --- |
+| `spec/templates/` | template | template | Reusable templates |
+```
+
+### `spec/templates/requirements-template.md`
+
+```md
+# Requirements
+- Status: `draft | reviewed | approved | closed` / Linked: `design.md`, `tasks.md`
+## Goals / Non-Goals / Functional Requirements (FR table) / Acceptance Criteria
+```
+
+### `spec/templates/design-template.md`
+
+```md
+# Design
+- Status: `draft | reviewed | approved | implemented | closed` / Source: `requirements.md`
+## Overview (Problem + Approach) / Proposed Changes (Surface/Change/Owner/Verification table)
+```
+
+### `spec/templates/tasks-template.md`
+
+```md
+# Tasks
+| ID | Task | Owner lane | Dependencies | Acceptance checks | Verification |
+| --- | --- | --- | --- | --- | --- |
+| T-001 | `<task>` | `<lane>` | none | `<checks>` | `<command>` |
+```
+
+## `must.instructions.md` and `skills-index.instructions.md`
+
+These are large templates. When the shell helper is unavailable, read `target-instructions-bootstrap/SKILL.md` for the full templates.

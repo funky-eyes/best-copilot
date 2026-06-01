@@ -16,7 +16,7 @@ When this skill has just been loaded, the very next assistant action must be the
 3. Emit the `## Repo Init Gate` output block below.
 4. Only after that block exists, decide whether to skip or run `repo-init-scan`.
 
-Do not search, grep, glob, list business source, inspect modules such as `core`, call codegraph, plan, dispatch, or summarize implementation before this block is emitted. A transcript that shows `Skill(...repo-init-gate...) Successfully loaded` followed by `Searched`, source `Read`, codegraph, project-structure exploration, or planning before `## Repo Init Gate` is invalid. Recovery is to discard that premature source context and run this rule inline immediately.
+Do not search, grep, glob, list business source, inspect modules such as `core`, call code intelligence, plan, dispatch, or summarize implementation before this block is emitted. A transcript that shows `Skill(...repo-init-gate...) Successfully loaded` followed by `Searched`, source `Read`, code intelligence, project-structure exploration, or planning before `## Repo Init Gate` is invalid. Recovery is to discard that premature source context and run this rule inline immediately.
 
 ## Contract
 

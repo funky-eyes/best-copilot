@@ -70,10 +70,11 @@ emit_success_if_artifact_exists() {
 run_claude_init_attempt() {
   attempt_name="$1"
   runner_label="$2"
-  shift 2
+  native_command_label="$3"
+  shift 3
 
   echo "attempted=$attempt_name"
-  echo "native_command=/init"
+  echo "native_command=$native_command_label"
   echo "runner=$runner_label"
 
   output_file="$(mktemp "${TMPDIR:-/tmp}/best-copilot-claude-init.XXXXXX")"
@@ -110,7 +111,8 @@ run_claude_init_attempt() {
 local_init_skill_path="$(find_local_init_skill || true)"
 if [ -n "$local_init_skill_path" ]; then
   echo "local_init_skill=$local_init_skill_path"
-  run_claude_init_attempt "target_local_init_skill" "claude --bare --permission-mode acceptEdits -p /init" claude --bare --permission-mode acceptEdits -p "/init"
+  local_init_prompt="Use the target-local Claude Code init skill at ${local_init_skill_path} to initialize this repository. If the runtime exposes it as a slash command, invoke that target-local skill rather than Claude's built-in /init. Write the resulting repository init artifact to disk."
+  run_claude_init_attempt "target_local_init_skill" "claude --bare --permission-mode acceptEdits -p <target-local init skill>" "target-local init skill: ${local_init_skill_path}" claude --bare --permission-mode acceptEdits -p "$local_init_prompt"
   local_status=$?
   if [ "$local_status" -eq 0 ]; then
     exit 0
@@ -119,5 +121,5 @@ if [ -n "$local_init_skill_path" ]; then
   echo "local_init_skill_status=fallback_to_claude_native_slash_init"
 fi
 
-run_claude_init_attempt "claude_native_slash_init" "claude --bare --permission-mode acceptEdits -p /init" claude --bare --permission-mode acceptEdits -p "/init"
+run_claude_init_attempt "claude_native_slash_init" "claude --bare --permission-mode acceptEdits -p /init" "/init" claude --bare --permission-mode acceptEdits -p "/init"
 exit $?

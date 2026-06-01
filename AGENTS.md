@@ -32,3 +32,47 @@ This project provides plugins for Claude Code and GitHub Copilot. As such, the .
 | execute | `exec_command` | Real command evidence must include command and result. |
 | todo | `update_plan` | Session plan only; does not replace formal spec/task state. |
 | `vscode_askQuestions` / `vscode/askQuestions` / `askQuestions` / `Asking user` | Use the available native ask mechanism when present | Top-level session and PM/coordinator only. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool before abstract `vscode/askQuestions` / `askQuestions`; in Copilot CLI, use `Asking user` when available. Specialists must not invoke native ask and should return `NEEDS_USER_INPUT` to PM when present or `BLOCKED missing_top_level_question` otherwise. Plain prose questions cannot replace native confirmation gates. If native ask is unavailable, continue only with a single safe interpretation or report a blocked/partial state. |
+
+<!-- gitnexus:start -->
+# GitNexus — Code Intelligence
+
+This project is indexed by GitNexus as **best-copilot** (1133 symbols, 1142 relationships, 0 execution flows). When `mcp__gitnexus__*` tools are available in the current session, use them to understand code, assess impact, and navigate safely. If GitNexus tools are absent, record that status and use the normal repository read/search fallback.
+
+> If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
+
+## Always Do
+
+- **MUST run impact analysis before editing any symbol when GitNexus tools are available.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `gitnexus_detect_changes()` before committing when GitNexus tools are available** to verify your changes only affect expected symbols and execution flows.
+- **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
+- When exploring unfamiliar code and GitNexus is available, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol and GitNexus is available, use `gitnexus_context({name: "symbolName"})`.
+
+## Never Do
+
+- NEVER edit a function, class, or method without first running `gitnexus_impact` on it when GitNexus tools are available.
+- NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
+- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope when GitNexus tools are available.
+
+## Resources
+
+| Resource | Use for |
+|----------|---------|
+| `gitnexus://repo/best-copilot/context` | Codebase overview, check index freshness |
+| `gitnexus://repo/best-copilot/clusters` | All functional areas |
+| `gitnexus://repo/best-copilot/processes` | All execution flows |
+| `gitnexus://repo/best-copilot/process/{name}` | Step-by-step execution trace |
+
+## CLI
+
+| Task | Read this skill file |
+|------|---------------------|
+| Understand architecture / "How does X work?" | `.claude/skills/gitnexus/gitnexus-exploring/SKILL.md` |
+| Blast radius / "What breaks if I change X?" | `.claude/skills/gitnexus/gitnexus-impact-analysis/SKILL.md` |
+| Trace bugs / "Why is X failing?" | `.claude/skills/gitnexus/gitnexus-debugging/SKILL.md` |
+| Rename / extract / split / refactor | `.claude/skills/gitnexus/gitnexus-refactoring/SKILL.md` |
+| Tools, resources, schema reference | `.claude/skills/gitnexus/gitnexus-guide/SKILL.md` |
+| Index, status, clean, wiki CLI commands | `.claude/skills/gitnexus/gitnexus-cli/SKILL.md` |
+
+<!-- gitnexus:end -->

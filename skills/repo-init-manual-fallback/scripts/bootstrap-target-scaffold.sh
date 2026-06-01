@@ -63,6 +63,44 @@ check_contains() {
   fi
 }
 
+project_instructions_needs_repair() {
+  rel_path=".github/instructions/project.instructions.md"
+  if [ ! -f "$rel_path" ]; then
+    return 0
+  fi
+
+  for needle in \
+    "## Project Facts" \
+    "## Build and Test Commands" \
+    "## Runtime and Entry Points" \
+    "## Module Boundaries" \
+    "## Known Unknowns" \
+    "## Verification Notes" \
+    "## Init Status" \
+    "Bootstrap contract version: 0.6.0"
+  do
+    if ! grep -Fq "$needle" "$rel_path"; then
+      return 0
+    fi
+  done
+
+  if grep -Eq 'Project name: unknown|Purpose: unknown|Primary languages/frameworks: unknown|Package/build system: unknown|Application entrypoints: unknown|Local runtime requirements: unknown|Source modules: unknown|Public API surfaces: unknown|Data/schema ownership: unknown|UI ownership: unknown|Security/auth ownership: unknown' "$rel_path"; then
+    return 0
+  fi
+
+  return 1
+}
+
+write_project_instructions() {
+  rel_path=".github/instructions/project.instructions.md"
+  mkdir -p "$(dirname "$rel_path")"
+  if [ ! -e "$rel_path" ]; then
+    created_paths="${created_paths}${rel_path}
+"
+  fi
+  cat >"$rel_path"
+}
+
 sentinel_is_current() {
   [ -f "best-copilot.md" ] && cmp -s "best-copilot.md" - <<EOF
 ---
@@ -259,16 +297,72 @@ elif [ "$has_python" = "yes" ]; then
   test_cmd="pytest"
 fi
 
-entrypoints_raw="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -name '*Application.java' -o -name '*Application.kt' -o -name 'main.go' -o -name 'app.py' -o -name 'main.py' \) -print 2>/dev/null | sort)"
+# Find Spring Boot main classes by annotation first (most reliable for Java/Kotlin)
+spring_boot_mains="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -name '*.java' -o -name '*.kt' \) -print 2>/dev/null | xargs grep -l '@SpringBootApplication' 2>/dev/null | sort)"
+# Fall back to filename patterns for non-Spring or non-Java projects
+entrypoints_raw="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -name '*Application.java' -o -name '*Application.kt' -o -name '*App.java' -o -name '*App.kt' -o -name '*Main.java' -o -name '*Main.kt' -o -name '*Bootstrap.java' -o -name '*Server.java' -o -name 'main.go' -o -name 'app.py' -o -name 'main.py' \) -print 2>/dev/null | sort)"
+# Merge Spring Boot mains with filename-detected entrypoints
+if [ -n "$spring_boot_mains" ]; then
+  entrypoints_raw="$(printf '%s\n%s\n' "$spring_boot_mains" "$entrypoints_raw" | sort -u | sed '/^$/d')"
+fi
 entrypoints_md="$(printf '%s\n' "$entrypoints_raw" | inline_list 8)"
+if [ "$entrypoints_md" = "unknown" ] && [ "$has_node" = "yes" ]; then
+  entrypoints_md="package.json scripts"
+fi
 test_entrypoints_raw="$(find . -maxdepth 6 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o -type d \( -path '*/src/test' -o -name 'test' -o -name 'tests' \) -print 2>/dev/null | sort)"
 test_entrypoints_md="$(printf '%s\n' "$test_entrypoints_raw" | inline_list 8)"
-module_dirs_raw="$(find . -mindepth 2 -maxdepth 2 \( -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' -o -name 'package.json' \) -print 2>/dev/null | sed 's#/[^/]*$##' | sort -u)"
-source_modules_md="$(printf '%s\n' "$module_dirs_raw" | inline_list 8)"
+if [ "$test_entrypoints_md" = "unknown" ]; then
+  test_entrypoints_md="none detected by bounded scan"
+fi
+# Detect modules: depth 2 submodules AND root pom.xml with <modules> tag (multi-module Maven)
+module_dirs_raw="$(find . -mindepth 2 -maxdepth 3 \( -name 'pom.xml' -o -name 'build.gradle' -o -name 'build.gradle.kts' -o -name 'package.json' \) -print 2>/dev/null | sed 's#/[^/]*$##' | sort -u)"
+# Also check root pom.xml for <modules> declaration
+if [ -f "pom.xml" ] && grep -q '<modules>' "pom.xml" 2>/dev/null; then
+  root_modules="$(tr '<' '\n' <"pom.xml" | sed -n 's#^module>\([^<][^<]*\).*#\1#p' | head -n 8)"
+  if [ -n "$root_modules" ]; then
+    root_modules_md="$(printf '%s\n' "$root_modules" | inline_list 8)"
+    if [ -n "$module_dirs_raw" ]; then
+      module_dirs_raw="$(printf '%s\n%s\n' "root(pom.xml: $root_modules_md)" "$module_dirs_raw" | sort -u | sed '/^$/d')"
+    else
+      module_dirs_raw="root(pom.xml: $root_modules_md)"
+    fi
+  fi
+fi
+source_modules_md="$(printf '%s\n' "$module_dirs_raw" | inline_list 12)"
 if [ "$source_modules_md" = "unknown" ] && [ -d "src" ]; then
   source_modules_md="root project"
 fi
+if [ "$source_modules_md" = "unknown" ] && [ "$has_node" = "yes" ]; then
+  source_modules_md="root package"
+fi
 security_auth_md="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -iname '*security*' -o -iname '*auth*' -o -iname '*oauth*' -o -iname '*oidc*' \) -print 2>/dev/null | sort | inline_list 8)"
+if [ "$security_auth_md" = "unknown" ]; then
+  security_auth_md="none detected by bounded scan"
+fi
+runtime_files_raw="$(find . -maxdepth 6 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -iname 'application.yml' -o -iname 'application.yaml' -o -iname 'application.properties' -o -iname 'Dockerfile' -o -iname 'docker-compose.yml' -o -iname 'docker-compose.yaml' -o -iname '.env.example' \) -print 2>/dev/null | sort)"
+runtime_requirements_md="$(printf '%s\n' "$runtime_files_raw" | inline_list 8)"
+if [ "$runtime_requirements_md" = "unknown" ]; then
+  runtime_requirements_md="none detected by bounded scan"
+fi
+public_api_raw="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -name '*.java' -o -name '*.kt' -o -name '*.ts' -o -name '*.tsx' -o -name '*.js' -o -name '*.jsx' \) -print 2>/dev/null | xargs grep -El '@(RestController|Controller|RequestMapping|GetMapping|PostMapping|PutMapping|DeleteMapping|PatchMapping)|app\.(get|post|put|delete|patch)\(|router\.(get|post|put|delete|patch)\(' 2>/dev/null | sort)"
+public_api_md="$(printf '%s\n' "$public_api_raw" | inline_list 8)"
+if [ "$public_api_md" = "unknown" ]; then
+  public_api_md="none detected by bounded scan"
+fi
+data_schema_raw="$(find . -maxdepth 8 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -path '*/db/migration/*' -o -path '*/migrations/*' -o -iname 'schema.sql' -o -iname '*Entity.java' -o -iname '*Entity.kt' \) -print 2>/dev/null | sort)"
+data_schema_md="$(printf '%s\n' "$data_schema_raw" | inline_list 8)"
+if [ "$data_schema_md" = "unknown" ]; then
+  data_schema_md="none detected by bounded scan"
+fi
+ui_raw="$(find . -maxdepth 5 \( -path './.git' -o -path './target' -o -path './build' -o -path './node_modules' \) -prune -o \( -path './frontend' -o -path './web' -o -path './app' -o -path '*/src/main/webapp' -o -path '*/src/main/resources/static' -o -path '*/src/main/resources/templates' \) -print 2>/dev/null | sort)"
+if [ "$has_node" = "yes" ]; then
+  package_json_raw="$(printf '%s\n' "$build_files_raw" | grep -E '(^|/)package\.json$' || true)"
+  ui_raw="$(printf '%s\n%s\n' "$ui_raw" "$package_json_raw" | sort -u | sed '/^$/d')"
+fi
+ui_md="$(printf '%s\n' "$ui_raw" | inline_list 8)"
+if [ "$ui_md" = "unknown" ]; then
+  ui_md="none detected by bounded scan"
+fi
 
 known_unknowns="- Commands were inferred from build files and were not executed during init."
 if [ "$entrypoints_md" = "unknown" ]; then
@@ -280,7 +374,8 @@ if [ "$source_modules_md" = "unknown" ]; then
 - Module boundaries were not found by the bounded scan."
 fi
 
-write_missing ".github/instructions/project.instructions.md" <<EOF
+if project_instructions_needs_repair; then
+write_project_instructions <<EOF
 ---
 name: target-project-facts
 description: Repository facts, build and test commands, entrypoints, and module boundaries for this repository.
@@ -310,14 +405,14 @@ applyTo: "**"
 
 - Application entrypoints: ${entrypoints_md}
 - Test entrypoints: ${test_entrypoints_md}
-- Local runtime requirements: unknown
+- Local runtime requirements: ${runtime_requirements_md}
 
 ## Module Boundaries
 
 - Source modules: ${source_modules_md}
-- Public API surfaces: unknown
-- Data/schema ownership: unknown
-- UI ownership: unknown
+- Public API surfaces: ${public_api_md}
+- Data/schema ownership: ${data_schema_md}
+- UI ownership: ${ui_md}
 - Security/auth ownership: ${security_auth_md}
 
 ## Known Unknowns
@@ -337,6 +432,7 @@ ${known_unknowns}
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
+fi
 
 append_if_missing ".github/instructions/project.instructions.md" "## Init Status" <<'EOF'
 ## Init Status
