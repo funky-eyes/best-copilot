@@ -138,7 +138,7 @@ For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask nat
 
 1. Pass init/fact preflight for target-repository work (`repo-init-gate` → `repo-init-scan` only when that gate fails).
 2. Parse intent, success criteria, scope, non-goals, assumptions, tradeoffs, simpler option considered, acceptance checks, verification budget, context budget, and stop conditions without PM-owned broad business-source exploration for `standard` or `full` work.
-3. For large ambiguous work, PM dispatches Technical Architect for SDD design brainstorming and self-review before other lanes review the plan (Developer, QA, Frontend Designer for user-visible surfaces). The Technical Architect lane owns the first broad business-code inspection for auth/protocol/schema/dependency work.
+3. For large ambiguous work, PM dispatches Technical Architect for SDD design brainstorming and self-review/fix, then dispatches Developer, Quality Assurance Expert, and (when applicable) Security Reviewer **in parallel** for second-pass design review. Include Security Reviewer when the plan touches auth, token, key, secret, permission, dependency, release, or external-service surfaces; include Frontend Designer when the plan affects user-visible frontend behavior. The Technical Architect lane owns the first broad business-code inspection for auth/protocol/schema/dependency work.
 4. Use `writing-plans` for reviewed direction; require parallel-ready tasks with dependencies, owner lanes, reviewer lanes, write sets, and verification.
 5. Before risky implementation, run `spec-review-gauntlet` or `structured-review` design-review mode.
 6. Execute through the right specialist (`subagent-driven-development` or `executing-plans` for multi-step plans).
