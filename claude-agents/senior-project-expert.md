@@ -68,7 +68,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 
 4. **COMMON PATTERNS**: For protocol/auth/upgrade tasks classified as `full` + `design_review`: `technical-architect` → SDD design + self-review → `developer` implementability review + `quality-assurance-expert` testability/regression review + `security-reviewer` auth/security review → PM fan-in. Security review is additive for auth surfaces; it must not replace Developer or QA second-pass design review. Only after blocker-free fan-in may PM move to implementation planning. For standard backend implementation: `developer` → implement → `quality-assurance-expert` → verify.
 
-Then load `/best-copilot:core-workflow-contract` and `/best-copilot:senior-project-expert-workflow` for the full orchestration protocol.
+Use the already preloaded `core-workflow-contract` and `senior-project-expert-workflow` for the full orchestration protocol. Load them explicitly only if the current runtime did not inject the frontmatter skills.
 
 ## Responsibilities
 
