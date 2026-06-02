@@ -41,18 +41,18 @@ Senior Project Expert owns orchestration (intent, scope, dispatch, fan-in, close
 
 ### Skill Loading
 
-- Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate`; `repo-init-scan` is loaded only when the sentinel gate fails.
+- Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate`; `repo-init-scan` is loaded only when the sentinel gate fails. In shell-capable Claude Code, the preferred failed-gate path is the bundled `repo-init-gate/scripts/run-preflight.sh` helper, which preserves the sentinel fast path and directly runs the scan bootstrap on failure.
 - Focused skills (e.g., `structured-review`, `test-driven-development`) are on-demand via namespaced slash commands such as `/best-copilot:skill-name` when installed as a plugin.
 - In agent teams, teammate `skills:` frontmatter is ignored — spawn prompts must name skills explicitly or the teammate returns `NEEDS_CONTEXT missing_required_skill`.
-- A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and `repo-init-scan` reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
+- A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and the preflight/scan path reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 
 ### Code Intelligence MCP (GitNexus / CodeGraph)
 
-Structural code intelligence is optional. The plugin uses whichever is available, in priority order: GitNexus (`mcp__gitnexus__*`), then CodeGraph (`mcp__codegraph__*`). A local binary or plugin inventory entry is not enough — the MCP tools must be present in the current session. If neither is available, do not call them and do not block; use built-in Read/Grep/Glob plus shell `rg` fallback.
+Structural code intelligence is optional. Choose by current tool inventory in this order: GitNexus (`mcp__gitnexus__*`), then CodeGraph (`mcp__codegraph__*`), then built-in Read/Grep/Glob plus shell `rg`. A local binary or plugin inventory entry is not enough, and absent tools must not be called.
 
 ### Init Gate (mandatory preflight)
 
-Before any substantive target-repository work: `repo-init-gate` reads the target root `best-copilot.md` sentinel. If frontmatter `version: "0.6.0"` matches, skip `repo-init-scan`. Otherwise run `repo-init-scan` which orchestrates official init (`/init` or `copilot init`), normalizes facts into `.github/instructions/project.instructions.md`, and bootstraps missing scaffolds. Work is fail-closed until init is verified.
+Before any substantive target-repository work: `repo-init-gate` reads the target root `best-copilot.md` sentinel. If frontmatter `version: "0.6.0"` matches, skip `repo-init-scan`. Otherwise run the preflight/scan bootstrap path, which orchestrates official init (`/init` or `copilot init`), normalizes facts into `.github/instructions/project.instructions.md`, and bootstraps missing scaffolds. Work is fail-closed until init is verified.
 
 ## Editing Conventions
 
@@ -74,24 +74,24 @@ Bootstrap skills (`target-instructions-bootstrap`, `target-memory-bootstrap`, `t
 <!-- gitnexus:start -->
 # GitNexus — Code Intelligence
 
-This project is indexed by GitNexus as **best-copilot** (1133 symbols, 1142 relationships, 0 execution flows). When `mcp__gitnexus__*` tools are available in the current session, use them to understand code, assess impact, and navigate safely. If GitNexus tools are absent, record that status and use the normal repository read/search fallback.
+This project is indexed by GitNexus as **best-copilot** (1135 symbols, 1144 relationships, 0 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
 ## Always Do
 
-- **MUST run impact analysis before editing any symbol when GitNexus tools are available.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing when GitNexus tools are available** to verify your changes only affect expected symbols and execution flows.
+- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
 - **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code and GitNexus is available, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
-- When you need full context on a specific symbol and GitNexus is available, use `gitnexus_context({name: "symbolName"})`.
+- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
 
 ## Never Do
 
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it when GitNexus tools are available.
+- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
 - NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
 - NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope when GitNexus tools are available.
+- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
 
 ## Resources
 

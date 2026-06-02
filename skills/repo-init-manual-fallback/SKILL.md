@@ -46,7 +46,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 - `memories/README.md`, `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, `memories/repo/project-state.md`, `memories/repo/workflow-rules.md`, `memories/repo/decisions.md`, `memories/repo/logs/README.md`, `memories/repo/archive/deprecated-decisions.md`
 - `spec/INDEX.md`, `spec/templates/requirements-template.md`, `spec/templates/design-template.md`, `spec/templates/tasks-template.md`
 
-`best-copilot.md` is the verified-init sentinel for contract version `0.6.0`. Must be written only after the other 16 artifacts and content checks pass. The only valid sentinel content is the exact 3-line YAML frontmatter block — no headings, descriptions, or dates.
+`best-copilot.md` is the verified-init sentinel for contract version `0.6.0`. Must be written only after the other 16 artifacts and content checks pass. The canonical write content is the exact 3-line YAML frontmatter block — no headings, descriptions, or dates. Repeat-request readers use only the frontmatter version for the cheap skip decision.
 
 ## Required Content Checks
 

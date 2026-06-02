@@ -684,7 +684,9 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 - The imported `.github/instructions/**` files are the shared source for repository facts, workflow gates, and skill routing.
 - Start a Senior-owned session with `claude --agent senior-project-expert` or the configured Claude `agent` setting; use the scoped fallback if Claude reports a name collision.
 - Use plugin skills with namespaced slash commands such as `/best-copilot:repo-init-gate` and `/best-copilot:repo-init-scan`.
-- `Skill(...) Successfully loaded` is not proof that init ran. Continue only after `repo-init-scan` verifies files on disk and reports ready.
+- In shell-capable Claude Code, prefer the bundled preflight helper when discoverable.
+- `Skill(...) Successfully loaded` is not proof that init ran. Continue only after the preflight/scan path verifies files on disk and reports ready.
+- Code intelligence is optional and ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`.
 EOF
 
   mkdir -p ".claude"
@@ -850,6 +852,7 @@ write_missing "spec/INDEX.md" <<'EOF'
 ## Maintenance Rules
 
 - Every medium or large feature gets a spec directory with `requirements.md`, `design.md`, and `tasks.md`.
+- Single-file SDD or plan notes under `spec/designs/` or `spec/plans/` are evidence only; they are not approved Spec Bundles.
 - Link active specs back to `memories/repo/current-workstreams.md`.
 EOF
 
@@ -859,9 +862,23 @@ write_missing "spec/templates/requirements-template.md" <<'EOF'
 ## Metadata
 
 - Status: `draft | reviewed | approved | closed`
+- Owner lane: `senior-project-expert | specification-writer | technical-architect | developer | frontend-designer`
 - Linked design: `design.md`
 - Linked tasks: `tasks.md`
-- Linked memory: `memories/repo/current-workstreams.md`
+- Linked memory: `memories/repo/current-workstreams.md`, `<topic memory>`
+- Last updated: `<YYYY-MM-DD>`
+
+## Background
+
+- Current behavior: `<what the system does now, with source references>`
+- Trigger: `<user request, incident, roadmap item, audit finding, or repeated workflow failure>`
+- Affected users or systems: `<actors, clients, jobs, APIs, or runtime surfaces>`
+
+## Current System Evidence
+
+| Evidence | Source | Why it matters | Confidence |
+| --- | --- | --- | --- |
+| `<fact>` | `<file, command, spec, or user source>` | `<impact on requirements>` | `high | medium | low` |
 
 ## Goals
 
@@ -877,9 +894,29 @@ write_missing "spec/templates/requirements-template.md" <<'EOF'
 | --- | --- | --- | --- | --- | --- |
 | FR-001 | `<The system must ...>` | P0 | `<source>` | `<check>` | `<task>` |
 
+## Data, API, Security, and Compatibility Requirements
+
+- Public API or route changes: `<none | endpoint, method, request, response, status codes>`
+- Data model or schema changes: `<none | tables, columns, indexes, defaults, rollback>`
+- Configuration and environment: `<none | keys, defaults, secret-handling>`
+- Auth, sensitive data, dependency, or abuse cases: `<none | required behavior>`
+- Backward compatibility and migration: `<what must remain unchanged, rollout, rollback>`
+
+## Assumptions and Open Questions
+
+| Type | Item | Impact if wrong | Resolution owner |
+| --- | --- | --- | --- |
+| Assumption | `<assumption>` | `<risk>` | `<lane/person>` |
+
 ## Acceptance Criteria
 
 - `<AC-001>`
+
+## Traceability Matrix
+
+| Requirement | Design Section | Task | Verification |
+| --- | --- | --- | --- |
+| FR-001 | `<design.md#section>` | `<Task ID>` | `<test/command/check>` |
 EOF
 
 write_missing "spec/templates/design-template.md" <<'EOF'
@@ -890,21 +927,70 @@ write_missing "spec/templates/design-template.md" <<'EOF'
 - Status: `draft | reviewed | approved | implemented | closed`
 - Requirement source: `requirements.md`
 - Task source: `tasks.md`
+- Owner lane: `technical-architect | frontend-designer | developer | specification-writer`
+- Review lanes: `<developer, qa, security, frontend, technical-architect>`
+- Last updated: `<YYYY-MM-DD>`
 
 ## Overview
 
 - Problem summary: `<summary>`
 - Chosen approach: `<smallest safe approach>`
+- Compatibility stance: `<unchanged behavior, migration, or breaking-change note>`
+- Rollout stance: `<direct, staged, feature flag, or manual migration>`
+
+## Current System Evidence
+
+| Surface | Source | Current behavior | Design implication |
+| --- | --- | --- | --- |
+| `<module/API/table/config>` | `<file, symbol, command, or spec>` | `<observed fact>` | `<constraint or reuse point>` |
+
+## Design Decisions
+
+| ID | Decision | Rationale | Requirement refs | Alternatives rejected |
+| --- | --- | --- | --- | --- |
+| DD-001 | `<decision>` | `<why this is the simplest safe option>` | `<FR IDs>` | `<summary>` |
 
 ## Proposed Changes
 
 | Surface | Change | Owner lane | Verification |
 | --- | --- | --- | --- |
 | `<file/module>` | `<change>` | `<lane>` | `<check>` |
+
+## API, Data, Configuration, and Runtime Contracts
+
+- API routes or methods: `<none | request, response, status/error behavior>`
+- Data model: `<none | tables, fields, indexes, defaults, migration, rollback>`
+- Configuration: `<none | key, default, override, secret-handling>`
+- External services or dependencies: `<none | dependency, version, failure mode>`
+- Runtime flow: `<actor/request/event> -> <component> -> <state change or response> -> <verification point>`
+
+## Error Handling, Security, and Release Risk
+
+| Case or risk | Expected behavior | Requirement refs | Verification |
+| --- | --- | --- | --- |
+| `<invalid input, auth failure, stale data, migration risk>` | `<response/state/log>` | `<FR IDs>` | `<test/check>` |
+
+## Alternatives Considered
+
+| Option | Why not chosen | Tradeoff kept |
+| --- | --- | --- |
+| `<alternative>` | `<specific reason>` | `<residual tradeoff>` |
+
+## Verification Plan
+
+| Requirement | Test or check | Command or method | Owner lane |
+| --- | --- | --- | --- |
+| `<FR ID>` | `<unit/integration/static/manual>` | `<command or evidence>` | `<lane>` |
 EOF
 
 write_missing "spec/templates/tasks-template.md" <<'EOF'
 # Tasks
+
+## Execution Rules
+
+- Every implementation task must map to at least one requirement ID and one design decision.
+- Split by ownership boundary, dependency order, and non-overlapping write set.
+- Each task must include read-before-write targets, acceptance checks, verification, reviewer lanes, and stop conditions.
 
 ## Metadata
 
@@ -914,9 +1000,33 @@ write_missing "spec/templates/tasks-template.md" <<'EOF'
 
 ## Task List
 
-| ID | Task | Owner lane | Dependencies | Acceptance checks | Verification |
-| --- | --- | --- | --- | --- | --- |
-| T-001 | `<task>` | `<lane>` | none | `<checks>` | `<command>` |
+### Task 1: `<short imperative title>`
+
+- Requirement refs: `<FR-001, FR-002>`
+- Design refs: `<DD-001>`
+- Owner lane: `technical-architect | developer | frontend-designer | root-cause-fixer | specification-writer`
+- Reviewer lanes: `<developer, technical-architect, qa, security, frontend>`
+- Files involved: `<explicit files or surfaces>`
+- Write set: `<files this task may edit>`
+- Read-before-write targets: `<public surface, immediate caller/callee, shared utility or local pattern>`
+- Dependencies: `<none | Task IDs>`
+- Parallel group: `<G0/G1/... or parallel_ready: false>`
+- Acceptance checks:
+  - `<observable result mapped to requirement refs>`
+- TDD or minimal check:
+  - `<failing test target, reproduction, static check, browser check, or N/A with reason>`
+- Verification command:
+  - `<command or manual evidence path>`
+- Ready artifacts:
+  - `<changed files, test evidence, review notes, migration note, memory update>`
+- Stop conditions:
+  - `<failed verification, missing context, write-set conflict, scope expansion, security concern>`
+
+## Traceability Matrix
+
+| Requirement | Design decision | Task | Acceptance | Verification |
+| --- | --- | --- | --- | --- |
+| `<FR ID>` | `<DD ID>` | `<Task ID>` | `<check>` | `<command/evidence>` |
 EOF
 
 required_paths=(
