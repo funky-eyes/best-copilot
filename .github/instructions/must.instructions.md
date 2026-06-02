@@ -121,7 +121,7 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 
 ## 8. Spec and Memory
 
-- Spec is authoritative for requirements, design, and acceptance: `requirements.md`, `design.md`, and `tasks.md`.
+- Spec is authoritative for requirements, design, and acceptance: `requirements.md`, `design.md`, and `tasks.md`. For MEDIUM/LARGE work these files must live together in one target-local Spec Bundle directory; a single SDD/design/plan markdown file is evidence only and must not be treated as an approved implementation spec.
 - Memory is the recovery entry: current focus, next action, last verified fact, key decisions, and links.
 - If `memories/repo` or `spec` is missing in the target repository and persistent recovery is needed, create a minimal local skeleton before writing task state.
 - If `.github/instructions/project.instructions.md` is missing after official init normalization, create it from bounded repository evidence before treating the repository as initialized.
@@ -147,7 +147,7 @@ Follow the canonical definitions in `core-workflow-contract` for specialist ask 
 - Prefer existing code, tools, components, and patterns.
 - New features and bug fixes should add focused tests or a minimal reproducible check when feasible.
 - Public APIs, message formats, schema, auth boundaries, CI/CD, and dependency upgrades are high-risk; assess blast radius first.
-- MEDIUM/LARGE implementation must not begin until the Spec Bundle or approved plan has passed a pre-implementation readiness review. Design review concerns must be adjudicated by `finding_kind`; only `implementation_todo` and `risk_note` may proceed without spec revision.
+- MEDIUM/LARGE implementation must not begin until the three-file Spec Bundle has passed a pre-implementation readiness review. Approved compact plans are allowed only for small bounded work. Design review concerns must be adjudicated by `finding_kind`; only `implementation_todo` and `risk_note` may proceed without spec revision.
 - Multi-step implementation must execute from an approved plan revision. Each task needs evidence, Stage 1 spec-compliance review, Stage 2 code-quality/release-risk review, and verification before PM marks it complete.
 - Spec/tasks must be parallel-ready when possible: include owner lane, reviewer lane, dependencies, write set, parallel group, acceptance checks, TDD or minimal reproducible check, verification command, and stop conditions.
 - Code changes follow SDD then TDD: reviewed design/task boundary first, then failing test or reproducible check before implementation when practical.

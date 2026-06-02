@@ -7,6 +7,13 @@ description: "Use when a MEDIUM/LARGE task needs concrete implementation tasks w
 
 Use this skill to turn a confirmed direction or spec into executable work.
 
+## Boundary
+
+- For MEDIUM/LARGE target-repository work, implementation planning consumes a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`.
+- A standalone `# Implementation Plan: <topic>` is a transient planning view only. It may be used in chat or as review evidence, but it must not replace `spec/<feature>/tasks.md` and must not be recorded as the active spec in `spec/INDEX.md`.
+- If a confirmed direction exists only as a single SDD/design/plan file, stop and route to Specification Writer to split it into the three-file Spec Bundle before implementation execution.
+- Before implementation starts, verify `tasks.md` exists and maps each task to requirement/design IDs. When shell access is available, run the Spec Bundle validator from `target-spec-bootstrap`.
+
 ## Plan Shape
 
 Each task maps to the six-block PM dispatch packet from `core-workflow-contract` plus plan-specific fields:
@@ -40,6 +47,8 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 - If the next step requires user choice between execution paths or whether to continue, follow the Native Ask Contract from `core-workflow-contract` for structured ask UI requirements.
 
 ## Output
+
+Use this output for a transient planning summary or for the content of `spec/<feature>/tasks.md`. For MEDIUM/LARGE persistent specs, the final artifact must be `tasks.md` inside the Spec Bundle.
 
 ```markdown
 # Implementation Plan: <topic>

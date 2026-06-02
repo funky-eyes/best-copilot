@@ -1,6 +1,6 @@
 ---
 name: subagent-driven-development
-description: "Use when an approved tasks.md or implementation plan should be executed by fresh-context specialist subagents, with each task receiving implementation, spec-compliance review, code-quality review, and verification before closure. DO NOT USE FOR: missing plans, brainstorming, or simple single-file edits."
+description: "Use when an approved tasks.md from a Spec Bundle, or a compact approved small-work plan, should be executed by fresh-context specialist subagents, with each task receiving implementation, spec-compliance review, code-quality review, and verification before closure. DO NOT USE FOR: missing plans, brainstorming, or simple single-file edits."
 user-invocable: false
 ---
 
@@ -10,7 +10,8 @@ Use this skill when a MEDIUM/LARGE plan is ready for implementation and fresh co
 
 ## Preconditions
 
-- A current plan or `tasks.md` exists and is approved for execution.
+- A current `tasks.md` exists and is approved for execution. For MEDIUM/LARGE target-repository work, it must live inside a Spec Bundle directory with sibling `requirements.md` and `design.md`; a single `spec/designs/*.md`, SDD note, or standalone implementation plan is evidence only and must be split before execution.
+- When shell access is available and the work is MEDIUM/LARGE, run `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` or consume equivalent validator evidence from PM.
 - Each task has a complete task statement, `files_involved`, dependencies, assumptions or explicit unknowns, acceptance checks, and verification budget.
 - PM has frozen `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
 - If the work came through PM planning, `execution_confirmed` must match the current `plan_revision`.

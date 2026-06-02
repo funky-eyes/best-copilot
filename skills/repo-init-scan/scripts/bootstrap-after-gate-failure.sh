@@ -4,6 +4,7 @@ set -u
 target_dir="${1:-$PWD}"
 compatibility="${2:-claude}"
 contract_version="0.6.0"
+force_reinit="${BEST_COPILOT_FORCE_REINIT:-0}"
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 skills_dir="$(CDPATH= cd -- "$script_dir/../.." && pwd)"
 claude_official_helper="$skills_dir/repo-init-official/scripts/run-claude-native-init.sh"
@@ -22,12 +23,50 @@ is_claude_compat() {
   [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]
 }
 
+frontmatter_is_valid() {
+  [ -f "best-copilot.md" ] && [ -r "best-copilot.md" ] && awk '
+    NR == 1 && $0 != "---" { exit 1 }
+    NR > 1 && /^---[[:space:]]*$/ { found = 1; exit }
+    END { exit(found ? 0 : 1) }
+  ' "best-copilot.md" 2>/dev/null
+}
+
+observed_version() {
+  if [ ! -f "best-copilot.md" ] || [ ! -r "best-copilot.md" ]; then
+    echo "none"
+    return
+  fi
+
+  if ! frontmatter_is_valid; then
+    echo "none"
+    return
+  fi
+
+  version="$(awk -F: '
+    NR == 1 { next }
+    /^---[[:space:]]*$/ { exit }
+    /^[[:space:]]*version[[:space:]]*:/ {
+      v = $2
+      sub(/^[[:space:]]+/, "", v)
+      sub(/[[:space:]]+$/, "", v)
+      gsub(/^["\047]|["\047]$/, "", v)
+      print v
+      exit
+    }
+  ' "best-copilot.md" 2>/dev/null)"
+  if [ -n "$version" ]; then
+    echo "$version"
+  else
+    echo "none"
+  fi
+}
+
 sentinel_is_current() {
-  [ -f "best-copilot.md" ] && cmp -s "best-copilot.md" - <<EOF
----
-version: "$contract_version"
----
-EOF
+  [ "$(observed_version)" = "$contract_version" ]
+}
+
+sentinel_fast_path_ready() {
+  [ "$force_reinit" != "1" ] && sentinel_is_current
 }
 
 required_paths=(
@@ -74,35 +113,29 @@ collect_artifact_evidence() {
   fi
 }
 
-echo "## Repo Init Gate"
+emit_scan_gate="${BEST_COPILOT_SCAN_EMIT_GATE:-1}"
 
-if sentinel_is_current; then
-  collect_artifact_evidence
-  if [ -z "$missing_paths" ]; then
-    echo "- status: ready"
-    echo "- sentinel: valid"
+if sentinel_fast_path_ready; then
+  if [ "$emit_scan_gate" != "0" ]; then
+    echo "## Repo Init Gate"
+    echo "- gate_result: ready"
+    echo "- next_action: skip_repo_init_scan"
+    echo "- evidence: target_root_best_copilot_md=present, observed_version=$(observed_version)"
     echo
-    echo "## Init Summary"
-    echo "- official_stage: skipped"
-    echo "- official_attempted: none"
-    echo "- manual_fallback_stage: skipped"
-    echo "- required_artifacts_verified: yes"
-    echo "- sentinel_written: yes"
-    echo "- next_task_ready: yes"
-    echo "- verified_paths:"
-    printf '%s' "$verified_paths" | sed 's/^/  - /'
-    echo "- missing_paths: none"
-    exit 0
   fi
-  echo "- status: needs_repair"
-  echo "- sentinel: valid"
-  echo "- missing_artifacts:"
-  printf '%s' "$missing_paths" | sed 's/^/  - /'
+  echo "## Repo Init Scan"
+  echo "INIT_SCAN=SKIP_SENTINEL_READY"
+  exit 0
 else
-  echo "- status: needs_init"
-  echo "- sentinel: missing_or_invalid"
+  if [ "$emit_scan_gate" != "0" ]; then
+    echo "## Repo Init Gate"
+    echo "- status: needs_init"
+    echo "- sentinel: missing_or_invalid"
+  fi
 fi
-echo
+if [ "$emit_scan_gate" != "0" ]; then
+  echo
+fi
 
 official_stage="official_init_unavailable"
 official_attempted="none"

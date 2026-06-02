@@ -8,12 +8,21 @@ user-invocable: false
 
 Use this skill as the pre-implementation gate for MEDIUM/LARGE work and for high-risk customization workflow changes. It prevents a plan from entering implementation before requirements, design, task boundaries, and review ownership are ready.
 
+## Spec Bundle Gate
+
+For MEDIUM/LARGE target-repository implementation, the approved input must be a Spec Bundle directory containing `requirements.md`, `design.md`, and `tasks.md`.
+
+- A single `spec/designs/*.md`, `spec/plans/*.md`, SDD note, or chat-only implementation plan is not an approved Spec Bundle.
+- If the only available artifact is a single-file SDD/design/plan, return `readiness tier: not_ready`, classify the finding as `spec_blocker`, and recommend `revise_spec` so Specification Writer splits it into the three required files.
+- For small bounded work, a compact approved plan can still be reviewed, but do not label it as a Spec Bundle.
+- When shell access is available, run `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` before returning `ready` for MEDIUM/LARGE work.
+
 ## Inputs
 
 Read only the minimum necessary evidence:
 
 - user-provided paths, current editor file, attachments, and priority files
-- current `requirements.md`, `design.md`, `tasks.md`, or equivalent approved plan
+- current Spec Bundle directory containing `requirements.md`, `design.md`, and `tasks.md`; for small bounded work only, an equivalent approved plan
 - relevant owner files and already-read context supplied by PM
 - changed files, search hints, and reference files when supplied
 

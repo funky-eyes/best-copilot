@@ -11,7 +11,7 @@ Use this thin orchestrator when the repository needs full init or scaffold repai
 
 When this skill has just been loaded after `repo-init-gate` failed, the very next assistant action must be staged init work or a `BLOCKED` init report:
 
-1. In shell-capable runtimes, run the single-command bootstrap path first when the helper path is discoverable. For Claude Code, resolve it with `CLAUDE_SKILL_DIR` when present, otherwise use the active plugin directory when available and run `<plugin-dir>/skills/repo-init-scan/scripts/bootstrap-after-gate-failure.sh <target-root> claude`. This command owns the official attempt, deterministic manual fallback helper, disk verification, sentinel rewrite, and `## Init Summary` output. If the helper path is not discoverable, continue to the strict inline fallback below instead of blocking solely on helper discovery.
+1. In shell-capable runtimes, run the single-command bootstrap path first when the helper path is discoverable. For Claude Code, prefer the gate-owned preflight helper from `repo-init-gate/scripts/run-preflight.sh <target-root> claude`; it preserves the sentinel fast path and delegates here only on a failed gate. If this scan skill has already been loaded after a failed gate, resolve the helper with `CLAUDE_SKILL_DIR` when present, otherwise use the active plugin directory when available and run `<plugin-dir>/skills/repo-init-scan/scripts/bootstrap-after-gate-failure.sh <target-root> claude`. This command owns the official attempt, deterministic manual fallback helper, disk verification, sentinel rewrite, and `## Init Summary` output. If the helper path is not discoverable, continue to the strict inline fallback below instead of blocking solely on helper discovery.
 2. If that script is unavailable, run `repo-init-official` first, or execute its documented official-init fallback inline when slash skill execution is unavailable.
 3. Then run `repo-init-manual-fallback`, including its bundled deterministic scaffold helper when shell access is available, or execute its documented scaffold verification and repair inline.
 4. Verify every required artifact from `repo-init-manual-fallback` on disk, rewrite the exact `best-copilot.md` sentinel when needed, and emit `## Init Summary`.
@@ -21,15 +21,15 @@ Do not hand-create a shortened scaffold, search/read business source, inspect mo
 ## Entry Contract
 
 - Default path: invoke `repo-init-gate` first, then load this skill only when the gate reports `needs_init`, `version_mismatch`, or `invalid_sentinel`.
-- If this skill is called directly without gate context, it may do one shallow read of the target root `best-copilot.md` and return early when the sentinel already matches.
+- If this skill is called directly without gate context, it may do one shallow read of the target root `best-copilot.md` and return early when the YAML frontmatter version is already current.
 - Explicit reinitialize/repair requests may bypass the gate.
 - Stage order: `repo-init-official` first, then `repo-init-manual-fallback`.
 
 ## Boundary
 
 - This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.6.0`.
-- Loading this skill is not execution. In Claude Code, `Skill(best-copilot:repo-init-scan) Successfully loaded` is only a preload trace. A valid `INIT_SCAN` requires running the stages below, creating or repairing target-local files when needed, checking them on disk, and returning the init summary.
-- In shell-capable Claude Code, a missing-sentinel scan should show the bundled `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` command. If shell execution is blocked but file tools work, a strict inline fallback is valid only when all 17 Claude-compatible paths are created/repaired and verified. A hand-written two-file or four-file scaffold is invalid.
+- Loading this skill is not execution. In Claude Code, `Skill(best-copilot:repo-init-scan) Successfully loaded` is only a preload trace. A valid `INIT_SCAN` requires running the preflight or scan bootstrap helper, or running the stages below inline, creating or repairing target-local files when needed, checking them on disk, and returning the init summary.
+- In shell-capable Claude Code, a missing-sentinel scan should show either `repo-init-gate/scripts/run-preflight.sh` or the bundled `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` command. If shell execution is blocked but file tools work, a strict inline fallback is valid only when all 17 Claude-compatible paths are created/repaired and verified. A hand-written two-file or four-file scaffold is invalid.
 - Do not dispatch specialist agents, run broad code search, or produce architecture/implementation plans while `required_artifacts_verified` is not `yes`.
 - The next observable assistant action after loading this skill must be either the staged init work or a `BLOCKED` init report. A code intelligence call, business-source read/search, architecture summary, or specialist dispatch before the init summary is invalid.
 - A valid missing-sentinel scan transcript contains `## Repo Init Gate` first, then real stage work, then the structured `## Init Summary` fields below. A narrative claim that files were created without verified paths is invalid.
@@ -63,7 +63,7 @@ Do not accept substitutes such as `memory/current-state.md`, `MEMORY.md`, `spec/
 
 The `verified_paths` output field must enumerate the exact relative path names. A phrase such as `all 17 required paths`, `created successfully`, or an absolute temp directory path is not valid evidence.
 
-## Inline Fallback: Exact Sentinel Content
+## Inline Fallback: Canonical Sentinel Content
 
 When performing the strict inline fallback (no shell helper available), the exact content for target-root `best-copilot.md` is:
 
@@ -73,7 +73,7 @@ version: "0.6.0"
 ---
 ```
 
-Do NOT add headings, project names, descriptions, dates, or any other prose. The file must contain only the YAML frontmatter block above — exactly 3 lines. This is the only valid sentinel format. A file with `# Best Copilot Sentinel`, a project description, or a `Last Updated` date is invalid even if it also contains the correct version string.
+Do NOT add headings, project names, descriptions, dates, or any other prose when writing or repairing the sentinel. The canonical write format is only the YAML frontmatter block above. Repeat-request gate reads accept a current frontmatter version as ready so harmless extra content does not trigger a second full scan.
 
 ## Stage Split
 
@@ -85,7 +85,7 @@ Do NOT add headings, project names, descriptions, dates, or any other prose. The
 ## Steps
 
 1. If this skill was invoked directly without `repo-init-gate`, do one shallow read of the target root `best-copilot.md` first:
-   - Matching sentinel: stop and treat repo init as already verified.
+   - Current frontmatter version: emit `INIT_SCAN=SKIP_SENTINEL_READY`, stop, and treat repo init as already verified by the sentinel contract.
    - Missing, unreadable, invalid, or mismatched sentinel: continue to the staged init flow.
 2. Run `repo-init-official` first.
 3. Run `repo-init-manual-fallback` after the official stage:

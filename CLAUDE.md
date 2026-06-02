@@ -41,18 +41,18 @@ Senior Project Expert owns orchestration (intent, scope, dispatch, fan-in, close
 
 ### Skill Loading
 
-- Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate`; `repo-init-scan` is loaded only when the sentinel gate fails.
+- Claude agents declare `skills:` in frontmatter — only `core-workflow-contract` + matching role workflow are preloaded. Senior Project Expert also preloads `repo-init-gate`; `repo-init-scan` is loaded only when the sentinel gate fails. In shell-capable Claude Code, the preferred failed-gate path is the bundled `repo-init-gate/scripts/run-preflight.sh` helper, which preserves the sentinel fast path and directly runs the scan bootstrap on failure.
 - Focused skills (e.g., `structured-review`, `test-driven-development`) are on-demand via namespaced slash commands such as `/best-copilot:skill-name` when installed as a plugin.
 - In agent teams, teammate `skills:` frontmatter is ignored — spawn prompts must name skills explicitly or the teammate returns `NEEDS_CONTEXT missing_required_skill`.
-- A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and `repo-init-scan` reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
+- A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and the preflight/scan path reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 
 ### Code Intelligence MCP (GitNexus / CodeGraph)
 
-Structural code intelligence is optional. The plugin uses whichever is available, in priority order: GitNexus (`mcp__gitnexus__*`), then CodeGraph (`mcp__codegraph__*`). A local binary or plugin inventory entry is not enough — the MCP tools must be present in the current session. If neither is available, do not call them and do not block; use built-in Read/Grep/Glob plus shell `rg` fallback.
+Structural code intelligence is optional. Choose by current tool inventory in this order: GitNexus (`mcp__gitnexus__*`), then CodeGraph (`mcp__codegraph__*`), then built-in Read/Grep/Glob plus shell `rg`. A local binary or plugin inventory entry is not enough, and absent tools must not be called.
 
 ### Init Gate (mandatory preflight)
 
-Before any substantive target-repository work: `repo-init-gate` reads the target root `best-copilot.md` sentinel. If frontmatter `version: "0.6.0"` matches, skip `repo-init-scan`. Otherwise run `repo-init-scan` which orchestrates official init (`/init` or `copilot init`), normalizes facts into `.github/instructions/project.instructions.md`, and bootstraps missing scaffolds. Work is fail-closed until init is verified.
+Before any substantive target-repository work: `repo-init-gate` reads the target root `best-copilot.md` sentinel. If frontmatter `version: "0.6.0"` matches, skip `repo-init-scan`. Otherwise run the preflight/scan bootstrap path, which orchestrates official init (`/init` or `copilot init`), normalizes facts into `.github/instructions/project.instructions.md`, and bootstraps missing scaffolds. Work is fail-closed until init is verified.
 
 ## Editing Conventions
 

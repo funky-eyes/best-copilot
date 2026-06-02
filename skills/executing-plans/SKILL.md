@@ -6,11 +6,13 @@ user-invocable: false
 
 # Executing Plans
 
-Use this skill to turn an approved plan into a checkpointed execution loop. The goal is not to run through every task as fast as possible; the goal is to make each task independently auditable, resumable, and verified.
+Use this skill to turn approved `tasks.md` from a Spec Bundle, or a compact approved small-work plan, into a checkpointed execution loop. The goal is not to run through every task as fast as possible; the goal is to make each task independently auditable, resumable, and verified.
 
 ## Preconditions
 
 - If the input packet is part of a PM orchestration flow, `execution_confirmed` must be present and must match the current `plan_revision`.
+- For MEDIUM/LARGE target-repository work, the approved plan must come from a Spec Bundle directory containing `requirements.md`, `design.md`, and `tasks.md`. A single `spec/designs/*.md`, SDD note, or standalone implementation plan is evidence only and must be split before execution.
+- When shell access is available and the work is MEDIUM/LARGE, run `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` or consume equivalent validator evidence from PM.
 - The plan must list concrete tasks, dependencies, `files_involved`, assumptions or explicit unknowns, acceptance checks, and verification commands or checks.
 - The plan must not contain placeholders such as `TBD`, `TODO`, or `to be decided`.
 - User-provided paths, current editor files, attachments, and priority files must be consumed before broad search.

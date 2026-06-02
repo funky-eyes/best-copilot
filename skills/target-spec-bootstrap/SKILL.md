@@ -13,6 +13,8 @@ Use this skill to create the target repository's spec routing structure. Specs a
 - Create missing files only. Do not overwrite active specs or project-specific templates.
 - Do not copy this plugin repository's active specs, memory, or workflow examples into the target repository. Generate only neutral target-local templates.
 - Use specs for MEDIUM/LARGE requirements, design, tasks, acceptance checks, and ADRs.
+- A MEDIUM/LARGE feature spec is a **Spec Bundle directory**, not a single markdown file. The required files are `requirements.md`, `design.md`, and `tasks.md` in the same feature directory, for example `spec/oidc-upgrade/requirements.md`, `spec/oidc-upgrade/design.md`, and `spec/oidc-upgrade/tasks.md`.
+- `spec/designs/*.md`, `spec/plans/*.md`, or any other single-file SDD/plan artifact may be used only as transient evidence. They do not satisfy the Spec Bundle gate and must be split into the three template-backed files before implementation planning or execution.
 - Generated templates must be detailed enough to execute from: evidence, requirements, design decisions, task ownership, verification, and traceability are first-class sections.
 - Keep templates dense, not verbose. Every section should ask for facts, decisions, checks, or links that change implementation behavior.
 - Link active specs to `memories/repo/current-workstreams.md` when persistent recovery is needed.
@@ -25,6 +27,16 @@ Create these paths when absent:
 - `spec/templates/requirements-template.md`
 - `spec/templates/design-template.md`
 - `spec/templates/tasks-template.md`
+
+## Spec Bundle Guard
+
+Use the bundled validator when shell access is available and a MEDIUM/LARGE feature is about to leave spec/design review:
+
+```bash
+<best-copilot-skills-dir>/target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>
+```
+
+The validator is intentionally shallow: it checks the required three files and their basic source links. It is not a substitute for content review, but it prevents single-file SDD documents from being mistaken for an executable Spec Bundle.
 
 ## `spec/INDEX.md`
 
@@ -40,6 +52,7 @@ Create these paths when absent:
 ## Maintenance Rules
 
 - Every MEDIUM/LARGE feature gets a spec directory with `requirements.md`, `design.md`, and `tasks.md`.
+- Single-file SDD or plan notes under `spec/designs/` or `spec/plans/` are evidence only; they are not approved Spec Bundles.
 - Add a row here when creating a spec.
 - Link active specs back to `memories/repo/current-workstreams.md`.
 - Mark specs `closed` when the workstream is complete and memory has been compressed.

@@ -2,7 +2,7 @@
 
 Canonical templates for `repo-init-manual-fallback` when the shell helper and bootstrap skills are unavailable. Do NOT improvise content.
 
-## `best-copilot.md` (exact sentinel)
+## `best-copilot.md` (canonical sentinel)
 
 ```md
 ---
@@ -68,8 +68,8 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 ## Claude Code Runtime
 - Imported `.github/instructions/**` are the shared source for repository facts, workflow gates, and skill routing. System/platform/user instructions outrank imported files.
 - Default agent: `"agent": "senior-project-expert"` in `.claude/settings.json`. PM dispatches to specialist subagents with scoped names (`best-copilot:technical-architect`, etc.).
-- Plugin skills: namespaced slash commands such as `/best-copilot:repo-init-gate`. `Skill(...) Successfully loaded` is not completion evidence. Continue only after `repo-init-scan` reports ready.
-- Code intelligence is optional. Use `mcp__gitnexus__*` or `mcp__codegraph__*` only when present in the current session; otherwise use built-in Read/Grep/Glob plus shell `rg`.
+- Plugin skills: namespaced slash commands such as `/best-copilot:repo-init-gate`. In shell-capable Claude Code, prefer the bundled preflight helper when discoverable. `Skill(...) Successfully loaded` is not completion evidence. Continue only after the preflight/scan path reports ready.
+- Code intelligence is optional and ordered. Use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`.
 - Keep this file short. Facts → `.github/instructions/`, memory → `memories/repo/**`, specs → `spec/**`.
 ```
 
@@ -180,6 +180,7 @@ Stores target-local AI memory. Does not override current repo files, command out
 | Directory | Tags | Status | Summary |
 | --- | --- | --- | --- |
 | `spec/templates/` | template | template | Reusable templates |
+Maintenance: every MEDIUM/LARGE feature gets a spec directory with requirements.md, design.md, and tasks.md. Single-file SDD/design/plan notes are evidence only.
 ```
 
 ### `spec/templates/requirements-template.md`
@@ -187,7 +188,7 @@ Stores target-local AI memory. Does not override current repo files, command out
 ```md
 # Requirements
 - Status: `draft | reviewed | approved | closed` / Linked: `design.md`, `tasks.md`
-## Goals / Non-Goals / Functional Requirements (FR table) / Acceptance Criteria
+## Background / Current System Evidence / Goals / Non-Goals / Functional Requirements (FR table) / Data+API+Security+Compatibility / Acceptance Criteria / Traceability Matrix
 ```
 
 ### `spec/templates/design-template.md`
@@ -195,16 +196,14 @@ Stores target-local AI memory. Does not override current repo files, command out
 ```md
 # Design
 - Status: `draft | reviewed | approved | implemented | closed` / Source: `requirements.md`
-## Overview (Problem + Approach) / Proposed Changes (Surface/Change/Owner/Verification table)
+## Overview (Problem + Approach) / Current System Evidence / Design Decisions (DD table) / Proposed Changes / API+Data+Config Contracts / Error+Security+Release Risk / Verification Plan
 ```
 
 ### `spec/templates/tasks-template.md`
 
 ```md
 # Tasks
-| ID | Task | Owner lane | Dependencies | Acceptance checks | Verification |
-| --- | --- | --- | --- | --- | --- |
-| T-001 | `<task>` | `<lane>` | none | `<checks>` | `<command>` |
+Each task: requirement refs, design refs, owner lane, reviewer lanes, files, write set, read-before-write targets, dependencies, parallel group, acceptance checks, TDD/minimal check, verification command, ready artifacts, stop conditions.
 ```
 
 ## `must.instructions.md` and `skills-index.instructions.md`
