@@ -430,6 +430,7 @@ Only the PM/Coordinator may use the Native Ask mechanism (Copilot: `vscode_askQu
 
 - Only top-level sessions or PM/Coordinators may use native asking
 - Each question must allow a free-form answer (fixed-choice UI must include "Custom answer")
+- Claude Code asks through `AskUserQuestion`: use selectable options plus the built-in custom/Other answer path, not prose-only "which next?" questions
 - Turns must not end with plain text summaries (when Native Ask UI is available)
 - If UI is unavailable and user selection is needed → report `BLOCKED missing_native_ask_ui`
 

@@ -28,7 +28,7 @@ System/developer/platform instructions > explicit user instructions > current re
 - Parallel execution only when fan-in can prove each lane's owner, reviewer, evidence, and stop condition.
 - Code generation: SDD then TDD (RED-GREEN-REFACTOR or minimal reproducible check).
 - PM/coordinator business-source boundary: before init completes, only sentinel and init-scoped bounded evidence may be read. After init, for `standard` or `full` target-repository work, PM freezes scope and dispatches named role lanes instead of using PM-owned code intelligence/read/search to analyze business code.
-- Code intelligence is an optional accelerator, not a dependency. In Claude Code, choose by current tool inventory only: `mcp__gitnexus__*` first, else `mcp__codegraph__*`, else Claude built-in Read/Grep/Glob plus shell `rg` where allowed. A local binary or plugin inventory entry is not enough. Record `code_intelligence_status: gitnexus|codegraph|unavailable` in PM evidence and specialist packets; do not call absent tools or block solely because code intelligence is unavailable. If available, use code intelligence for structural discovery, callers/callees, and impact checks before broad text search.
+- Code intelligence is an optional accelerator, not a dependency. In Claude Code, choose by current tool inventory only: `mcp__gitnexus__*` first, else `mcp__codegraph__*`, else Claude built-in Read/Grep/Glob plus shell `rg` where allowed. For TypeScript/JavaScript, if Claude exposes LSP tools or diagnostics from `typescript-lsp@claude-plugins-official`, record `typescript_lsp_status: available` and use it for go-to-definition, references, and diagnostics before grep fallback; otherwise record `typescript_lsp_status: unavailable|not_applicable`. A local binary, marketplace entry, or plugin inventory line is not enough. Record `code_intelligence_status: gitnexus|codegraph|unavailable` in PM evidence and specialist packets; do not call absent tools or block solely because code intelligence is unavailable. If available, use code intelligence for structural discovery, callers/callees, diagnostics, and impact checks before broad text search.
 
 ## Reliability Gate Enforcement
 
@@ -57,7 +57,7 @@ Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-c
 | Runtime | Contract | Native Ask Mechanism |
 | --- | --- | --- |
 | Copilot CLI / VS Code Copilot | `agents/*.agent.md` + `skills/`; Copilot-only metadata in agent files. | VS Code: `vscode_askQuestions` (preferred), fallback `vscode/askQuestions`, `askQuestions`. CLI: `Asking user`. PM frontmatter declares these as availability signals. |
-| Claude Code | `claude-plugin/` manifest; plugin skills as namespaced slash commands like `/best-copilot:<skill>` unless the picker inserts another displayed plugin form. PM is the main session (via `--agent senior-project-expert` or `.claude/settings.json` `"agent"` key; scoped `best-copilot:senior-project-expert` is valid when disambiguation is needed). PM dispatches specialists via the Agent tool using exact `/agents` names, which plugin agents display as scoped names such as `best-copilot:developer`. Code intelligence MCP is optional and ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in file/search tools and `rg`. Background execution is an invocation-level PM choice for independent research/read-only review with pre-granted permissions; implementation/fix/spec writes run foreground by default so permission prompts can surface. Use `isolation: "worktree"` for file-conflict isolation, and PM owns the worktree fan-in plus `development-branch-closeout`. Agent frontmatter pins Claude model aliases (`opus`, `sonnet`, or `haiku`) using the Copilot model-tier mapping; omitted model fields still default to `inherit`. | Built-in `AskUserQuestion`. No declaration needed. |
+| Claude Code | `claude-plugin/` manifest; plugin skills as namespaced slash commands like `/best-copilot:<skill>` unless the picker inserts another displayed plugin form. PM is the main session (via `--agent senior-project-expert` or `.claude/settings.json` `"agent"` key; scoped `best-copilot:senior-project-expert` is valid when disambiguation is needed). PM dispatches specialists via the Agent tool using exact `/agents` names, which plugin agents display as scoped names such as `best-copilot:developer`. Code intelligence MCP is optional and ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in file/search tools and `rg`; for TypeScript/JavaScript, also use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` before grep fallback. Background execution is an invocation-level PM choice for independent research/read-only review with pre-granted permissions; implementation/fix/spec writes run foreground by default so permission prompts can surface. Use `isolation: "worktree"` for file-conflict isolation, and PM owns the worktree fan-in plus `development-branch-closeout`. Agent frontmatter pins Claude model aliases (`opus`, `sonnet`, or `haiku`) using the Copilot model-tier mapping; omitted model fields still default to `inherit`. | Built-in `AskUserQuestion`. No declaration needed. |
 | Other runtimes | Map contract to local tools. | Check runtime tool inventory. |
 
 ### Claude-Compatible Proxy Caveat
@@ -135,7 +135,7 @@ For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask nat
 ## Search Discipline
 
 - Start from explicit user paths, changed files, frozen `files_involved`, and repository indexes before content search.
-- For structural code discovery, choose the cheapest available path in order: `code_intelligence_status: gitnexus` -> GitNexus MCP; `code_intelligence_status: codegraph` -> CodeGraph MCP; `code_intelligence_status: unavailable` -> built-in Read/Grep/Glob plus shell `rg`. Do not call tools absent from the current inventory.
+- For structural code discovery, choose the cheapest available path in order: `code_intelligence_status: gitnexus` -> GitNexus MCP; `code_intelligence_status: codegraph` -> CodeGraph MCP; `code_intelligence_status: unavailable` -> built-in Read/Grep/Glob plus shell `rg`. In Claude Code TypeScript/JavaScript work, also use `typescript_lsp_status: available` tools or diagnostics for definition/reference/type-error checks before grep fallback. Do not call tools absent from the current inventory.
 - Prefer filename/glob and fixed-string `rg -F` for class names, methods, routes, config keys, and copied errors.
 - Use regex only when genuinely vague or prior exact searches failed; record the reason in `search_hints`.
 - Avoid repo-wide regex; scope to the smallest directory; stop after two searches with no new signal.
@@ -204,12 +204,21 @@ Canonical definition — runtime-specific tool names live only in the Runtime Ad
 - If unavailable and a human choice is required → `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with question, options, safe default, resume state.
 - Re-check availability from current tool inventory each turn. Enforced from instruction text alone — no plugin hooks or scripts.
 
+#### Claude Code `AskUserQuestion` Shape
+
+- In Claude Code, the concrete native ask action is an `AskUserQuestion` tool call. A prose sentence such as "continue with frontend/tests, or run E2E first?" is invalid when `AskUserQuestion` is available.
+- Use a `questions` array. Each item has `header` (12 characters or fewer), `question`, `options` with 2-4 `{label, description}` choices, and `multiSelect: false` unless multi-select is explicitly needed.
+- Prefer one question per call. Put the recommended or safest default first and mark it in the label only when it is genuinely recommended, for example `Run E2E first (Recommended)`.
+- Preserve a custom free-form path. Claude Code's built-in UI may provide an `Other`/custom text answer; if the active integration exposes only fixed choices, include `Custom answer` and then ask a native follow-up before deciding.
+- Treat any selected option label or custom text answer as the new user instruction. If the tool is absent, disabled, or fails, report the Native Ask Contract fallback instead of replacing the popup with prose.
+
 #### PM Trigger Guidance
 
 Extends the Native Ask Contract for PM/coordinator:
 
 - PM/coordinator must use native ask for every blocking clarification, route selection, execution approval, specialist `NEEDS_USER_INPUT` handback, continuation, and closeout — from any skill (brainstorming, review, verification, workspace isolation, branch closeout, etc.).
 - Frontmatter ask-tool declarations are an availability signal: attempt concrete native ask before prose fallback.
+- If the PM/coordinator writes a message that asks the user to choose between next actions, that message is itself a native ask trigger. The choice must be expressed through the runtime's native ask UI, not as a final prose question.
 - See Runtime Adapters table for runtime-specific tool names.
 
 ### Specialist Handback
