@@ -483,13 +483,15 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ### No Silent Closeout
 
 - Do not end a turn with a prose-only summary when a native ask tool is available.
-- In VS Code, use `vscode_askQuestions` before final closeout. In other runtimes, use the native ask mechanism when exposed.
+- In Claude Code, use `AskUserQuestion` for route, approval, continuation, and closeout choices when exposed. In VS Code, use `vscode_askQuestions` before final closeout. In other runtimes, use the native ask mechanism when exposed.
+- Native ask must present selectable options plus a custom free-form answer path. A prose-only next-step question is invalid when native ask is available.
 - Specialists must not ask users directly. Missing human input becomes `NEEDS_USER_INPUT` to PM/coordinator, or `BLOCKED missing_top_level_question` when PM is absent.
 
 ### PM Native Ask Trigger Gate
 
 - PM/coordinator uses native ask for blocking clarification, route choice, execution approval, specialist `NEEDS_USER_INPUT`, continuation, and closeout.
 - A native ask prompt must allow a custom free-form answer path.
+- In Claude Code, `AskUserQuestion` prompts should use one question by default, 2-4 options with short descriptions, and the built-in custom/Other answer path.
 
 ## Repository Truth
 
@@ -552,11 +554,13 @@ append_if_missing ".github/instructions/must.instructions.md" "## Per-Request Ha
 
 - Do not end a turn with a prose-only summary when a native ask tool is available.
 - Specialists must not ask users directly. Missing human input becomes `NEEDS_USER_INPUT` to PM/coordinator, or `BLOCKED missing_top_level_question` when PM is absent.
+- In Claude Code, use `AskUserQuestion` for route, approval, continuation, and closeout choices when exposed; a prose-only next-step question is invalid.
 
 ### PM Native Ask Trigger Gate
 
 - PM/coordinator uses native ask for blocking clarification, route choice, execution approval, specialist `NEEDS_USER_INPUT`, continuation, and closeout.
 - A native ask prompt must allow a custom free-form answer path.
+- In Claude Code, `AskUserQuestion` prompts should use one question by default, 2-4 options with short descriptions, and the built-in custom/Other answer path.
 EOF
 
 append_if_missing ".github/instructions/must.instructions.md" "### PM Native Ask Trigger Gate" <<'EOF'
@@ -564,6 +568,7 @@ append_if_missing ".github/instructions/must.instructions.md" "### PM Native Ask
 
 - PM/coordinator uses native ask for blocking clarification, route choice, execution approval, specialist `NEEDS_USER_INPUT`, continuation, and closeout.
 - A native ask prompt must allow a custom free-form answer path.
+- In Claude Code, `AskUserQuestion` prompts should use one question by default, 2-4 options with short descriptions, and the built-in custom/Other answer path.
 EOF
 
 append_if_missing ".github/instructions/must.instructions.md" "## Shared State Contracts" <<'EOF'
@@ -617,6 +622,22 @@ append_if_missing ".github/instructions/must.instructions.md" "vscode_askQuestio
 ## Runtime Ask Fallback
 
 - In VS Code, use `vscode_askQuestions` before other ask aliases when a native ask tool is available.
+- In Claude Code, use `AskUserQuestion` when available; do not replace it with prose-only questions.
+EOF
+
+append_if_missing ".github/instructions/must.instructions.md" "AskUserQuestion" <<'EOF'
+## Claude Code Native Ask
+
+- In Claude Code, use `AskUserQuestion` for route, approval, continuation, and closeout choices when exposed.
+- `AskUserQuestion` prompts should use one question by default, 2-4 selectable options with short descriptions, and the built-in custom/Other answer path.
+- A prose-only next-step question is invalid when `AskUserQuestion` is available.
+EOF
+
+append_if_missing ".github/instructions/must.instructions.md" "typescript-lsp@claude-plugins-official" <<'EOF'
+## Claude Code TypeScript LSP
+
+- For TypeScript/JavaScript work, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` for go-to-definition, references, and diagnostics before grep fallback when available.
+- A local plugin entry is not enough; use LSP only when Claude exposes the actual capability or diagnostics.
 EOF
 
 write_missing ".github/instructions/skills-index.instructions.md" <<'EOF'
@@ -687,6 +708,8 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 - In shell-capable Claude Code, prefer the bundled preflight helper when discoverable.
 - `Skill(...) Successfully loaded` is not proof that init ran. Continue only after the preflight/scan path verifies files on disk and reports ready.
 - Code intelligence is optional and ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`.
+- For TypeScript/JavaScript work, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` for go-to-definition, references, and diagnostics before grep fallback when available.
+- When Claude Code exposes `AskUserQuestion`, route choices, execution approvals, specialist `NEEDS_USER_INPUT` handbacks, continuation choices, and closeout choices must use that native popup with selectable options and a custom/Other answer path. Do not end with prose-only next-step questions.
 EOF
 
   mkdir -p ".claude"
@@ -722,6 +745,19 @@ EOF
 
 append_if_missing "CLAUDE.md" "@.github/instructions/skills-index.instructions.md" <<'EOF'
 @.github/instructions/skills-index.instructions.md
+EOF
+
+append_if_missing "CLAUDE.md" "typescript-lsp@claude-plugins-official" <<'EOF'
+## Claude Code Best Copilot Runtime
+
+- For TypeScript/JavaScript work, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` for go-to-definition, references, and diagnostics before grep fallback when available.
+- When Claude Code exposes `AskUserQuestion`, route choices, execution approvals, specialist `NEEDS_USER_INPUT` handbacks, continuation choices, and closeout choices must use that native popup with selectable options and a custom/Other answer path. Do not end with prose-only next-step questions.
+EOF
+
+append_if_missing "CLAUDE.md" "AskUserQuestion" <<'EOF'
+## Claude Code Native Ask
+
+- When Claude Code exposes `AskUserQuestion`, route choices, execution approvals, specialist `NEEDS_USER_INPUT` handbacks, continuation choices, and closeout choices must use that native popup with selectable options and a custom/Other answer path. Do not end with prose-only next-step questions.
 EOF
 
 write_missing "memories/README.md" <<'EOF'

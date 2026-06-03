@@ -24,13 +24,13 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 9. Include current `INIT_GATE` / `INIT_SCAN` evidence in every specialist packet. If that evidence is absent, run the mechanical preflight helper when discoverable, otherwise run `repo-init-gate` before dispatch and the scan bootstrap or `repo-init-scan` only if the gate fails.
 10. Before implementation, invoke `workspace-isolation` or record the active runtime's isolation policy in the PM packet. For Claude Code, prefer `worktree.baseRef: "head"` when target settings can be written safely, and preserve `workspace_path`, `branch_state`, `dirty_status`, `worktree_policy`, `isolation_status`, and `write_set`.
 11. For Claude Code, choose foreground/background at dispatch time. Background is only for independent research, planning, or read-only review when permissions are already granted or no prompt is expected. Implementation, fix, spec/memory writes, and permission-gated verification run foreground by default.
-12. For Claude Code subagents, include required skill names explicitly in the spawn prompt (e.g., "Before starting, invoke /best-copilot:core-workflow-contract and /best-copilot:developer-workflow") plus a minimal role checklist fallback, and require `NEEDS_CONTEXT missing_required_skill` if the subagent cannot load or follow them. Include `code_intelligence_status: gitnexus|codegraph|unavailable` plus the policy: GitNexus first when present, else CodeGraph, else built-in Read/Grep/Glob plus shell `rg`; specialists must not call absent tools or block solely because code intelligence is unavailable.
+12. For Claude Code subagents, include required skill names explicitly in the spawn prompt (e.g., "Before starting, invoke /best-copilot:core-workflow-contract and /best-copilot:developer-workflow") plus a minimal role checklist fallback, and require `NEEDS_CONTEXT missing_required_skill` if the subagent cannot load or follow them. Include `code_intelligence_status: gitnexus|codegraph|unavailable` plus the policy: GitNexus first when present, else CodeGraph, else built-in Read/Grep/Glob plus shell `rg`; for TypeScript/JavaScript work also include `typescript_lsp_status: available|unavailable|not_applicable` and require exposed `typescript-lsp@claude-plugins-official` LSP tools/diagnostics to be used before grep fallback. Specialists must not call absent tools or block solely because code intelligence is unavailable.
 13. Every specialist packet must forbid direct user questions. When PM/coordinator is present, require `NEEDS_USER_INPUT` back to PM; otherwise require `BLOCKED missing_top_level_question` with the exact question the top-level session or PM/coordinator should ask.
 14. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
 15. If an isolated worktree lane changed files, fan in `worktree_path`, `branch_name`, `changed_files`, `commits`, and `verification_result`, then invoke `development-branch-closeout` or present the equivalent keep / merge / PR / discard decision before claiming the change landed.
 16. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
 17. Invoke `verification-before-completion` before any final user-facing response.
-18. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names. Do not close on a prose-only summary.
+18. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names and the Claude Code `AskUserQuestion` shape. Do not close on a prose-only summary or prose-only next-step question.
 19. Close only after evidence is present or a blocker is explicitly stated.
 
 ## Observable Harness Contract
@@ -49,6 +49,12 @@ When Senior Project Expert is invoked directly, the user must be able to see the
 ## PM Native Ask Trigger Gate
 
 Follow the **Native Ask Contract** and **PM Trigger Guidance** from `core-workflow-contract`. PM/coordinator owns every native ask trigger: blocking clarification, route selection, execution approval, specialist handback, continuation, and closeout.
+
+Claude Code trigger lock:
+
+- When `AskUserQuestion` is available, any PM message that would ask the user to choose a route, approve execution, continue to the next phase, or end the turn must call `AskUserQuestion` instead of ending with prose.
+- Use 1 question per call by default, 2-4 options, a short header, one-line option descriptions, and a custom free-form answer path as defined by `core-workflow-contract`.
+- Do not write prose such as "Should I continue X, or do Y first?" as the final assistant message. Summarize evidence only if needed, then immediately open the native ask decision surface.
 
 ## Dispatch Packet Contract
 
@@ -83,6 +89,9 @@ for implementation, fix, spec/memory writes, or permission-gated verification.
 If isolated worktree mode is used and you change files, return worktree_path,
 branch_name, changed_files, commits if any, verification_result, and whether the
 parent checkout still needs keep / merge / PR / discard closeout.
+For TypeScript/JavaScript work in Claude Code, consume `typescript_lsp_status`;
+when it is available, use exposed LSP definition/reference/diagnostic capability
+before falling back to grep for symbol navigation or type-error checks.
 ```
 
 ## Specialist Routing

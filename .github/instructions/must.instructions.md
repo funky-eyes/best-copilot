@@ -59,6 +59,7 @@ Follow the **Native Ask Contract** and **Specialist Ask Boundary** in `core-work
 - If the native ask reply contains free text or a new instruction, treat it as a new ordinary user request and continue from there.
 - This gate must be enforceable from instruction text alone. Do not rely on plugin hooks, local scripts, or runtime-specific interpreters as the default closeout backstop.
 - A prose-only question such as "Should I continue?", "Do you want me to create a worktree?", or "Reply A/B/C" does not satisfy planning, approval, continuation, or closeout gates.
+- In Claude Code, the concrete native ask mechanism is `AskUserQuestion`: use one question by default, 2-4 selectable options with short descriptions, and the built-in custom/Other answer path. A prose-only next-step question is invalid when `AskUserQuestion` is available.
 
 ### Continuation Rules
 
