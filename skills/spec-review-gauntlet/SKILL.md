@@ -16,6 +16,7 @@ For MEDIUM/LARGE target-repository implementation, the approved input must be a 
 - If the only available artifact is a single-file SDD/design/plan, return `readiness tier: not_ready`, classify the finding as `spec_blocker`, and recommend `revise_spec` so Specification Writer splits it into the three required files.
 - For small bounded work, a compact approved plan can still be reviewed, but do not label it as a Spec Bundle.
 - When shell access is available, run `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` before returning `ready` for MEDIUM/LARGE work.
+- `tasks.md` must contain `## Progress Ledger` or equivalent per-task status blocks before implementation. If absent, return `readiness tier: not_ready` with `spec_blocker` so Specification Writer repairs it.
 
 ## Inputs
 
@@ -42,6 +43,7 @@ Check these dimensions before implementation:
 - `requirement_quality`: requirements have stable IDs, priority, source, acceptance signal, and one verifiable behavior per item.
 - `design_quality`: design has decision IDs, ownership boundaries, API/data/config contracts, error behavior, compatibility, migration/rollback, and alternatives.
 - `task_traceability`: each task references requirement/design IDs and includes owner lane, reviewer lanes, write set, dependencies, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
+- `progress_recovery`: `tasks.md` has durable task status fields, and active work links to `memories/repo/current-workstreams.md`.
 - `tdd_testability`: new behavior or bug fixes can be proven with a failing test or minimal reproducible check.
 - `task_granularity`: tasks are small enough to execute and review independently.
 - `blast_radius`: public APIs, message formats, schemas, auth, dependencies, and release surfaces have explicit risk handling.

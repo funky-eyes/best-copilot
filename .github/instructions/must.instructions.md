@@ -128,7 +128,9 @@ When adapting ideas from external repositories or prompt systems, reduce them to
 - If `.github/instructions/project.instructions.md` is missing after official init normalization, create it from bounded repository evidence before treating the repository as initialized.
 - On first substantial plugin use, missing target-local `.github/instructions/**`, runtime adapters, `memories/repo/**`, or `spec/**` scaffolds are also a fail-closed bootstrap barrier. Create them through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify the paths on disk before requirements analysis. For Claude Code target use, create or verify `CLAUDE.md` so Claude can load the shared `.github/instructions/**` rules. If required scaffolds cannot be created, return `BLOCKED` with the missing paths and do not continue the substantive task.
 - MEDIUM/LARGE active work must link both ways: spec points to memory and `current-workstreams.md` points to spec.
-- When task status changes, update both `tasks.md` and `current-workstreams.md`.
+- When task status, verification result, batch state, or closeout changes, update both `tasks.md` and `current-workstreams.md` before continuing to the next task or final closeout. If `tasks.md` lacks a progress ledger or per-task status blocks, add a compatible `## Progress Ledger` without rewriting task definitions.
+- Update `spec/INDEX.md` and `memories/repo/INDEX.md` when linked spec or memory rows change.
+- Chat-only task progress is invalid for persistent MEDIUM/LARGE work; if required state files are not writable, return `BLOCKED state_sync_unavailable` or `DONE_WITH_CONCERNS state_sync_blocked` with exact missing paths.
 - When work closes, compress final conclusions into topic memory and close or remove the active workstream.
 
 ## 9. Agents and Dispatch
@@ -162,6 +164,7 @@ Follow the canonical definitions in `core-workflow-contract` for specialist ask 
 - Decisions need dates; separate facts from opinions; mark superseded conclusions as deprecated.
 - Before closeout, prepare the smallest useful memory diff: Add / Update / Deprecate.
 - When editing target repository `memories/repo/**`, update that target repository's `memories/repo/INDEX.md`; active tasks also update its `current-workstreams.md`. Do not write active task state into the plugin package or plugin cache.
+- Memory is updated when durable verified information changes: current focus, next resume action, last verified evidence, blocker, decision, accepted/rejected evolution event, or workstream closeout. Do not write memory for casual ideas, raw chat, or unverified guesses.
 
 ## 12. Prohibitions
 

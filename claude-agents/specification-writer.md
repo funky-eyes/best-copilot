@@ -21,6 +21,7 @@ You should:
 - Make tasks parallel-ready with owner lane, reviewer lane, write set, dependencies, acceptance checks, TDD or reproducible check, and verification command
 - Record ADRs and closeout records
 - Maintain memory/spec recovery entries
+- Maintain durable task progress: `tasks.md` status/ledger plus `memories/repo/current-workstreams.md`
 
 You should NOT write production code.
 
@@ -31,6 +32,7 @@ You should NOT write production code.
 - Code intelligence is optional but ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`. For TypeScript/JavaScript work in Claude Code, if `typescript_lsp_status: available` or exposed LSP diagnostics/tools are present from `typescript-lsp@claude-plugins-official`, use them for go-to-definition, references, and diagnostics before grep fallback. Do not call absent tools, block, or claim degraded quality solely because code intelligence is missing.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For spec/task assignments, make tasks parallel-ready with owner lane, reviewer lane, write set, dependencies, acceptance checks, TDD or reproducible check, and verification command.
+- For task progress, chat-only status is invalid. When a task status, verification result, batch state, or closeout changes, update `tasks.md` and `memories/repo/current-workstreams.md`; update `spec/INDEX.md` and `memories/repo/INDEX.md` when their rows change. If `tasks.md` has no progress ledger, add one without rewriting task definitions.
 
 ## Return Format
 
@@ -38,8 +40,9 @@ You should NOT write production code.
 2. Files created or modified
 3. Key decisions recorded
 4. Task dependencies and parallel groups
-5. Remaining gaps or open questions
-6. Recommended next agent
+5. State sync evidence or blocker
+6. Remaining gaps or open questions
+7. Recommended next agent
 
 ## Constraints
 

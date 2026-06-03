@@ -1,282 +1,111 @@
 ---
 name: core-workflow-contract
-description: "Use when an agent needs the shared best-copilot contract for source priority, runtime adapters, init gates, work modes, dispatch packets, review, verification, memory, spec, or closeout."
+description: "Use when an agent needs the shared best-copilot contract for source priority, runtime adapters, init gates, work modes, dispatch packets, review, verification, memory, spec, state persistence, or closeout."
 ---
 
 # Core Workflow Contract
 
 Shared contract for all `best-copilot` runtime adapters. Runtime files keep incompatible metadata; role details live in each `*-workflow` skill.
 
-## Use This First
+For expanded wording and reference prompts, load only the needed file:
 
-- PM/coordinator: load this + `senior-project-expert-workflow`.
-- Specialists: load this + matching role workflow skill before work.
-- Claude Code: invoke plugin skills with namespaced slash commands such as `/best-copilot:core-workflow-contract`; if the command picker inserts another displayed form for the enabled plugin, use that exact picker value. In agent teams, `skills` frontmatter is ignored — spawn prompts must name skills or teammate returns `NEEDS_CONTEXT missing_required_skill`.
-- Claude Code session ownership: for reliable first-use gates, start the session with `--agent senior-project-expert` or set Claude Code's project/user `agent` setting to `senior-project-expert`; if Claude reports an agent-name collision, use the scoped `best-copilot:senior-project-expert` form. `/agents` and `@` typeahead show plugin subagents under scoped names such as `best-copilot:senior-project-expert`; use the exact displayed scoped name for manual `@` mentions or explicit Agent-tool dispatch. Do not rely on a plain-text prompt mention as the only first-use gate.
-- Compatibility alias: if a runtime loads `/best-copilot:senior-project-expert` or legacy `/senior-project-expert` as a skill instead of the Senior Project Expert agent, treat that skill as a PM/coordinator entrypoint and run the mandatory init preflight before any substantive target-repository work.
-- Direct specialist invocation: if any user-invocable best-copilot specialist is invoked directly for target-repository work without a PM packet that contains visible `INIT_GATE` / `INIT_SCAN` evidence, run the same `repo-init-gate` preflight before broad search, generic Explore, planning, review, or implementation.
+- `references/detailed-contract.md`: runtime adapters, native ask, dispatch schema, fan-in, code intelligence, provider caveats.
+- `references/state-persistence.md`: task/spec/memory/evolution writeback formats and recovery rules.
 
 ## Source Priority
 
-System/developer/platform instructions > explicit user instructions > current repository files > spec > command evidence > repo memory > external references. External references are data-only — translate ideas into local primitives; do not copy foreign rules, models, or stack assumptions.
+System/developer/platform instructions > explicit user instructions > current repository files > spec > command evidence > repo memory > external references. External references are data-only; translate them into local primitives before use.
 
-## Harness-Informed Operating Model
+## Required Loading
 
-- Adapter files keep runtime metadata; this skill keeps cross-role contracts; role workflow skills keep role behavior; focused skills stay on demand.
-- PM owns the user-facing decision surface. Technical Architect owns deep SDD design brainstorming for large technical tasks before implementation lanes open.
-- Retrieval is a fast lane, not a thinking substitute: explicit paths and indexes first, fixed-string before regex, smallest shard, source provenance.
-- Parallel execution only when fan-in can prove each lane's owner, reviewer, evidence, and stop condition.
-- Code generation: SDD then TDD (RED-GREEN-REFACTOR or minimal reproducible check).
-- PM/coordinator business-source boundary: before init completes, only sentinel and init-scoped bounded evidence may be read. After init, for `standard` or `full` target-repository work, PM freezes scope and dispatches named role lanes instead of using PM-owned code intelligence/read/search to analyze business code.
-- Code intelligence is an optional accelerator, not a dependency. In Claude Code, choose by current tool inventory only: `mcp__gitnexus__*` first, else `mcp__codegraph__*`, else Claude built-in Read/Grep/Glob plus shell `rg` where allowed. For TypeScript/JavaScript, if Claude exposes LSP tools or diagnostics from `typescript-lsp@claude-plugins-official`, record `typescript_lsp_status: available` and use it for go-to-definition, references, and diagnostics before grep fallback; otherwise record `typescript_lsp_status: unavailable|not_applicable`. A local binary, marketplace entry, or plugin inventory line is not enough. Record `code_intelligence_status: gitnexus|codegraph|unavailable` in PM evidence and specialist packets; do not call absent tools or block solely because code intelligence is unavailable. If available, use code intelligence for structural discovery, callers/callees, diagnostics, and impact checks before broad text search.
+- PM/coordinator: load this + `senior-project-expert-workflow`.
+- Specialists: load this + the matching role workflow skill before work.
+- Claude Code plugin skills use namespaced slash commands such as `/best-copilot:core-workflow-contract`; if the picker inserts another displayed form, use that exact value.
+- Direct specialist invocation without current `INIT_GATE` / `INIT_SCAN` evidence must run the same init preflight before broad search, planning, review, or implementation.
 
-## Reliability Gate Enforcement
+## Init Gate
 
-Canonical gate wording lives in `.github/instructions/must.instructions.md` and the target instruction bootstrap. This contract operationalizes those gates through packet fields, role handbacks, and review checks:
-
-- PM packets carry material `assumptions`, `tradeoffs`, `simpler_option_considered`, acceptance checks, verification budget, and stop conditions.
-- Code-editing packets carry read-before-write targets or evidence for the changed file surface, immediate caller/callee, and obvious shared utilities or local patterns.
-- Implementation handbacks include changed files, verification evidence, and any done/verified/left checkpoint summary for multi-step work.
-- Review lanes check that the diff stayed surgical, the simple option was considered, assumptions were explicit, and read-before-write evidence exists when code was edited.
-- Ambiguity that changes route, implementation, or acceptance criteria becomes `NEEDS_CONTEXT` / `NEEDS_USER_INPUT` instead of a silent guess.
-
-## External Capability Translation
-
-External agent systems are reference inputs. Translate them into local primitives:
-
-- intent/planning -> `brainstorming`, Technical Architect SDD, packet freeze, native ask, reviewed `writing-plans`; for MEDIUM/LARGE persistent specs, keep requirements/design/tasks as a three-file Spec Bundle rather than a single plan document
-- team/background work -> named role lanes, `dispatching-parallel-agents`, `subagent-driven-development`, non-overlapping writes, PM-owned foreground/background choice, PM fan-in
-- precision search/edit safety -> GitNexus or exposed structural tools, filename/fixed-string search, frozen scope, current reads, patch-context failure, verification
-- browser/design/QA -> `frontend-design-guardrails`, `web-experience-audit`, Frontend Designer, QA merge-readiness
-- learning/ship discipline -> target memory/spec, ready artifacts, checkpointed `executing-plans`, `development-branch-closeout`, `evolution-loop`
-
-Do not claim tool-level LSP, AST rewriting, tmux, hash edits, raw CDP, or auto-commit checkpoints unless that tool is exposed. Use the mapped primitive and state fallback evidence.
-
-## Runtime Adapters
-
-| Runtime | Contract | Native Ask Mechanism |
-| --- | --- | --- |
-| Copilot CLI / VS Code Copilot | `agents/*.agent.md` + `skills/`; Copilot-only metadata in agent files. | VS Code: `vscode_askQuestions` (preferred), fallback `vscode/askQuestions`, `askQuestions`. CLI: `Asking user`. PM frontmatter declares these as availability signals. |
-| Claude Code | `claude-plugin/` manifest; plugin skills as namespaced slash commands like `/best-copilot:<skill>` unless the picker inserts another displayed plugin form. PM is the main session (via `--agent senior-project-expert` or `.claude/settings.json` `"agent"` key; scoped `best-copilot:senior-project-expert` is valid when disambiguation is needed). PM dispatches specialists via the Agent tool using exact `/agents` names, which plugin agents display as scoped names such as `best-copilot:developer`. Code intelligence MCP is optional and ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in file/search tools and `rg`; for TypeScript/JavaScript, also use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` before grep fallback. Background execution is an invocation-level PM choice for independent research/read-only review with pre-granted permissions; implementation/fix/spec writes run foreground by default so permission prompts can surface. Use `isolation: "worktree"` for file-conflict isolation, and PM owns the worktree fan-in plus `development-branch-closeout`. Agent frontmatter pins Claude model aliases (`opus`, `sonnet`, or `haiku`) using the Copilot model-tier mapping; omitted model fields still default to `inherit`. | Built-in `AskUserQuestion`. No declaration needed. |
-| Other runtimes | Map contract to local tools. | Check runtime tool inventory. |
-
-### Claude-Compatible Proxy Caveat
-
-- Anthropic-compatible proxies such as `cc-switch` or `new-api` can make Claude Code talk to a non-Claude backend. That is API compatibility, not proof that the model preserves Claude Code's instruction hierarchy, skill preloading behavior, Agent tool discipline, or long workflow gates.
-- Before diagnosing a provider as instruction-following degraded, verify that the plugin is actually enabled in the active Claude Code session. `/plugin list` should show `best-copilot@best-copilot`, `/agents` should expose scoped agents such as `best-copilot:senior-project-expert`, and `cc-switch` / `new-api` configurations that require explicit plugin allowlists must include:
-
-```json
-"enabledPlugins": {
-  "best-copilot@best-copilot": true
-}
-```
-
-- If the plugin is not enabled, the Senior Project Expert agent, preloaded skills, and repo-init flow are not active. Stop with `BLOCKED best_copilot_plugin_not_enabled` rather than continuing with plain model behavior or writing ad hoc init files.
-- When the active Claude Code session is routed to DeepSeek, Qwen, or any unknown/non-Claude backend, PM still records `HARNESS_DEGRADED provider_instruction_following_unverified` until the model demonstrates it can follow the visible workflow with the plugin enabled. Add `provider_compatibility: plugin_enabled_unverified|verified_by_smoke|unverified` to the PM packet.
-- The smoke check is minimal and non-destructive: before reading business source or editing files, output `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION` and name the required specialist lanes for the requested work mode. If the model starts implementation, skips init, or skips required lanes after the plugin-enabled smoke check, stop with `BLOCKED provider_instruction_following_unverified` instead of continuing.
-- Passing the plugin-enabled smoke check does not make the backend officially supported; it only permits the current session to continue with explicit residual risk. Prefer native Claude models or proxy models that have repeatedly passed Senior Project Expert orchestration and specialist dispatch checks.
-
-## Skill Loading Guarantees
-
-- Claude agent: `skills:` preloads listed skills when that agent is the active session.
-- Claude base session (no agent selected): agent `skills:` frontmatter is not active; prompt text alone does not preload agent skills.
-- Claude subagent (spawned via Agent tool): receives its own agent definition's `skills:` frontmatter. The PM spawn prompt should still name required skills explicitly as a fallback.
-- Claude `Skill(...) Successfully loaded` output is instruction-loading evidence only. It does NOT prove that a workflow step ran, files were created, or verification passed. Init workflows require the explicit gate/scan report and target-path verification before any substantive target-repository work. If the transcript shows only a `Skill(...)` load line without the structured output block from that skill, the step is INCOMPLETE — execute the skill's documented steps now.
-- For `repo-init-gate`, the next observable action after the skill load must be a shallow read of target-root `best-copilot.md` and a `## Repo Init Gate` output block. A transcript that shows `Skill(...repo-init-gate...) Successfully loaded` followed by `Searched`, source `Read`, code intelligence, project-structure exploration, planning, or specialist dispatch before that output block is a hard protocol violation. Recovery is to stop using the premature source context and run `repo-init-gate` inline immediately.
-- For init in shell-capable Claude Code, prefer the resolved `repo-init-gate/scripts/run-preflight.sh <target-root> claude` helper when discoverable from `CLAUDE_SKILL_DIR` or the active plugin directory. It emits the gate result, skips scan on a current frontmatter version, and directly delegates to `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` after a failed gate. For `repo-init-scan`, the next observable action after the skill load must be that resolved bootstrap helper when shell access exists and the helper path is discoverable. If the helper cannot be located, shell execution is blocked, or file tools are the only reliable path, the valid fallback is creating/repairing and verifying the full 17-path Claude-compatible artifact set from `repo-init-scan`; a two-file or four-file scaffold is invalid. If neither shell nor file verification is available, return `BLOCKED tool_execution_unavailable`. Otherwise run staged init work (`repo-init-official` then `repo-init-manual-fallback`) or a `BLOCKED` init report, followed by `## Init Summary`. Source search/read, code intelligence, planning, hand-written shortened scaffolds, or specialist dispatch before that summary is the same hard protocol violation.
-- Init success must not be synthesized. If the runtime cannot actually read/write target files or verify paths on disk, return `BLOCKED tool_execution_unavailable`. A prose-only `## Init Summary` without the required yes/no fields and verified paths is invalid; a partial `verified_paths` list is also invalid unless `missing_paths` is reported and `required_artifacts_verified` / `next_task_ready` are both `no`. The exact required path list lives in `repo-init-scan`; similar paths such as `memory/current-state.md` do not count.
-- Copilot CLI: body refs are not a mechanical preload — include minimal checklist in packet or return `NEEDS_CONTEXT missing_required_skill`.
-- `senior-project-expert` exists as a skill only to catch runtimes that resolve the Senior Project Expert request through the skill path. It must not bypass this contract, `senior-project-expert-workflow`, or the repo init preflight.
-
-## Init And Fact Capture
-
-- Fail closed when repo facts or first-use scaffolds are missing. Allowed work: official init, bounded fact capture, target bootstrap only.
-- Direct user-invoked best-copilot agents that analyze, plan, review, verify, or implement target-repository code start with an init preflight before classification, broad search, generic Explore workers, planning, dispatch, or implementation unless a PM dispatch packet already carries current `INIT_GATE` / `INIT_SCAN` evidence.
-- The init preflight always invokes `repo-init-gate` or its mechanical preflight helper and reads only the target root `best-copilot.md` on the fast path. A matching current sentinel is the only normal reason to skip `repo-init-scan`.
-- Invoke `repo-init-scan` or the scan bootstrap helper when the gate reports `needs_init`, `version_mismatch`, or `invalid_sentinel`, or when explicit reinitialization/repair is requested. Continue only after the preflight/scan path reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`; otherwise return its blocker.
-- `repo-init-scan` success is never inferred from skill loading, official init chat output, or analysis text. It requires a verified `.github/instructions/project.instructions.md`, required scaffolds, and the current `best-copilot.md` sentinel on disk.
-- Never create a narrative `best-copilot.md` such as a project summary or "Best Copilot Sentinel" note. Writers must use the canonical three-line version frontmatter from `repo-init-gate`. Readers use only the frontmatter version for the repeat-request fast path, so a current version skips scan unless the user explicitly requests repair/reinitialization.
-- If a runtime cannot invoke the gate skill mechanically, perform the gate's documented shallow sentinel read exactly, report `HARNESS_DEGRADED skill_invocation_unavailable`, and then apply the same scan-or-skip decision.
-- Required project fact file: target `.github/instructions/project.instructions.md` with build/test/check/dev, runtime/framework, entrypoint, and module-boundary facts or bounded-scan `unknown`.
-- Use the active runtime's official initializer when available. In shell-capable runtimes, the official helper runs from the target root and first invokes a target-local `init` skill when one is discoverable and mechanically invokable (`skills/init/SKILL.md`, plus `.claude/skills/init/SKILL.md` for Claude Code; for Copilot, target root also needs `plugin.json`). If that does not write a recognized artifact, Copilot falls back to `copilot init`, while Claude Code falls back to the native `/init` command shown as "Initialize a new CLAUDE.md file with codebase documentation" through `claude --bare --permission-mode acceptEdits -p "/init"`. The bare runtime `/init` command and Copilot `copilot init` command are distinct from best-copilot plugin skills such as `/repo-init-official` or `/best-copilot:repo-init-official`. Normalize official output into the project facts file. Command output without a verified project facts file, Claude-native `CLAUDE.md`, Copilot `.github/copilot-instructions.md`, or another recognized init artifact is `official_init_no_write`, not success.
-- Once facts are sufficient, do not rerun init. Create missing target-local scaffolds (`target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap`) when persistent recovery is needed. For Claude Code, create or verify a project `CLAUDE.md`.
-- Store instructions, memory, and spec in the target repository, never in the plugin package/cache. Mark unknowns explicitly.
-- If required target paths cannot be verified, return `BLOCKED first_use_gate_incomplete`.
-- For Claude Code target use, prefer target `.claude/settings.json` with `"agent": "senior-project-expert"` and `"worktree": {"baseRef": "head"}` when safe to write. `baseRef: "head"` keeps isolated subagents aligned with the current branch HEAD instead of silently starting from the default branch.
-
-## Spec Bundle Contract
-
-- For MEDIUM/LARGE target-repository work, the authoritative persistent spec is a directory containing `requirements.md`, `design.md`, and `tasks.md`.
-- Single-file SDD, design, or implementation-plan markdown files are evidence only. They must be split into the three-file Spec Bundle before implementation planning or execution.
-- `spec/INDEX.md` should point at the Spec Bundle directory, not at a single design note, for active MEDIUM/LARGE work.
-- When shell access is available, use `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` as a cheap structure check before claiming `SPEC_BUNDLE_READY`.
+- Target-repository work starts with `repo-init-gate`; read only target-root `best-copilot.md` on the fast path.
+- A current frontmatter `version` sentinel means `INIT_SCAN=SKIP_SENTINEL_READY`.
+- Missing, invalid, unreadable, or stale sentinel requires `repo-init-scan` or its bootstrap helper.
+- Continue only after `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
+- `Skill(...) Successfully loaded` is instruction-loading evidence only. It never proves the gate ran, files were created, or verification passed.
 
 ## Work Modes
 
-Classify every task before broad context loading:
+- `micro`: tiny edit/check; no public contract, auth, dependency, release, schema, frontend, or cross-module risk.
+- `standard`: bounded file set or one owner surface.
+- `full`: ambiguous, cross-module, public API/message/schema/auth/dependency/CI/release surface, frontend experience, or multi-agent execution.
 
-- `micro`: tiny edit/check; no public contract, security, dependency, release, or cross-module risk. Direct execution.
-- `standard`: bounded file set or one owner surface. Lean packet, focused review.
-- `full`: ambiguous, cross-module, public API/message/schema/auth/dependency/CI/release surface, frontend experience, or multi-agent execution. Planning, design-review, and fan-in gates.
+`task_type`: `implementation | design_review | verification | fix | spec`.
 
-`task_type` tracks behavior separately from size: `implementation` (write/update), `design_review` (assess without implementing), `verification` (review risk, confirm merge readiness), `fix` (bounded repair), `spec` (requirements, design, tasks, ADRs — no production code).
+## PM Flow
 
-For non-explicit requests, check `outcome`, `target`, and `constraints`. Ask natively only when a missing answer changes the route.
+1. Pass init/fact preflight.
+2. Classify work mode and task type before broad context loading.
+3. Freeze the six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, `output_contract`.
+4. For full or ambiguous work, dispatch Technical Architect for SDD design and self-review, then dispatch Developer, QA, and security/frontend lanes when applicable.
+5. For MEDIUM/LARGE work, require a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`; single-file SDD/design/plan notes are evidence only.
+6. Execute through `subagent-driven-development` or `executing-plans`.
+7. Each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, and verification before closure.
+8. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
+9. Invoke `verification-before-completion` and native continuation/closeout UI when available.
 
-## Claude Background And Worktree Policy
+## State Sync
 
-- PM/coordinator chooses foreground versus background at dispatch time. Do not rely on Claude agent frontmatter to force background execution for roles that may edit files, run permission-gated commands, or ask blocking questions.
-- Background lanes are limited to independent research, planning, or read-only review when required permissions are already granted or no prompt is expected. If a background lane reports permission denial, retry that lane foreground or return the blocker to PM.
-- Implementation, fix, spec/memory writes, and verification that may need new tool approval run foreground by default.
-- For isolated implementation in Claude Code, PM records `workspace_path`, `branch_state`, `dirty_status`, `worktree_policy`, `isolation_status`, and non-overlapping `write_set` in the dispatch packet.
-- Any specialist that changes files in an isolated worktree must return `worktree_path`, `branch_name`, `changed_files`, `commits`, `verification_result`, and `merge_or_keep_note`.
-- PM must not claim isolated worktree changes have landed in the parent checkout until `development-branch-closeout` or an equivalent native keep / merge / PR / discard decision has completed.
+For persistent work, chat-only progress is invalid. Load `references/state-persistence.md` when any of these happen:
 
-## Search Discipline
+- a task becomes `DONE`, `DONE_WITH_CONCERNS`, `BLOCKED`, `NEEDS_CONTEXT`, or `NEEDS_USER_INPUT`
+- verification result changes
+- a plan batch starts, pauses, resumes, or closes
+- memory/spec recovery would be needed in a future session
+- an evolution signal is accepted, rejected, or deferred
 
-- Start from explicit user paths, changed files, frozen `files_involved`, and repository indexes before content search.
-- For structural code discovery, choose the cheapest available path in order: `code_intelligence_status: gitnexus` -> GitNexus MCP; `code_intelligence_status: codegraph` -> CodeGraph MCP; `code_intelligence_status: unavailable` -> built-in Read/Grep/Glob plus shell `rg`. In Claude Code TypeScript/JavaScript work, also use `typescript_lsp_status: available` tools or diagnostics for definition/reference/type-error checks before grep fallback. Do not call tools absent from the current inventory.
-- Prefer filename/glob and fixed-string `rg -F` for class names, methods, routes, config keys, and copied errors.
-- Use regex only when genuinely vague or prior exact searches failed; record the reason in `search_hints`.
-- Avoid repo-wide regex; scope to the smallest directory; stop after two searches with no new signal.
-- Before editing a code file, gather read-before-write evidence: its public surface/exports, the immediate caller/callee path, and any obvious shared utility or existing local pattern. Skip only for documentation-only edits where no code behavior changes.
-- Before designing with concurrency, unfamiliar patterns, or infrastructure, search for runtime/framework built-ins first (tried-and-true → new-and-popular → first-principles; Layer 3 is highest priority).
+Required writeback for MEDIUM/LARGE active work:
 
-## Default Flow
+- update the active `tasks.md` progress ledger or per-task status block
+- update `memories/repo/current-workstreams.md`
+- update `memories/repo/INDEX.md` when any memory file changes
+- update `spec/INDEX.md` when spec status, linked memory, or closure changes
 
-1. Pass init/fact preflight for target-repository work (`repo-init-gate` → `repo-init-scan` only when that gate fails).
-2. Parse intent, success criteria, scope, non-goals, assumptions, tradeoffs, simpler option considered, acceptance checks, verification budget, context budget, and stop conditions without PM-owned broad business-source exploration for `standard` or `full` work.
-3. For large ambiguous work, PM dispatches Technical Architect for SDD design brainstorming and self-review/fix, then dispatches Developer, Quality Assurance Expert, and (when applicable) Security Reviewer **in parallel** for second-pass design review. Include Security Reviewer when the plan touches auth, token, key, secret, permission, dependency, release, or external-service surfaces; include Frontend Designer when the plan affects user-visible frontend behavior. The Technical Architect lane owns the first broad business-code inspection for auth/protocol/schema/dependency work.
-4. Use `writing-plans` for reviewed direction; for MEDIUM/LARGE work, the persistent result is `spec/<feature>/tasks.md` inside the Spec Bundle. Require parallel-ready tasks with dependencies, owner lanes, reviewer lanes, write sets, and verification.
-5. Before risky implementation, run `spec-review-gauntlet` or `structured-review` design-review mode.
-6. Execute through the right specialist (`subagent-driven-development` or `executing-plans` for multi-step plans).
-7. Each implementation task needs evidence, cross-review by a non-author lane, spec compliance review, code-quality review, and verification before closure.
-8. Fan in changed files, completed tasks, verification evidence, review findings, and next resume action.
-9. Before ending the turn, invoke `verification-before-completion` and use native closeout/continuation UI when available.
-10. Evolve only from verified signals: repeated failures, user corrections, stale triggers, or recurring workflow friction.
+Do not proceed to the next ready task or final closeout if required state files were writable but not updated. If writeback is impossible, return `BLOCKED state_sync_unavailable` or `DONE_WITH_CONCERNS state_sync_blocked` with exact missing paths.
 
-## Role Workflow Skills
+## Specialist Handback
 
-Each runtime adapter must load this shared contract and its matching role workflow skill. Keep role-specific boundaries out of this file so one role can evolve without weakening another.
+Delegated specialists return one structured handback:
 
-| Role | Workflow skill |
-| --- | --- |
-| Senior Project Expert | `senior-project-expert-workflow` |
-| Specification Writer | `specification-writer-workflow` |
-| Technical Architect | `technical-architect-workflow` |
-| Developer | `developer-workflow` |
-| Frontend Designer | `frontend-designer-workflow` |
-| Quality Assurance Expert | `quality-assurance-workflow` |
-| Security Reviewer | `security-reviewer-workflow` |
-| Root Cause Fixer | `root-cause-fixer-workflow` |
+- `task_id`
+- `current_stage`
+- `status`: `DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_USER_INPUT | BLOCKED`
+- `summary`
+- `artifacts`
+- `risks`
+- `uncovered_items`
+- `recommended_next_stage`
 
-Role workflow skills own boundaries, routing rules, role-local verification, and role-local output requirements. This skill owns only cross-role contracts. For PM routing decisions and specialist lane assignments, see `senior-project-expert-workflow`.
+When `status=NEEDS_CONTEXT`, include `clarification_request` and `pm_action: "pm_clarify"`. Include `search_path_used` when repository exploration was needed.
 
-## PM Dispatch Packet
+## Ask Boundary
 
-Every delegated task is a six-block packet:
+- Specialists never ask users directly. Missing context returns `NEEDS_CONTEXT`; missing human input returns `NEEDS_USER_INPUT` to PM.
+- Only top-level session or PM/coordinator may use native ask for blocking clarification, route choice, execution approval, specialist handback, continuation, or closeout.
+- If native ask exists, do not end a turn with a prose-only summary. If unavailable and a human choice is required, return `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui`.
 
-1. `task_intent`: goal, user paths, intent summary, expected outcome, task_type, work_mode
-2. `frozen_scope`: scope, non-goals, files involved, changed files, priority/already-read files, dependencies
-3. `fact_packet`: authoritative repo facts, provenance refs, reference files
-4. `execution_contract`: `assumptions`, `tradeoffs`, `simpler_option_considered`, constraints, acceptance checks, verification/search/context budgets, stop conditions, forbidden approaches, `read_before_write_targets` before edits or `read_before_write_evidence` after edits
-5. `review_state`: followup scope, verified items, review lanes, ready artifacts
-6. `output_contract`: required skills, role checklist fallback, required artifacts, next stage
+## Search And Edits
 
-Plan execution packets also include `plan_revision`, `execution_confirmed`, `task_id`, full task text. Older prompt keys normalize as: `TASK` → `task_intent.goal`, `EXPECTED OUTCOME` → `task_intent.expected_outcome`, `REQUIRED TOOLS` → `output_contract.required_skills`, `MUST DO` → `execution_contract.constraints`, `MUST NOT DO` → `execution_contract.forbidden_approaches`, `CONTEXT` → frozen_scope + fact_packet + review_state fields.
-
-### Specialist Ask Boundary
-
-Canonical definition — all other files must reference this, not restate it.
-
-- Specialists must not ask the user directly. Forbidden tools: `Asking user`, `vscode_askQuestions`, `vscode/askQuestions`, `askQuestions`, or any equivalent mechanism.
-- Your human partner is PM/coordinator, not the end user. Missing context → `NEEDS_CONTEXT`. Missing human input → `NEEDS_USER_INPUT` to PM/coordinator with `question`, `why_blocking`, `options`, `safe_default`, `resume_prompt_for_pm`.
-- If PM/coordinator is absent → `BLOCKED` or `DONE_WITH_CONCERNS` with `missing_top_level_question` and the exact question for the top-level session.
-- Prose-only questions ("Should I continue?", "Reply A/B/C") do not satisfy this boundary.
-
-### Native Ask Contract
-
-Canonical definition — runtime-specific tool names live only in the Runtime Adapters table and Copilot adapter frontmatter.
-
-- Only top-level session or PM/coordinator may use native ask. Covers: blocking clarification, route choice, execution approval, specialist handback, continuation, closeout.
-- Every native ask must allow free-form answer. Fixed-choice-only UI must include `Custom answer` followed by free-form follow-up.
-- Do not end a turn with prose-only summary when native ask is available.
-- If unavailable and a human choice is required → `BLOCKED missing_native_ask_ui` or `DONE_WITH_CONCERNS missing_native_ask_ui` with question, options, safe default, resume state.
-- Re-check availability from current tool inventory each turn. Enforced from instruction text alone — no plugin hooks or scripts.
-
-#### Claude Code `AskUserQuestion` Shape
-
-- In Claude Code, the concrete native ask action is an `AskUserQuestion` tool call. A prose sentence such as "continue with frontend/tests, or run E2E first?" is invalid when `AskUserQuestion` is available.
-- Use a `questions` array. Each item has `header` (12 characters or fewer), `question`, `options` with 2-4 `{label, description}` choices, and `multiSelect: false` unless multi-select is explicitly needed.
-- Prefer one question per call. Put the recommended or safest default first and mark it in the label only when it is genuinely recommended, for example `Run E2E first (Recommended)`.
-- Preserve a custom free-form path. Claude Code's built-in UI may provide an `Other`/custom text answer; if the active integration exposes only fixed choices, include `Custom answer` and then ask a native follow-up before deciding.
-- Treat any selected option label or custom text answer as the new user instruction. If the tool is absent, disabled, or fails, report the Native Ask Contract fallback instead of replacing the popup with prose.
-
-#### PM Trigger Guidance
-
-Extends the Native Ask Contract for PM/coordinator:
-
-- PM/coordinator must use native ask for every blocking clarification, route selection, execution approval, specialist `NEEDS_USER_INPUT` handback, continuation, and closeout — from any skill (brainstorming, review, verification, workspace isolation, branch closeout, etc.).
-- Frontmatter ask-tool declarations are an availability signal: attempt concrete native ask before prose fallback.
-- If the PM/coordinator writes a message that asks the user to choose between next actions, that message is itself a native ask trigger. The choice must be expressed through the runtime's native ask UI, not as a final prose question.
-- See Runtime Adapters table for runtime-specific tool names.
-
-### Specialist Handback
-
-Canonical schema — all other files must reference this, not restate the field list.
-
-Delegated specialists return one structured handback with these **owner-controlled vocabulary** fields:
-
-- `task_id`, `current_stage`, `status` (`DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_USER_INPUT | BLOCKED`), `summary`, `artifacts`, `risks`, `uncovered_items`, `recommended_next_stage`
-
-When `status=NEEDS_CONTEXT`, also require `clarification_request` and `pm_action: "pm_clarify"`. `pm_action` is a PM/coordinator routing field; current allowed value: `pm_clarify` (repair packet before redispatch).
-
-Role workflows may extend only `artifacts`. Include `search_path_used` when the task required repository exploration, with values such as `gitnexus`, `codegraph`, `read_grep_glob_rg`, or `not_needed`. Do not rename shared fields or create parallel aliases.
-
-### Fan-In Arbitration
-
-PM/coordinator adjudicates fan-in priority order:
-
-1. `BLOCKED`, `NEEDS_USER_INPUT`, invalid handback, or repeated `NEEDS_CONTEXT`.
-2. Security, privacy, data-loss, auth, dependency, release, or destructive-action risk.
-3. Failed/missing verification or unproven completion claims.
-4. Spec mismatch, scope expansion, overlapping write sets.
-5. Code quality, maintainability, performance, UX, accessibility, or test sufficiency.
-6. Non-blocking concerns and follow-up notes.
-
-When reviewers disagree, PM records `decision_provenance` (evidence, blocking status, next stage, residual risk). No fan-out or closeout from unadjudicated conflicts.
-
-### Cross-Review Lanes
-
-- Developer code → Technical Architect review. Technical Architect code → Developer review.
-- Frontend code by Developer/Technical Architect → Frontend Designer review. Frontend Designer code → Technical Architect review.
-- QA owns final merge-readiness after required peer lanes. Security Reviewer required for security-sensitive surfaces.
+- Start from explicit paths, changed files, frozen packet files, `spec/INDEX.md`, and `memories/repo/INDEX.md`.
+- Prefer GitNexus when present, else CodeGraph, else built-in Read/Grep/Glob plus shell `rg`.
+- For TypeScript/JavaScript in Claude Code, use exposed `typescript-lsp@claude-plugins-official` tools/diagnostics when actually available.
+- Before code edits, read the changed file surface, immediate caller/callee, and obvious local utilities or patterns.
+- Keep diffs surgical; every changed line must trace to user intent, acceptance checks, or verification repair.
 
 ## Review And Verification
 
-- Evidence beats claims. "Done", "passed", and "verified" require command/static/browser evidence or a stated blocker. Findings are ordered by severity and grounded in files, diffs, specs, commands, browser evidence, or official docs.
+- Evidence beats claims. "Done", "passed", and "verified" require command/static/browser evidence or an explicit blocker.
 - Public APIs, schemas, auth, dependencies, CI/CD, and release surfaces need blast-radius assessment.
-- New behavior and bug fixes should add tests or minimal reproducible checks when practical. Frontend changes need browser evidence when runtime permits.
-- Do not store secrets, tokens, credentials, PII, raw long logs, internal hosts, or sensitive paths in instructions, memory, specs, or task logs.
-- Once a plan is approved, execute ready tasks through the checkpointed plan loop without pausing after every successful task. Each checkpoint records done/verified/left state for PM fan-in. Respect explicit plan checkpoints and stop on `BLOCKED`, `NEEDS_USER_INPUT`, failed verification, review blockers, dependency conflicts, or checkpoint stop conditions.
-
-### Red Flags (Anti-Rationalization)
-
-Before claiming work is done, check these common rationalizations:
-
-| Excuse | Rebuttal |
-|--------|----------|
-| "I'll add tests later" | Tests are part of the task, not a follow-up. |
-| "It works on my machine" | Show the verification command and its output. |
-| "This is a minor change" | Minor changes still need scoped verification evidence. |
-| "The spec says it's fine" | Quote the exact spec line. Do not paraphrase. |
-
-## Memory And Spec
-
-- Spec: authoritative for requirements, design, tasks, acceptance checks.
-- Memory: recovery index — current focus, decisions, last verification, next action.
-- MEDIUM/LARGE work links spec ↔ memory both ways. EvolutionEvents need signal, target, mutation, validation, rollback, status.
+- New behavior and bug fixes should add tests or a minimal reproducible check when practical.
+- Do not store secrets, tokens, credentials, PII, raw long logs, internal hosts, or sensitive paths in instructions, memory, specs, or logs.
 
 ## Output
 
-Be concise: current stage, completed actions, verification evidence, ownership boundaries, residual risk, next step. Do not dump internal packets.
+Be concise: current stage, completed actions, verification evidence, state sync evidence, ownership boundaries, residual risk, and next step. Do not dump internal packets.

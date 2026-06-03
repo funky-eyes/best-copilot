@@ -99,3 +99,4 @@ For Claude Code distribution, users should add the marketplace with `/plugin mar
 - Installable memory and spec templates live in `target-memory-bootstrap` and `target-spec-bootstrap`.
 - Target repositories that need persistent recovery should create their own `memories/repo/INDEX.md`, `current-workstreams.md`, and `spec/INDEX.md`.
 - Target memory records stable preferences, current state, verified decisions, and recovery entries only. It does not store chat transcripts, long logs, secrets, PII, or unverified guesses.
+- Persistent MEDIUM/LARGE execution must record task progress durably: `tasks.md` gets a progress ledger or per-task status, `memories/repo/current-workstreams.md` gets the active recovery entry, and indexes are updated when their rows change. Chat-only progress is not resumable state.
