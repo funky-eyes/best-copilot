@@ -14,6 +14,7 @@ description: "Use when requirements or spec are clear and the implementation sho
 5. Simplify recently touched code when it preserves behavior: reduce unnecessary nesting, remove redundant branches, improve names, and align with local style.
 6. Add or update focused tests when behavior changes.
 7. Verify with the smallest sufficient command or static evidence.
+8. For persistent task/spec work, update `tasks.md` status and `memories/repo/current-workstreams.md` before reporting completion.
 
 ## Guardrails
 
@@ -22,7 +23,8 @@ description: "Use when requirements or spec are clear and the implementation sho
 - Do not simplify by changing behavior, public contracts, error semantics, or observability.
 - Public contracts, auth, data, dependencies, CI, and runtime config require blast radius assessment.
 - Customization files require frontmatter/schema and residual-reference checks.
+- Chat-only progress is invalid for persistent MEDIUM/LARGE work.
 
 ## Output
 
-Return changed files, behavior summary, verification evidence, and residual risk.
+Return changed files, behavior summary, verification evidence, state-sync evidence when applicable, and residual risk.

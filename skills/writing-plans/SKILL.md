@@ -12,7 +12,7 @@ Use this skill to turn a confirmed direction or spec into executable work.
 - For MEDIUM/LARGE target-repository work, implementation planning consumes a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`.
 - A standalone `# Implementation Plan: <topic>` is a transient planning view only. It may be used in chat or as review evidence, but it must not replace `spec/<feature>/tasks.md` and must not be recorded as the active spec in `spec/INDEX.md`.
 - If a confirmed direction exists only as a single SDD/design/plan file, stop and route to Specification Writer to split it into the three-file Spec Bundle before implementation execution.
-- Before implementation starts, verify `tasks.md` exists and maps each task to requirement/design IDs. When shell access is available, run the Spec Bundle validator from `target-spec-bootstrap`.
+- Before implementation starts, verify `tasks.md` exists, maps each task to requirement/design IDs, and includes a `## Progress Ledger` or equivalent per-task status blocks. When shell access is available, run the Spec Bundle validator from `target-spec-bootstrap`.
 
 ## Plan Shape
 
@@ -22,6 +22,7 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 - **frozen_scope**: `requirement_refs`, `design_refs`, `non_goals`, `files_involved`, `write_set`, `dependencies`, `owner_lane`, `reviewer_lanes`, `parallel_group`, `parallel_ready`
 - **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check`, `verification_command`, `stop_conditions`, `context_budget`, `read_before_write_targets`
 - **output_contract**: `ready_artifacts`, `implementation_steps`
+- **state_sync**: required `tasks.md` progress ledger/status update, `current-workstreams.md` update, and index updates when rows change
 
 ## Decomposition Rules
 
@@ -34,6 +35,7 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 - Prefer parallel groups that let Technical Architect and Developer work independently; add Frontend Designer as owner or reviewer for frontend surfaces.
 - Assign cross-review lanes per the Cross-Review Lanes from `core-workflow-contract`.
 - Give each task a small `ready_artifacts` list so fan-in can check outputs without rereading the whole conversation.
+- Include a `Progress Ledger` in persistent `tasks.md`; task status and verification changes must be durable before the next task starts.
 - Include material assumptions, meaningful tradeoffs, and the simplest viable option for each task or batch; if an unresolved question changes implementation or acceptance, mark it as a blocker instead of planning from a guess.
 - Include `read_before_write_targets` for code-editing tasks: target file public surface/exports, immediate caller/callee, and obvious shared utility or local pattern to inspect.
 - Include `stop_conditions` for tasks that might otherwise expand into broad discovery.
@@ -60,6 +62,11 @@ Use this output for a transient planning summary or for the content of `spec/<fe
 - owner_lanes:
 - reviewer_lanes:
 - verification_plan:
+
+## Progress Ledger
+
+| Task ID | Status | Owner | Reviewer | Last updated | Verification | Evidence | Next action | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ## Tasks
 ### Task 1: ...

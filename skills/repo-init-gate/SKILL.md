@@ -34,11 +34,11 @@ Canonical `best-copilot.md` content written by init:
 
 ```md
 ---
-version: "0.6.0"
+version: "0.6.1"
 ---
 ```
 
-- Current YAML frontmatter `version: "0.6.0"`: `ready` + `skip_repo_init_scan`.
+- Current YAML frontmatter `version: "0.6.1"`: `ready` + `skip_repo_init_scan`.
 - Missing, unreadable, invalid frontmatter, missing version, or version mismatch: report the corresponding gate result and run `repo-init-scan`.
 - Extra content after a current frontmatter block is not a reason to run scan on repeat requests. Writers should still keep the canonical three-line sentinel when creating or repairing the file.
 - Explicit reinitialize/repair requests bypass this gate and run `repo-init-scan`.

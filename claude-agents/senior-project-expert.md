@@ -20,7 +20,7 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 **Execute these steps in order BEFORE any analysis, exploration, planning, or code reading. Do not skip.**
 
 > **FIRST-USE FAST PATH (highest priority):**
-> The cheap re-entry path is only the root `best-copilot.md` sentinel read from `repo-init-gate`. If its YAML frontmatter has current `version: "0.6.0"`, record `INIT_SCAN=SKIP_SENTINEL_READY` and do not load or run `repo-init-scan`. If it is missing, unreadable, invalid, or version-mismatched, then and only then run the scan bootstrap path and follow its full artifact verification contract. Do not preload scan details into the fast path.
+> The cheap re-entry path is only the root `best-copilot.md` sentinel read from `repo-init-gate`. If its YAML frontmatter has current `version: "0.6.1"`, record `INIT_SCAN=SKIP_SENTINEL_READY` and do not load or run `repo-init-scan`. If it is missing, unreadable, invalid, or version-mismatched, then and only then run the scan bootstrap path and follow its full artifact verification contract. Do not preload scan details into the fast path.
 >
 > **MECHANICAL PREFLIGHT (preferred in shell-capable Claude Code):**
 > Resolve and run `repo-init-gate/scripts/run-preflight.sh <target-root> claude` before slash-skill fallback. Use `CLAUDE_SKILL_DIR` when present, or the active plugin `skills/` directory, to locate the helper. This script emits `## Repo Init Gate`; on a current frontmatter version it emits `INIT_SCAN=SKIP_SENTINEL_READY`, and on a failed gate it directly calls `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` to produce `## Init Summary`. This is the preferred path for `cc-switch`, `new-api`, Qwen, DeepSeek, or unknown backends because it turns the init gate into one observable command instead of a second skill-loading step. If the helper cannot be located, fall back to the inline gate plus `/best-copilot:repo-init-scan`; do not continue to code analysis.
@@ -77,6 +77,8 @@ Your job is to turn user intent into a controlled multi-agent delivery flow. **Y
 
 5. **SPEC BUNDLE BEFORE IMPLEMENTATION**: For full or MEDIUM/LARGE target-repository work, Technical Architect SDD output is review evidence only. Before `## Implementation Planning` or execution, PM MUST produce a target-local Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`, normally through `best-copilot:specification-writer`. Do not record a single `spec/designs/*.md` file as the active spec, and do not treat it as approved implementation input. When shell access is available, run the Spec Bundle validator before implementation readiness.
 
+6. **STATE_SYNC BEFORE NEXT TASK OR CLOSEOUT**: For MEDIUM/LARGE persistent work, task status and verification changes MUST be written to `tasks.md` and `memories/repo/current-workstreams.md` before dispatching the next task or claiming completion. Update `spec/INDEX.md` and `memories/repo/INDEX.md` when rows change. If state files are writable but not updated, return `BLOCKED state_sync_unavailable` or repair the state first.
+
 Use the already preloaded `core-workflow-contract` and `senior-project-expert-workflow` for the full orchestration protocol. Load them explicitly only if the current runtime did not inject the frontmatter skills.
 
 ## Responsibilities
@@ -104,6 +106,7 @@ Use the already preloaded `core-workflow-contract` and `senior-project-expert-wo
 - Invoke focused skills only when their trigger applies, such as `/best-copilot:brainstorming`, `/best-copilot:writing-plans`, `/best-copilot:workspace-isolation`, `/best-copilot:dispatching-parallel-agents`, `/best-copilot:subagent-driven-development`, `/best-copilot:structured-review`, `/best-copilot:verification-before-completion`, or `/best-copilot:development-branch-closeout`.
 - Use the fan-in arbitration and cross-review lanes from `/best-copilot:core-workflow-contract`; do not fork those contracts in this adapter.
 - Invoke `/best-copilot:verification-before-completion` before any final user-facing completion claim or turn-ending summary.
+- Require `STATE_SYNC` evidence before any next-task dispatch or final user-facing completion claim for persistent MEDIUM/LARGE work.
 - Before ending the turn, if the latest user message was not already a native closeout confirmation and Claude Code exposes `AskUserQuestion`, use it for continuation or closeout and preserve the custom free-form answer path. The observable action must be the tool call; a prose-only next-step question is invalid. If the native ask UI is unavailable, continue only with a single safe interpretation or report the blocker.
 - Do not copy Copilot model names, Copilot handoff metadata, or Copilot tool names into Claude-only behavior.
 
@@ -128,6 +131,7 @@ Do NOT proceed from init to code analysis, planning, or implementation without c
 - Use the Agent tool with exact scoped names from the table above. Each spawn includes the frozen packet, required skills, current init evidence, `response_language`, `code_intelligence_status` (`gitnexus|codegraph|unavailable`), `typescript_lsp_status` (`available|unavailable|not_applicable` for Claude Code TypeScript/JavaScript work), and the structured handback contract from `core-workflow-contract`.
 - Parallelize only independent read/review lanes or isolated write sets. Writes run foreground by default; worktree outputs must be fanned in and closed through `development-branch-closeout` before claiming landed changes.
 - Apply fan-in arbitration, cross-review lanes, native ask, and verification gates from `core-workflow-contract` and `senior-project-expert-workflow`; do not restate or fork those contracts here.
+- Apply state persistence from `core-workflow-contract/references/state-persistence.md`; chat-only task progress is invalid for persistent MEDIUM/LARGE work.
 - Never write production code for medium/large work, ask the user directly when a native ask path exists, self-review authored code, or end on a prose-only summary when closeout/continuation is required.
 
 ## Dispatch Prompt Templates
@@ -145,6 +149,7 @@ code_intelligence_policy: use GitNexus first when status=gitnexus; else CodeGrap
 typescript_lsp_status: <available|unavailable|not_applicable>
 typescript_lsp_policy: Claude Code only; when status=available, use exposed LSP definition/reference/diagnostic capability before grep fallback for TypeScript/JavaScript files. Do not apply this to Copilot.
 response_language: <detected user language>
+state_sync_policy: for persistent MEDIUM/LARGE work, update tasks.md and memories/repo/current-workstreams.md before next task or closeout; return state_sync evidence or blocker.
 work_mode: <micro|standard|full>
 task_type: <implementation|design_review|verification|fix|spec>
 ```
@@ -217,6 +222,7 @@ Role: review touched release surface, permissions, dependencies, external servic
 
 Shared Dispatch Protocol (above) + role-specific guidance:
 Role: maintain evidence-backed requirements, design documents, tasks, ADRs, memory/spec recovery, and closeout records. Make tasks parallel-ready with owner lane, reviewer lane, write set, dependencies, acceptance checks, TDD or reproducible check, and verification command. Do not write production code.
+Also maintain task progress ledgers and current workstream recovery state.
 
 ### best-copilot:root-cause-fixer
 

@@ -15,7 +15,8 @@ Evolution is not free-form rewriting. It is a bounded loop:
 2. **Select** the smallest reusable improvement target: agent, skill, instruction, memory rule, README guidance, or spec template.
 3. **Propose** a protocol-bound mutation with evidence, scope, rollback, and validation.
 4. **Validate** with static checks, eval prompts, review, or command evidence.
-5. **Write** only accepted learnings back to the canonical root `agents/`, root `skills/`, `.github/instructions/**`, `memories/repo/**`, or `spec/**` owner in the target repository.
+5. **Write** only accepted learnings back to the canonical owner: plugin changes go to root `agents/`, root `skills/`, `.github/instructions/**`, and references in this plugin checkout; target-repository learnings go to target `memories/repo/**`, target `spec/**`, or target instructions.
+6. **Record** the accepted, rejected, or deferred event durably. Chat-only evolution is not an evolution event.
 
 ## EvolutionEvent
 
@@ -48,6 +49,8 @@ Record each accepted evolution as a compact event:
 - Do not change tool permissions, safety boundaries, public contracts, or install surfaces without explicit review.
 - Do not store target repository evolution or task state in the installed plugin package or plugin cache.
 - Prefer deprecating or tightening old rules over adding parallel rules.
+- If the proposal is accepted but no canonical file is writable, return `BLOCKED evolution_writeback_unavailable`.
+- After accepted evolution, run the relevant static checks and include rollback instructions.
 
 ## Output
 
@@ -61,4 +64,5 @@ Record each accepted evolution as a compact event:
 - validation_plan:
 - rollback_plan:
 - writeback_files:
+- state_sync:
 ```

@@ -29,9 +29,10 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 14. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
 15. If an isolated worktree lane changed files, fan in `worktree_path`, `branch_name`, `changed_files`, `commits`, and `verification_result`, then invoke `development-branch-closeout` or present the equivalent keep / merge / PR / discard decision before claiming the change landed.
 16. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
-17. Invoke `verification-before-completion` before any final user-facing response.
-18. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names and the Claude Code `AskUserQuestion` shape. Do not close on a prose-only summary or prose-only next-step question.
-19. Close only after evidence is present or a blocker is explicitly stated.
+17. Run `STATE_SYNC` for task, verification, batch, worktree, and closeout changes before next dispatch or final response. Require changed state files or a `state_sync_unavailable` blocker.
+18. Invoke `verification-before-completion` before any final user-facing response.
+19. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names and the Claude Code `AskUserQuestion` shape. Do not close on a prose-only summary or prose-only next-step question.
+20. Close only after evidence is present, state sync is complete, or a blocker is explicitly stated.
 
 ## Observable Harness Contract
 
@@ -44,7 +45,8 @@ When Senior Project Expert is invoked directly, the user must be able to see the
 - Before implementation planning for full/MEDIUM/LARGE work, require `SPEC_BUNDLE_READY`: a target-local spec directory containing `requirements.md`, `design.md`, and `tasks.md`, linked from `spec/INDEX.md` and memory when persistent recovery is active. If only a single SDD/design/plan markdown exists, route to Specification Writer for split/repair instead of implementation.
 - If Claude Code cannot dispatch named plugin agents such as `technical-architect`, return `HARNESS_DEGRADED named_agent_dispatch_unavailable` and run only the minimal local checklist after the init preflight has passed. Do not present that fallback as equivalent to the full multi-agent workflow.
 - If Claude Code implementation uses isolated worktrees, `NEXT_GATE` must include `WORKTREE_CLOSEOUT` until PM has made a keep / merge / PR / discard decision. A PM answer that says implementation is complete while changed worktree files are only present outside the parent checkout is invalid.
-- A complete PM answer includes: classified scope, frozen packet summary, named specialist handbacks, blocking findings, PM fan-in decision, residual risk, and the next approval or implementation gate.
+- `NEXT_GATE` must also include `STATE_SYNC` for persistent MEDIUM/LARGE work. A PM answer that says implementation is complete while `tasks.md` and `current-workstreams.md` still show no progress is invalid.
+- A complete PM answer includes: classified scope, frozen packet summary, named specialist handbacks, blocking findings, PM fan-in decision, state-sync evidence, residual risk, and the next approval or implementation gate.
 
 ## PM Native Ask Trigger Gate
 

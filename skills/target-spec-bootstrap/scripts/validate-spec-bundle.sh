@@ -70,6 +70,11 @@ if ! grep -Fq 'Design source: `design.md`' "$bundle_path/tasks.md"; then
 "
 fi
 
+if ! grep -Fq '## Progress Ledger' "$bundle_path/tasks.md"; then
+  link_errors="${link_errors}tasks.md missing ## Progress Ledger
+"
+fi
+
 if [ -n "$link_errors" ]; then
   echo "SPEC_BUNDLE_INVALID link_errors"
   echo "path=$bundle_path"

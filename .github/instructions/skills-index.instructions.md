@@ -19,7 +19,7 @@ This file is only for discovery and routing. Match the current task to the index
 - `target-instructions-bootstrap`: create missing target-local `.github/instructions/**`, including the neutral project facts scaffold, plus runtime adapters such as `AGENTS.md` for Codex and `CLAUDE.md` for Claude Code when applicable.
 - `target-memory-bootstrap`: create missing target-local `memories/repo/**` skeleton for persistent task recovery.
 - `target-spec-bootstrap`: create missing target-local `spec/INDEX.md` and `spec/templates/**` before spec-driven work.
-- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, work modes, dispatch packet shape, review/verification, memory/spec, and closeout rules.
+- `core-workflow-contract`: shared cross-role source priority, runtime adapters, init gates, work modes, dispatch packet shape, review/verification, memory/spec, state persistence, and closeout rules.
 - Role workflow skills: load one matching the active agent role together with `core-workflow-contract`.
   - `senior-project-expert-workflow`: PM/coordinator scope, routing, dispatch, fan-in, closeout, and evolution signals.
   - `specification-writer-workflow`: requirements, design, tasks, ADRs, closeout records, and memory/spec recovery.
@@ -33,8 +33,8 @@ This file is only for discovery and routing. Match the current task to the index
 - `brainstorming`: top-level or PM planning gate where route-changing ambiguity must be locked through explicit direction confirmation before spec or code; PM-led large technical design routes deep brainstorming through Technical Architect.
 - `writing-plans`: MEDIUM/LARGE tasks that need executable slices with files and verification; persistent MEDIUM/LARGE output belongs in `spec/<feature>/tasks.md`, not a standalone plan file.
 - `spec-review-gauntlet`: pre-implementation readiness and multi-lane design review for Spec Bundles, execution plans, cross-module changes, and high-risk customization workflow changes; MEDIUM/LARGE target work must have `requirements.md`, `design.md`, and `tasks.md` in one spec directory before implementation.
-- `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, and per-task review.
-- `subagent-driven-development`: fresh-context specialist execution for approved plans, requiring implementation, spec-compliance review, code-quality review, and verification per task.
+- `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, per-task review, and durable state sync.
+- `subagent-driven-development`: fresh-context specialist execution for approved plans, requiring implementation, spec-compliance review, code-quality review, verification, and state sync per task.
 - `dispatching-parallel-agents`: independent frozen subtasks with non-overlapping write sets.
 - `workspace-isolation`: before approved implementation or substantial feature/fix work when branch/worktree isolation, provenance, or baseline setup must be decided.
 

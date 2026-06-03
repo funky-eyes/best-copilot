@@ -42,6 +42,7 @@ When shell access is available, verify the bundle before returning a ready/appro
 6. Do not store secrets, PII, raw long logs, or unverified guesses.
 7. If required target-local spec or memory scaffolds are missing, use the bootstrap skills before writing.
 8. For MEDIUM/LARGE work, do not stop after writing only one SDD/design/plan markdown file. Produce or repair the three-file Spec Bundle and update `spec/INDEX.md` to point at the bundle directory.
+9. When task status, verification, batch state, or closeout changes, update `tasks.md` and `memories/repo/current-workstreams.md` in the same handback. If `tasks.md` has no progress ledger, add one without rewriting task definitions.
 
 ## Spec Authoring Quality Contract
 
@@ -51,6 +52,7 @@ Specs must be rich enough for another fresh-context agent to implement or review
 - Requirements record current-system evidence, source provenance, compatibility expectations, security/privacy implications, and open questions that affect behavior.
 - Design records concrete decisions (`DD-001`), ownership boundaries, API/data/config contracts, error paths, migration/rollback, blast radius, alternatives rejected, and verification strategy.
 - Tasks map back to requirement and design IDs. Each task includes owner lane, reviewer lanes, write set, dependencies, parallel group, read-before-write targets, acceptance checks, TDD or minimal check, verification command, ready artifacts, and stop conditions.
+- Tasks include a `Progress Ledger` or equivalent per-task status blocks so future sessions can recover without chat history.
 - Traceability is mandatory for MEDIUM/LARGE work: every P0/P1 requirement maps to design, task, and verification evidence before implementation starts.
 - Use tables when they improve scanability; use short prose for rationale. Do not add generic filler such as "improve robustness", "add proper validation", or "handle edge cases" without exact behavior.
 - If evidence is missing, mark it as an assumption or open question. Do not silently convert uncertainty into a requirement.
@@ -84,9 +86,10 @@ Spec-kit style implementation tasks map to the six-block PM dispatch packet from
 - **frozen_scope**: `requirement_refs`, `design_refs`, `owner_lane` (`technical-architect | developer | frontend-designer | root-cause-fixer`), `reviewer_lanes`, `files_involved`, `write_set`, `dependencies`, `parallel_group` or `parallel_ready: false`
 - **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check` (failing test target or minimal reproducible check), `verification_command`, `stop_conditions`, `read_before_write_targets`
 - **output_contract**: `ready_artifacts`, traceability updates, and memory updates when persistent recovery is active
+- **state_sync**: required `tasks.md` progress update, `current-workstreams.md` recovery update, and index updates when rows change
 
 Default decomposition should expose parallel work for Technical Architect and Developer when write sets do not overlap; add Frontend Designer as an owner or reviewer when frontend surfaces are present.
 
 ## Output
 
-Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `spec_bundle_path`, `updated_files`, `requirements_delta`, `design_delta`, `tasks_delta`, `unresolved_questions`, `traceability_notes`, and `verification_performed`. If a single-file SDD/plan was consumed, include `source_single_file` and confirm it was split into the three required files or explain why the handback is blocked.
+Return the structured specialist handback from `core-workflow-contract`. Within `artifacts`, include `spec_bundle_path`, `updated_files`, `requirements_delta`, `design_delta`, `tasks_delta`, `state_sync_delta`, `unresolved_questions`, `traceability_notes`, and `verification_performed`. If a single-file SDD/plan was consumed, include `source_single_file` and confirm it was split into the three required files or explain why the handback is blocked.
