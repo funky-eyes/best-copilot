@@ -25,7 +25,7 @@ For every ready task:
 2. Dispatch implementation to the right specialist: Technical Architect for full-stack architecture/mainline slices, Developer for scoped slices, Frontend Designer for UI-owned slices, or Root Cause Fixer for confirmed failures.
 3. Require implementation evidence: changed files, read-before-write evidence for code edits, tests/checks run, key output, risk, and next-step notes.
 4. Run Stage 1 review: spec/task compliance. The reviewer checks whether requirements, non-goals, file boundaries, and acceptance checks were honored.
-5. Run Stage 2 review: code quality and release risk. The reviewer checks maintainability, coupling, security/performance risk, dead code, and test adequacy.
+5. Run Stage 2 review: context-chain, code quality, and release risk. The reviewer must use the `structured-review` code-review context-chain gate before assessing maintainability, coupling, security/performance risk, dead code, and test adequacy.
 6. Send confirmed findings to a fix loop using `structured-review` feedback-intake and targeted re-review modes.
 7. Run `STATE_SYNC`: update `tasks.md`, `memories/repo/current-workstreams.md`, and relevant index rows using `core-workflow-contract/references/state-persistence.md`.
 8. Only after the task passes the required reviews, verification, and state sync may PM mark it complete or dispatch the next task.

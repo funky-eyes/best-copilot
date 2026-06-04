@@ -19,6 +19,22 @@ Checklist:
 
 If phase 1 fails, stop the review and ask for a fix. Do not proceed to phase 2 except to mention clearly scoped evidence gaps.
 
+## Context-chain gate
+
+Before Phase 2, connect the diff to the surrounding execution path. A review that reads only changed hunks is incomplete unless the change is a pure text/config edit with no runtime consumer.
+
+Check:
+
+- changed symbol or component public surface, exports, props, inputs, response shape, events, side effects, and error contract
+- direct callers/importers/rendering parent, route handler, hook consumer, or command entrypoint
+- downstream callees, shared utility assumptions, API consumers, state owners, and persistence/cache effects
+- compatibility with existing call sites, feature flags, permissions, schemas, generated types, tests, and documented examples
+- for frontend changes: parent route/component, data contract, critical user path, loading/error/empty/disabled/focus/mobile states, and visible sensitive data exposure
+
+Use code intelligence when available: GitNexus impact/context/API impact/shape check, codegraph callers/callees/trace, or LSP references before grep fallback. If tooling is unavailable, inspect at least the immediate caller/callee or mark the missing chain evidence under `concerns / risks / unverified items`.
+
+Record `context_chain_reviewed` with the concrete files/symbols/routes checked. If a downstream contract cannot be verified, do not approve without a risk note or targeted verification.
+
 ## Phase 2: code quality review
 
 Run only after phase 1 passes or when the user explicitly asks for general code quality despite spec gaps.
@@ -95,6 +111,7 @@ Apply when the change affects workflows, scaffolding, agents, skills, generated 
 
 ## required section results
 - spec compliance: passed/failed/partial, evidence
+- context-chain: passed/partial/blocked, `context_chain_reviewed`
 - correctness: ...
 - security: ...
 - performance/resources: ...

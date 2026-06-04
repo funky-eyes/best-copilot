@@ -8,6 +8,7 @@ Before asking another reviewer to inspect completed work, prepare a bounded pack
 
 - goal and user-facing behavior
 - changed files and why they changed
+- context-chain targets: changed public surface plus direct callers/importers, downstream callees/consumers, routes/API shape, state owners, or the reason no runtime consumer exists
 - relevant spec, requirements, or acceptance checks
 - verification already run, with command/check evidence
 - known gaps, risks, and skipped checks
@@ -42,6 +43,7 @@ Do not blindly implement vague feedback. If feedback conflicts with requirements
 - mode: handoff | intake | fix-scope
 - scope:
 - findings_or_focus:
+- context_chain_targets:
 - accepted_fixes:
 - rejected_or_deferred:
 - verification_needed:
