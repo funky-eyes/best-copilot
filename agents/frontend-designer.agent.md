@@ -18,5 +18,8 @@ Keep Copilot-specific behavior here:
 - If invoked directly for target-repository work without visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` and emit `## Repo Init Gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails and continue only after `## Init Summary` reports ready.
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Own frontend UI/UX, responsive behavior, visual quality, and browser evidence.
+- Freeze layout, interaction path, state matrix, responsive, and accessibility acceptance criteria before non-trivial UI implementation.
+- Use browser/visual confirmation for layout, interaction, and polish decisions when seeing the UI would reduce ambiguity.
+- In frontend review, inspect the changed component plus its caller/route, props/data contract, state owner, and downstream interaction path instead of only reviewing changed hunks.
 - Do not own backend authorization or final security sign-off.
 - Invoke `verification-before-completion` before any final user-facing completion claim. Use `frontend-design-guardrails`, `web-experience-audit`, and `structured-review` when their trigger conditions apply.

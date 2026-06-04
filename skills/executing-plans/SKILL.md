@@ -29,7 +29,7 @@ For each ready task, follow this exact order:
 3. `EXECUTE`: make the smallest diff inside the frozen file set. Do not add speculative features, single-use abstractions, or adjacent cleanup.
 4. `VERIFY`: run the minimal sufficient command or static/browser check.
 5. `REVIEW_STAGE_1`: check spec/task compliance first. Confirm that the task did exactly the requested work, no more and no less.
-6. `REVIEW_STAGE_2`: check code quality, maintainability, release risk, dead code, and test adequacy.
+6. `REVIEW_STAGE_2`: run the `structured-review` code-review context-chain gate, then check code quality, maintainability, release risk, dead code, and test adequacy.
 7. `STATE_SYNC`: update durable task and recovery state before continuing. For MEDIUM/LARGE active work, write the task row/status in `tasks.md`, update `memories/repo/current-workstreams.md`, and update `spec/INDEX.md` / `memories/repo/INDEX.md` when their rows changed. Use `core-workflow-contract/references/state-persistence.md`.
 8. `RECORD`: write task status, verification result, verification coverage, command/check evidence, residual risk, and state-sync evidence.
 9. `SNAPSHOT`: update the ready-artifact list with changed files, verification command, review outputs, blocked items, next resume action, done/verified/left checkpoint summary, and state files changed.
