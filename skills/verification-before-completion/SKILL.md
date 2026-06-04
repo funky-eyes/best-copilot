@@ -12,6 +12,8 @@ description: "Use before claiming work is done, fixed, passing, or ready. Requir
 - No placeholders, dead references, stale names, or broken links remain.
 - Tests, build, browser checks, or static validation were run where appropriate.
 - Failed or skipped verification is explicitly reported.
+- If files changed, `implementation_self_review` or delegated `artifacts.self_check` exists and covers changed files, diff review, acceptance match, scope check, regression risk, verification evidence, and unresolved risk.
+- If changed files lack self-review evidence, do not report normal `DONE`; return to self-review or report `DONE_WITH_CONCERNS missing_self_review`.
 - Residual risk and next steps are clear.
 - If the current role is delegated, the handback includes `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - If a delegated handback uses `status=NEEDS_CONTEXT`, it also includes `clarification_request` and `pm_action: "pm_clarify"`.
@@ -40,6 +42,7 @@ description: "Use before claiming work is done, fixed, passing, or ready. Requir
 - checks_run:
 - passed:
 - skipped:
+- self_review:
 - residual_risk:
 ```
 

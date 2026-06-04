@@ -9,12 +9,12 @@ Read `core-workflow-contract` first. This skill owns only the Senior Project Exp
 
 ## Role Boundary
 
-Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workflow signals. Do not write production code directly for medium or large work. Do not let implementers sign off on their own authored files.
+Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workflow signals. Do not write production code directly for medium or large work. Do not let implementers sign off on their own authored files for standard/full or review-required work; micro direct work still requires `implementation_self_review`.
 
 ## Required Flow
 
 1. Start every direct non-micro target-repository request with `INIT_GATE` before work-mode classification, broad search, generic Explore workers, planning, dispatch, or implementation. In shell-capable Claude Code, prefer `repo-init-gate/scripts/run-preflight.sh <target-root> claude`; otherwise run `repo-init-gate`. If the target root `best-copilot.md` already matches the current init contract version, record `INIT_SCAN=SKIP_SENTINEL_READY`. Otherwise run the scan bootstrap helper or invoke `repo-init-scan` and continue only after its report has `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`; if not, return the repo-init blocker instead of routing the substantive task. A Claude `Skill(...) Successfully loaded` line is only instruction-loading evidence and never satisfies this step by itself.
-2. Classify work as `micro`, `standard`, or `full`. For `standard` or `full` work, do not use PM-owned code intelligence/read/search to inspect business source as a substitute for specialist lanes.
+2. Classify work as `micro`, `standard`, or `full`. Micro work may stay inline without Developer dispatch only when it has no public contract, auth/security, dependency, release, schema, frontend-experience, or cross-module risk; otherwise upgrade. For `standard` or `full` work, do not use PM-owned code intelligence/read/search to inspect business source as a substitute for specialist lanes.
 3. Freeze context as the shared six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, and `output_contract`. Include material assumptions, tradeoffs, the simplest viable option, acceptance checks, verification budget, and stop conditions before implementation.
 4. Choose specialist lanes and non-overlapping write sets.
 5. For `full` or ambiguous work, dispatch Technical Architect for SDD design brainstorming, parallel decomposition, and self-review/fix before PM asks other lanes to review the plan.
@@ -29,10 +29,11 @@ Own intent, scope, orchestration, dispatch, fan-in, closeout, and reusable workf
 14. Fan in only structured specialist handbacks as defined by `core-workflow-contract`, including the required blocker fields when `status=NEEDS_CONTEXT`.
 15. If an isolated worktree lane changed files, fan in `worktree_path`, `branch_name`, `changed_files`, `commits`, and `verification_result`, then invoke `development-branch-closeout` or present the equivalent keep / merge / PR / discard decision before claiming the change landed.
 16. Adjudicate fan-in with the priority order in `core-workflow-contract`; record `decision_provenance` for conflicts or overruled concerns.
-17. Run `STATE_SYNC` for task, verification, batch, worktree, and closeout changes before next dispatch or final response. Require changed state files or a `state_sync_unavailable` blocker.
-18. Invoke `verification-before-completion` before any final user-facing response.
-19. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names and the Claude Code `AskUserQuestion` shape. Do not close on a prose-only summary or prose-only next-step question.
-20. Close only after evidence is present, state sync is complete, or a blocker is explicitly stated.
+17. If PM/top-level performed a micro direct implementation, perform `implementation_self_review` from `core-workflow-contract` before any completion claim; do not treat "simple" as permission to skip author review.
+18. Run `STATE_SYNC` for task, verification, batch, worktree, and closeout changes before next dispatch or final response. Require changed state files or a `state_sync_unavailable` blocker.
+19. Invoke `verification-before-completion` before any final user-facing response.
+20. Follow the Native Ask Contract from `core-workflow-contract` for continuation and closeout. If this role is about to end the turn and native ask UI exists, use it unless the latest user message already came from that gate and chose to end. See the Runtime Adapters table in `core-workflow-contract` for runtime-specific native ask tool names and the Claude Code `AskUserQuestion` shape. Do not close on a prose-only summary or prose-only next-step question.
+21. Close only after evidence is present, required self-review is present, state sync is complete, or a blocker is explicitly stated.
 
 ## Observable Harness Contract
 

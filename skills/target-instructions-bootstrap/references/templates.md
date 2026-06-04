@@ -83,7 +83,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 3. Read explicit user paths and init artifacts first. If repository facts are incomplete, normalize official init output into `.github/instructions/project.instructions.md`; command output without a project facts file or recognized artifact is `official_init_no_write`.
 4. Before editing, freeze a minimal packet with goal, scope, constraints, expected outcome, assumptions, tradeoffs, simpler option considered, acceptance checks, verification budget, work mode, and task type. Multi-agent dispatch uses the six-block packet from `core-workflow-contract`.
 5. Search at most three rounds. Prefer explicit paths, filename/glob lookup, and fixed-string `rg -F` before regex.
-6. Before completion, provide verification evidence or state the blocker.
+6. Before completion, provide verification evidence or state the blocker. If files changed, also provide implementation self-review evidence.
 
 ## Reliability Gates
 
@@ -92,6 +92,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Surgical changes: every changed line must trace to the request, acceptance checks, or verification repair.
 - Read before writing: before code edits, read the file surface, immediate caller/callee, and local pattern.
 - Goal-driven execution: define acceptance checks, verification budget, and stop conditions before implementation.
+- Implementation self-review: any role that changes files must inspect the final diff and record changed files, acceptance match, scope check, regression risk, verification evidence, and unresolved risk before claiming completion. This is required for `micro` work too and does not replace cross-author review for `standard` or `full` risk.
 - Checkpoint significant steps with done, verified, and left state.
 
 ## Native Ask And Closeout
@@ -135,6 +136,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - Use existing code, tools, components, and patterns.
 - Public APIs, schemas, auth, dependencies, CI/CD, and release surfaces need blast-radius assessment.
 - New behavior and bug fixes should add focused tests or a minimal reproducible check when practical.
+- `micro` work may skip specialist dispatch and cross-author review only when it avoids public APIs, schemas, auth/security, dependencies, CI/CD, release surfaces, frontend experience, and cross-module behavior; changed files still require implementation self-review.
 - Each plan task needs implementation evidence, spec-compliance review, code/release-risk review, verification, and STATE_SYNC before closure.
 - "Done", "passed", and "verified" require fresh command/static/browser evidence or a stated blocker.
 ```
