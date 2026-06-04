@@ -33,9 +33,11 @@ System/developer/platform instructions > explicit user instructions > current re
 
 ## Work Modes
 
-- `micro`: tiny edit/check; no public contract, auth, dependency, release, schema, frontend, or cross-module risk.
+- `micro`: tiny edit/check; no public contract, auth, dependency, release, schema, frontend, or cross-module risk. May skip specialist dispatch and cross-author review, but must still produce `implementation_self_review` before closure when files changed.
 - `standard`: bounded file set or one owner surface.
 - `full`: ambiguous, cross-module, public API/message/schema/auth/dependency/CI/release surface, frontend experience, or multi-agent execution.
+
+If a task touches public APIs, message formats, schemas, auth/security boundaries, dependencies, CI/CD, release surfaces, user-visible frontend experience, or cross-module behavior, it is not `micro`; classify it as `standard` or `full` and use the matching review lanes.
 
 `task_type`: `implementation | design_review | verification | fix | spec`.
 
@@ -46,10 +48,11 @@ System/developer/platform instructions > explicit user instructions > current re
 3. Freeze the six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, `output_contract`.
 4. For full or ambiguous work, dispatch Technical Architect for SDD design and self-review, then dispatch Developer, QA, and security/frontend lanes when applicable.
 5. For MEDIUM/LARGE work, require a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`; single-file SDD/design/plan notes are evidence only.
-6. Execute through `subagent-driven-development` or `executing-plans`.
-7. Each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, and verification before closure.
-8. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
-9. Invoke `verification-before-completion` and native continuation/closeout UI when available.
+6. Execute through `subagent-driven-development` or `executing-plans` when a plan or delegated implementation is required.
+7. For micro direct implementation, closure requires implementation evidence, `implementation_self_review`, and verification evidence; do not require cross-author review unless the risk surface forces upgrade.
+8. For standard/full tasks, each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, and verification before closure.
+9. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
+10. Invoke `verification-before-completion` and native continuation/closeout UI when available.
 
 ## State Sync
 
@@ -85,6 +88,22 @@ Delegated specialists return one structured handback:
 
 When `status=NEEDS_CONTEXT`, include `clarification_request` and `pm_action: "pm_clarify"`. Include `search_path_used` when repository exploration was needed.
 
+## Implementation Self-Review
+
+Any role that changes files must review its own diff before claiming completion. This is an author self-check, not a replacement for cross-author review when `standard` or `full` risk applies.
+
+`implementation_self_review` must include:
+
+- `changed_files`
+- `diff_reviewed`: whether the author inspected the final diff
+- `acceptance_match`: how the change satisfies the request and acceptance checks
+- `scope_check`: confirmation that changed lines stay within the frozen scope
+- `regression_risk`: risk level and what could still break
+- `verification_evidence`: commands, static checks, browser evidence, or explicit blocker
+- `unresolved_risk`: remaining gaps or `none`
+
+A delegated specialist's `artifacts.self_check` satisfies this gate only when it covers the same fields. Missing self-review on changed files blocks normal `DONE`; return to self-review or report `DONE_WITH_CONCERNS missing_self_review`.
+
 ## Ask Boundary
 
 - Specialists never ask users directly. Missing context returns `NEEDS_CONTEXT`; missing human input returns `NEEDS_USER_INPUT` to PM.
@@ -102,6 +121,7 @@ When `status=NEEDS_CONTEXT`, include `clarification_request` and `pm_action: "pm
 ## Review And Verification
 
 - Evidence beats claims. "Done", "passed", and "verified" require command/static/browser evidence or an explicit blocker.
+- Changed files also require `implementation_self_review` before closure, even for `micro` work that skipped specialist dispatch.
 - Public APIs, schemas, auth, dependencies, CI/CD, and release surfaces need blast-radius assessment.
 - New behavior and bug fixes should add tests or a minimal reproducible check when practical.
 - Do not store secrets, tokens, credentials, PII, raw long logs, internal hosts, or sensitive paths in instructions, memory, specs, or logs.

@@ -32,6 +32,8 @@ Record each accepted evolution as a compact event:
 - status: proposed|accepted|rejected|deprecated
 ```
 
+Accepted plugin evolution events are logged in `references/events.md` when no target-local memory applies.
+
 ## Strategy Presets
 
 - `repair-only`: fix broken trigger, broken route, false claim, failed validation.

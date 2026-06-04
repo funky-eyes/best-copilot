@@ -472,11 +472,11 @@ System, platform, and explicit user instructions outrank repository files. Curre
 3. Read explicit user paths and init artifacts first. If repository facts are incomplete, normalize official init output into `.github/instructions/project.instructions.md`; command output without a verified facts file is `official_init_no_write`.
 4. Before editing, freeze a minimal packet with goal, scope, constraints, expected outcome, assumptions, tradeoffs, simpler option considered, acceptance checks, verification budget, `work_mode`, and `task_type`.
 5. Search at most three rounds. Prefer explicit paths, filename/glob lookup, and fixed-string `rg -F` before regex.
-6. Before completion, provide real verification evidence or state the blocker.
+6. Before completion, provide real verification evidence or state the blocker. If files changed, also provide implementation self-review evidence.
 
 ## Reliability Gates
 
-- Think before coding, choose the simplest viable approach, keep changes surgical, read before writing, and checkpoint significant steps.
+- Think before coding, choose the simplest viable approach, keep changes surgical, read before writing, self-review changed files before completion, and checkpoint significant steps.
 
 ## Per-Request Hard Gates
 
@@ -535,7 +535,8 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ## Implementation and Verification
 
 - Prefer existing patterns. Public APIs, schemas, auth, dependencies, and CI/CD require blast-radius assessment.
-- Before claiming work is done, run the smallest useful verification or state why it could not run.
+- `micro` work may skip specialist dispatch and cross-author review only when it avoids public APIs, schemas, auth/security, dependencies, CI/CD, release surfaces, frontend experience, and cross-module behavior; changed files still require implementation self-review.
+- Before claiming work is done, inspect the final diff, record changed files, acceptance match, scope check, regression risk, verification evidence, and unresolved risk; then run the smallest useful verification or state why it could not run.
 EOF
 
 append_if_missing ".github/instructions/must.instructions.md" "## Request Flow" <<'EOF'
@@ -544,7 +545,7 @@ append_if_missing ".github/instructions/must.instructions.md" "## Request Flow" 
 1. Parse literal request, real intent, and success criteria.
 2. Before editing, freeze a minimal packet with goal, scope, constraints, expected outcome, assumptions, tradeoffs, simpler option considered, acceptance checks, verification budget, `work_mode`, and `task_type`.
 3. Search at most three rounds. Prefer explicit paths, filename/glob lookup, and fixed-string `rg -F` before regex.
-4. Before completion, provide real verification evidence or state the blocker.
+4. Before completion, provide real verification evidence or state the blocker. If files changed, also provide implementation self-review evidence.
 EOF
 
 append_if_missing ".github/instructions/must.instructions.md" "## Per-Request Hard Gates" <<'EOF'
@@ -615,7 +616,8 @@ append_if_missing ".github/instructions/must.instructions.md" "## Implementation
 ## Implementation and Verification
 
 - Prefer existing patterns. Public APIs, schemas, auth, dependencies, and CI/CD require blast-radius assessment.
-- Before claiming work is done, run the smallest useful verification or state why it could not run.
+- `micro` work may skip specialist dispatch and cross-author review only when it avoids public APIs, schemas, auth/security, dependencies, CI/CD, release surfaces, frontend experience, and cross-module behavior; changed files still require implementation self-review.
+- Before claiming work is done, inspect the final diff, record changed files, acceptance match, scope check, regression risk, verification evidence, and unresolved risk; then run the smallest useful verification or state why it could not run.
 EOF
 
 append_if_missing ".github/instructions/must.instructions.md" "vscode_askQuestions" <<'EOF'
