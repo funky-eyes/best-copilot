@@ -2,7 +2,8 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.6.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.7.0-1d9bf0)](plugin.json)
+[![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -11,9 +12,9 @@
 
 ![best-copilot hero](assets/best-copilot-hero.png)
 
-`best-copilot` は、Copilot CLI と Claude Code で利用できるインストール可能なエージェントチームテンプレートで、真剣なエンジニアリング作業を対象としています。リポジトリに対してシニア品質のデリバリーフローを提供します：事実の初期化、範囲の固定、設計→構築、専門役割による実装、独立したレビュー、証拠に基づく検証、および次回セッションのための復帰ポイントの保持。
+`best-copilot` は、Codex、Copilot CLI、Claude Code で利用できるインストール可能なエージェントチーム workflow で、真剣なエンジニアリング作業を対象としています。リポジトリに対してシニア品質のデリバリーフローを提供します：事実の初期化、範囲の固定、設計→構築、専門役割による実装、独立したレビュー、証拠に基づく検証、および次回セッションのための復帰ポイントの保持。
 
-Copilot CLI は `plugin.json` 経由でルートの `agents/` と `skills/` を使います。Claude Code は `claude-plugin/` パッケージを使います：`claude-plugin/.claude-plugin/plugin.json`、`claude-plugin/skills -> ../skills`、`claude-plugin/agents -> ../claude-agents`。リポジトリレベルのルールは `.github/instructions/**` にあります。
+Codex は `.codex-plugin/plugin.json`、`.agents/plugins/marketplace.json`、`.agents/skills -> ../skills` を使います。Copilot CLI は `plugin.json` 経由でルートの `agents/` と `skills/` を使います。Claude Code は `claude-plugin/` パッケージを使います：`claude-plugin/.claude-plugin/plugin.json`、`claude-plugin/skills -> ../skills`、`claude-plugin/agents -> ../claude-agents`。リポジトリレベルのルールは `.github/instructions/**` にあります。
 
 ## なぜ存在するのか
 
@@ -261,7 +262,7 @@ INIT_GATE → [必要に応じて INIT_SCAN] → CLASSIFY → FREEZE_PACKET → 
 
 ### ステージ 1: Init ゲート（必須プリフライト）
 
-ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.6.1"` と一致するか確認します。
+ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.7.0"` と一致するか確認します。
 
 ```
 repo-init-gate
@@ -473,7 +474,7 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 │   ├── must.instructions.md       ← コアルール
 │   └── skills-index.instructions.md ← スキルルーティング
 │
-└── best-copilot.md               ← Init sentinel（version: "0.6.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.7.0"）
 ```
 
 ### Spec vs Memory の分担
@@ -542,7 +543,7 @@ memories/repo/INDEX.md                           ← 復帰インデックスル
 memories/repo/current-workstreams.md             ← 現在のアクティブな作業
 spec/INDEX.md                                    ← スペックルーティングテーブル
 spec/templates/                                  ← 再利用可能なテンプレート
-best-copilot.md                                  ← Init sentinel（version: "0.6.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.7.0"）
 ```
 
 必要な事実やスキャフォールドを作成できない場合、推測に基づく継続ではなく `BLOCKED first_use_gate_incomplete` として停止します——完全な説明は[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト)を参照してください。
@@ -598,7 +599,7 @@ best-copilot.md                                  ← Init sentinel（version: "0
 ## このパッケージの検証
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read(".claude/settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".codex-plugin/plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read(".claude/settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); JSON.parse(File.read(".agents/plugins/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
 find claude-agents -maxdepth 1 -name '*.md' | sort

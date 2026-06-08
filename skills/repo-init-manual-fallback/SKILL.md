@@ -46,7 +46,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 - `memories/README.md`, `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, `memories/repo/project-state.md`, `memories/repo/workflow-rules.md`, `memories/repo/decisions.md`, `memories/repo/logs/README.md`, `memories/repo/archive/deprecated-decisions.md`
 - `spec/INDEX.md`, `spec/templates/requirements-template.md`, `spec/templates/design-template.md`, `spec/templates/tasks-template.md`
 
-`best-copilot.md` is the verified-init sentinel for contract version `0.6.1`. Must be written only after the other 16 artifacts and content checks pass. The canonical write content is the exact 3-line YAML frontmatter block — no headings, descriptions, or dates. Repeat-request readers use only the frontmatter version for the cheap skip decision.
+`best-copilot.md` is the verified-init sentinel for contract version `0.7.0`. Must be written only after the other 16 artifacts and content checks pass. The canonical write content is the exact 3-line YAML frontmatter block — no headings, descriptions, or dates. Repeat-request readers use only the frontmatter version for the cheap skip decision.
 
 ## Required Content Checks
 
@@ -72,12 +72,12 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
    - Infer build/test commands. Only mark genuinely undetectable items as `unknown`.
 4. Create or repair `.github/instructions/project.instructions.md` with: `Project Facts`, `Build and Test Commands`, `Runtime and Entry Points`, `Module Boundaries`, `Known Unknowns`, `Verification Notes`, and `Init Status`.
 5. Replace markers with `Init source: manual_fallback|official_init_plus_manual_fallback` and a real timestamp.
-6. Ensure `## Init Status` contains: `Init ready`, `Required artifacts verified`, `Bootstrap contract version: 0.6.1`, `Last full verification`, `Reentry rule`.
+6. Ensure `## Init Status` contains: `Init ready`, `Required artifacts verified`, `Bootstrap contract version: 0.7.0`, `Last full verification`, `Reentry rule`.
 7. Initialize missing scaffolds: shell helper → `target-instructions-bootstrap` → `target-memory-bootstrap` → `target-spec-bootstrap`.
 8. Re-check the required artifact paths on disk.
 9. Re-check the required instruction content.
 10. After all other artifacts and content checks pass, write `best-copilot.md` with the exact sentinel.
-11. Verify: `project.instructions.md` exists and is not placeholder-heavy, `Init Status` has version `0.6.1`, `best-copilot.md` matches sentinel, `verified_paths` covers all 17 paths.
+11. Verify: `project.instructions.md` exists and is not placeholder-heavy, `Init Status` has version `0.7.0`, `best-copilot.md` matches sentinel, `verified_paths` covers all 17 paths.
 
 ## Inline Fallback Templates
 
