@@ -1,12 +1,13 @@
 {
   "name": "best-copilot",
-  "description": "A senior-agent team plugin for GitHub Copilot CLI and Claude Code, with planning, architecture, implementation, QA, security, fix, memory, and spec workflows.",
-  "version": "0.6.1",
+  "description": "A senior-agent workflow plugin for Codex, GitHub Copilot CLI, and Claude Code, with planning, architecture, implementation, QA, security, fix, memory, and spec workflows.",
+  "version": "0.7.0",
   "author": {
     "name": "best-copilot maintainers"
   },
   "keywords": [
     "copilot",
+    "codex",
     "claude-code",
     "agents",
     "skills",
@@ -24,6 +25,7 @@
   "category": "agent-team",
   "tags": [
     "custom-agents",
+    "codex-skills",
     "agent-skills",
     "frontend-design",
     "design-systems",

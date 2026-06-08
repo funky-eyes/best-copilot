@@ -2,7 +2,8 @@
 
 [English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.6.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.7.0-1d9bf0)](plugin.json)
+[![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
 [![agents](https://img.shields.io/badge/agents-8-2563eb)](agents/)
@@ -11,9 +12,9 @@
 
 ![best-copilot hero](assets/best-copilot-hero-cn.png)
 
-`best-copilot` 是一套面向 Copilot CLI 和 Claude Code 的可安装 agent 团队，服务严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
+`best-copilot` 是一套面向 Codex、Copilot CLI 和 Claude Code 的可安装 agent-team workflow，服务严肃的工程工作。它为仓库提供一条资深交付流程：初始化事实、冻结范围、先设计再构建、通过专责角色实现、独立审查、以证据验证，并保留下次会话的恢复点。
 
-Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claude Code 通过 `claude-plugin/` 包加载：`claude-plugin/.claude-plugin/plugin.json`、`claude-plugin/skills -> ../skills` 和 `claude-plugin/agents -> ../claude-agents`。仓库级规则保存在 `.github/instructions/**`。
+Codex 使用 `.codex-plugin/plugin.json`、`.agents/plugins/marketplace.json` 和 `.agents/skills -> ../skills`。Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claude Code 通过 `claude-plugin/` 包加载：`claude-plugin/.claude-plugin/plugin.json`、`claude-plugin/skills -> ../skills` 和 `claude-plugin/agents -> ../claude-agents`。仓库级规则保存在 `.github/instructions/**`。
 
 ## 为什么存在
 
@@ -26,6 +27,33 @@ Copilot CLI 通过 `plugin.json` 使用根目录 `agents/` 与 `skills/`。Claud
 - **证据优先的收尾**：宣称“完成”必须有命令输出、静态检查、浏览器证据，或一个明确的阻塞说明。
 
 ## 安装
+
+### Codex
+
+Codex 官方支持将插件作为可安装分发单元，用来打包可复用 skills、apps 和 MCP 配置。把本仓库添加为 Codex marketplace，然后在 Codex 插件目录中安装：
+
+```bash
+codex plugin marketplace add funky-eyes/best-copilot
+codex
+/plugins
+```
+
+本地开发时从当前 checkout 使用：
+
+```bash
+codex plugin marketplace add /absolute/path/to/best-copilot
+codex
+/plugins
+```
+
+Codex 会发现：
+
+- 插件元数据：[.codex-plugin/plugin.json](.codex-plugin/plugin.json)
+- 本地/仓库 marketplace 元数据：[.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
+- 通过插件 manifest 暴露的共享技能：[skills/](skills/)
+- 通过 [.agents/skills](.agents/skills) 直接暴露的 repo-scoped 共享技能
+
+安装或修改插件后，启动新的 Codex thread/session。需要使用本工作流时，显式调用 `@best-copilot` 或某个 bundled `$skill`。
 
 ### Copilot CLI
 
@@ -101,6 +129,7 @@ Claude Code 会发现：
 - **Copilot CLI**：运行 `/agent`，选择 **Senior Project Expert**，然后描述要做的工作。Copilot 使用 `handoffs:` 声明进行专员路由。
 - **VS Code 插件**：在聊天中手动切换到 **Senior Project Expert** 这个 agent，然后开始任务。
 - **Claude Code**：PM 作为主会话，通过 **Agent tool** 显式 spawn 专业子 agent。
+- **Codex**：调用 `@best-copilot` 或兼容入口 `$senior-project-expert` skill，然后要求执行该 workflow。需要并行工作时，必须显式要求 Codex spawn subagents；仅安装插件不会自动 spawn subagents。
 
 ### Claude Code 启动方式
 
@@ -138,32 +167,32 @@ Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4
 
 ## 运行时适配架构
 
-### 三层隔离原则
+### 三运行时隔离原则
 
-```
-                    ┌─────────────────────────────────┐
-                    │   共享契约层 (Shared Contract)    │
-                    │   core-workflow-contract         │
-                    │   + 各角色 role-*-workflow       │
-                    └──────────────┬──────────────────┘
-                                   │
-                  ┌────────────────┴────────────────┐
-                  │                                  │
-        ┌─────────▼──────────┐          ┌────────────▼─────────┐
-        │  Copilot CLI 适配  │          │  Claude Code 适配     │
-        │                    │          │                       │
-        │  agents/*.agent.md │          │  claude-agents/*.md   │
-        │  model: GPT-5.4 等 │          │  model: opus/haiku/...│
-        │  handoffs: 声明    │          │  Agent tool 调用      │
-        │  vscode_askQ...    │          │  AskUserQuestion      │
-        │                    │          │                       │
-        │  直接读 skills/    │          │  claude-plugin/       │
-        │                    │          │    agents -> symlink  │
-        │                    │          │    skills -> symlink  │
-        └────────────────────┘          └───────────────────────┘
+```text
+共享契约层
+core-workflow-contract + 各角色 role-*-workflow
+        |
+        +-- Codex 适配
+        |   .codex-plugin/
+        |   .agents/plugins/
+        |   .agents/skills -> ../skills
+        |   @plugin / $skill，显式 subagents
+        |
+        +-- Copilot CLI 适配
+        |   agents/*.agent.md
+        |   model: GPT-5.4 等
+        |   handoffs 声明
+        |   直接读取 skills/
+        |
+        +-- Claude Code 适配
+            claude-agents/*.md
+            model: opus/haiku/sonnet
+            Agent tool dispatch
+            claude-plugin/{agents,skills} symlinks
 ```
 
-跨角色公共规则放在 [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md)。每个角色自己的 workflow 放在 `skills/*-workflow/`：`senior-project-expert-workflow`、`specification-writer-workflow`、`technical-architect-workflow`、`developer-workflow`、`frontend-designer-workflow`、`quality-assurance-workflow`、`security-reviewer-workflow`、`root-cause-fixer-workflow`。Copilot-only 的内容留在 [agents/](agents/)：模型名、Copilot 工具、`user-invocable`、`agents` 和 `handoffs`。Claude-only 的内容留在 [claude-agents/](claude-agents/) 里的同名文件：Claude Code 实际显示的 agent 名称、Claude 模型别名（`opus`、`sonnet`、`haiku`）、只读限制、`isolation: worktree`，以及 PM 拥有的 foreground/background 派发策略。
+跨角色公共规则放在 [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md)。每个角色自己的 workflow 放在 `skills/*-workflow/`：`senior-project-expert-workflow`、`specification-writer-workflow`、`technical-architect-workflow`、`developer-workflow`、`frontend-designer-workflow`、`quality-assurance-workflow`、`security-reviewer-workflow`、`root-cause-fixer-workflow`。Codex-only 的内容留在 [.codex-plugin/](.codex-plugin/) 和 [.agents/](.agents/)：插件元数据、marketplace 元数据和直接 repo-scoped skill discovery。Copilot-only 的内容留在 [agents/](agents/)：模型名、Copilot 工具、`user-invocable`、`agents` 和 `handoffs`。Claude-only 的内容留在 [claude-agents/](claude-agents/) 里的同名文件：Claude Code 实际显示的 agent 名称、Claude 模型别名（`opus`、`sonnet`、`haiku`）、只读限制、`isolation: worktree`，以及 PM 拥有的 foreground/background 派发策略。
 
 这样公共行为、角色专属行为、无法共存的 runtime metadata 三层隔离；每个 agent 都必须同时加载公共 contract 和自己的角色 workflow。
 
@@ -171,6 +200,8 @@ Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4
 
 | 场景 | 行为 |
 |------|------|
+| Codex 插件会话 | `.codex-plugin/plugin.json` 打包 skills；调用 `@best-copilot` 或 `$skill`，并行工作需显式要求 subagents |
+| Codex repo checkout | `.agents/skills -> ../skills` 暴露同一份共享 skills，不复制内容 |
 | Claude PM 主会话 | PM 的 `skills:` frontmatter 声明式预加载 |
 | Claude 子 agent（PM spawn） | 子 agent 从自身 `skills:` frontmatter 加载，PM 的 spawn prompt 必须包含任务上下文和所需技能 |
 | Claude base session | agent 的 `skills:` 未激活，需手动调用 |
@@ -178,19 +209,19 @@ Claude 适配器在 `claude-agents/*.md` 中使用 Claude 模型别名：GPT-5.4
 
 Claude agent 的 frontmatter 通常只预加载 `core-workflow-contract` 和对应角色 workflow。Senior Project Expert 额外预加载 `repo-init-gate` 和 `repo-init-scan`，因为 init preflight 是强制启动门禁。`structured-review`、`test-driven-development`、`web-experience-audit` 这类其他 focused skills 保留在 agent 正文里按需触发，避免启动时默认吃掉过多上下文。
 
-### 双运行时差异一览
+### 运行时差异一览
 
-| 维度 | Copilot CLI | Claude Code |
-|------|-------------|-------------|
-| 入口 agent | `agents/pm-coordinator.agent.md` | `claude-agents/senior-project-expert.md`（通过 `--agent` 或 `.claude/settings.json`） |
-| 模型指定 | 具体名如 `GPT-5.4 (copilot)` | `model: opus` / `haiku` / `sonnet` 角色档位别名 |
-| 专员分发 | `handoffs:` 声明 + `agent` tool | PM 主会话通过 **Agent tool** spawn 子 agent |
-| 并行执行 | handoff 声明自动处理 | PM 只对安全的独立调研/只读 review 选择后台 |
-| 文件隔离 | Copilot 内置 | `isolation: "worktree"` + PM closeout |
-| 用户交互 | `vscode_askQuestions` / `Asking user` | 内置 `AskUserQuestion` |
-| 技能发现 | 从根目录 `skills/` 直接读取 | `claude-plugin/skills -> ../skills` 符号链接 |
-| Agent 发现 | 从根目录 `agents/` 直接读取 | `claude-plugin/agents -> ../claude-agents` 符号链接 |
-| 跨模型路由 | 支持（GPT / Gemini / Claude 混合） | 仅 Claude 模型档位别名 |
+| 维度 | Codex | Copilot CLI | Claude Code |
+|------|-------|-------------|-------------|
+| 入口 | `@best-copilot` 或 bundled `$senior-project-expert` skill | `agents/pm-coordinator.agent.md` | `claude-agents/senior-project-expert.md`（通过 `--agent` 或 `.claude/settings.json`） |
+| 模型指定 | Codex runtime/config 选择，除非 prompt 指定 | 具体名如 `GPT-5.4 (copilot)` | `model: opus` / `haiku` / `sonnet` 角色档位别名 |
+| 专员分发 | 通过 workflow skills 显式要求 Codex subagents/delegation | `handoffs:` 声明 + `agent` tool | PM 主会话通过 **Agent tool** spawn 子 agent |
+| 并行执行 | 需要用户/PM 显式请求 | handoff 声明自动处理 | PM 只对安全的独立调研/只读 review 选择后台 |
+| 文件隔离 | Codex sandbox/worktree 行为 | Copilot 内置 | `isolation: "worktree"` + PM closeout |
+| 用户交互 | 当前 Codex ask/approval surface | `vscode_askQuestions` / `Asking user` | 内置 `AskUserQuestion` |
+| 技能发现 | `.codex-plugin` skills + `.agents/skills` symlink | 从根目录 `skills/` 直接读取 | `claude-plugin/skills -> ../skills` 符号链接 |
+| Agent 发现 | 无安装式角色 adapter 等价物；使用 skills 和显式 subagents | 从根目录 `agents/` 直接读取 | `claude-plugin/agents -> ../claude-agents` 符号链接 |
+| 跨模型路由 | Codex runtime/config 控制 | 支持（GPT / Gemini / Claude 混合） | 仅 Claude 模型档位别名 |
 
 Copilot handoff 是 fail-closed：每个 PM handoff prompt 都要求 `core-workflow-contract` 加目标角色 workflow skill。如果运行时不能加载这些 skill，handoff 会带上最小角色 checklist fallback；两者都没有时，specialist 必须返回 `NEEDS_CONTEXT missing_required_skill`。
 
@@ -206,6 +237,12 @@ Copilot handoff 是 fail-closed：每个 PM handoff prompt 都要求 `core-workf
 ```text
 best-copilot
 ├── plugin.json
+├── .codex-plugin/
+│   └── plugin.json
+├── .agents/
+│   ├── plugins/
+│   │   └── marketplace.json
+│   └── skills -> ../skills
 ├── .claude-plugin/
 │   └── marketplace.json
 ├── claude-plugin/
@@ -261,7 +298,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELE
 
 ### 阶段一：Init 门禁（强制预检）
 
-在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.6.1"`。
+在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.7.0"`。
 
 ```
 repo-init-gate
@@ -473,7 +510,7 @@ PM 按优先级裁决所有专员返回的结果。仲裁优先级：
 │   ├── must.instructions.md       ← 核心规则
 │   └── skills-index.instructions.md ← 技能路由
 │
-└── best-copilot.md               ← Init sentinel（version: "0.6.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.7.0"）
 ```
 
 ### Spec vs Memory 的分工
@@ -542,7 +579,7 @@ memories/repo/INDEX.md                           ← 恢复索引路由表
 memories/repo/current-workstreams.md             ← 当前活跃工作
 spec/INDEX.md                                    ← Spec 路由表
 spec/templates/                                  ← 可复用模板
-best-copilot.md                                  ← Init sentinel（version: "0.6.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.7.0"）
 ```
 
 如果必需的事实或脚手架无法创建，工作会以 `BLOCKED first_use_gate_incomplete` 停止——参见 [核心工作流 Stage 1](#阶段一init-门禁强制预检) 的完整说明。
@@ -598,7 +635,7 @@ best-copilot.md                                  ← Init sentinel（version: "0
 ## 验证此包
 
 ```bash
-ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read(".claude/settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); puts "json ok"'
+ruby -rjson -e 'JSON.parse(File.read("plugin.json")); JSON.parse(File.read(".codex-plugin/plugin.json")); JSON.parse(File.read("claude-plugin/.claude-plugin/plugin.json")); JSON.parse(File.read(".claude-plugin/marketplace.json")); JSON.parse(File.read("settings.json")); JSON.parse(File.read(".claude/settings.json")); JSON.parse(File.read("marketplace.json")); JSON.parse(File.read(".github/plugin/marketplace.json")); JSON.parse(File.read(".agents/plugins/marketplace.json")); puts "json ok"'
 ruby -ryaml -e 'Dir["{agents,skills,claude-agents}/**/*.{md,agent.md}"].sort.uniq.each { |f| s=File.read(f); next unless s.start_with?("---"); YAML.safe_load(s.split("---",3)[1], permitted_classes: [Symbol]); }; puts "frontmatter ok"'
 find agents -maxdepth 1 -name '*.agent.md' | sort
 find claude-agents -maxdepth 1 -name '*.md' | sort

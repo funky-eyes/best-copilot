@@ -27,7 +27,7 @@ Do not hand-create a shortened scaffold, search/read business source, inspect mo
 
 ## Boundary
 
-- This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.6.1`.
+- This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.7.0`.
 - Loading this skill is not execution. In Claude Code, `Skill(best-copilot:repo-init-scan) Successfully loaded` is only a preload trace. A valid `INIT_SCAN` requires running the preflight or scan bootstrap helper, or running the stages below inline, creating or repairing target-local files when needed, checking them on disk, and returning the init summary.
 - In shell-capable Claude Code, a missing-sentinel scan should show either `repo-init-gate/scripts/run-preflight.sh` or the bundled `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` command. If shell execution is blocked but file tools work, a strict inline fallback is valid only when all 17 Claude-compatible paths are created/repaired and verified. A hand-written two-file or four-file scaffold is invalid.
 - Do not dispatch specialist agents, run broad code search, or produce architecture/implementation plans while `required_artifacts_verified` is not `yes`.
@@ -69,7 +69,7 @@ When performing the strict inline fallback (no shell helper available), the exac
 
 ```md
 ---
-version: "0.6.1"
+version: "0.7.0"
 ---
 ```
 
@@ -92,7 +92,7 @@ Do NOT add headings, project names, descriptions, dates, or any other prose when
    - On official success, use it to verify scaffolds, repair any remaining gaps, and rewrite `best-copilot.md`.
    - On official unavailability, no-write, or incomplete output, use it to do the bounded manual repair and then rewrite `best-copilot.md`.
 4. In Claude Code, when shell access exists, prefer the current skill's resolved single-command path using `CLAUDE_SKILL_DIR` or the active plugin directory when available. Otherwise invoke the best-copilot stage skills when available, using the exact picker value such as `/repo-init-official (best-copilot)` or `/best-copilot:repo-init-official`, then `/repo-init-manual-fallback (best-copilot)` or `/best-copilot:repo-init-manual-fallback`. These plugin skills are different from the bare built-in `/init` command. If `Skill(...) Successfully loaded` appears but no actual init operations happen, that means the skill text loaded but was not executed — execute the documented steps inline now. If shell access exists and the manual fallback helper is discoverable, run its bundled `scripts/bootstrap-target-scaffold.sh` helper before any hand-written scaffold attempt. If the runtime only loads the skill text or cannot invoke plugin slash commands or discover the helper, execute the documented fallback inline: apply the official stage rules, then read the bootstrap skill templates and create/repair the target files directly.
-5. Stop only when the target repository has a verified `.github/instructions/project.instructions.md`, all required scaffolds, and a rewritten `best-copilot.md` sentinel for version `0.6.1`.
+5. Stop only when the target repository has a verified `.github/instructions/project.instructions.md`, all required scaffolds, and a rewritten `best-copilot.md` sentinel for version `0.7.0`.
 6. If either stage cannot complete its verification barrier, return `BLOCKED` instead of continuing to the user's substantive task.
 
 ## Output

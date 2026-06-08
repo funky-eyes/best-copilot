@@ -1,0 +1,21 @@
+{
+  "name": "best-copilot",
+  "plugins": [
+    {
+      "name": "best-copilot",
+      "source": {
+        "source": "local",
+        "path": "./"
+      },
+      "policy": {
+        "installation": "AVAILABLE",
+        "authentication": "ON_INSTALL"
+      },
+      "category": "Productivity",
+      "interface": {
+        "displayName": "best-copilot",
+        "description": "Senior multi-agent engineering workflow skills for Codex, Claude Code, and GitHub Copilot CLI."
+      }
+    }
+  ]
+}
