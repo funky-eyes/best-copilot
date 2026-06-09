@@ -5,7 +5,7 @@
       "name": "best-copilot",
       "source": {
         "source": "local",
-        "path": "./"
+        "path": "./plugins/best-copilot"
       },
       "policy": {
         "installation": "AVAILABLE",

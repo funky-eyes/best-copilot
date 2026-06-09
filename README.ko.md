@@ -28,6 +28,32 @@ Codex는 `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.agen
 
 ## 설치
 
+### Codex
+
+Codex는 재사용 가능한 skills, apps, MCP 설정을 플러그인으로 배포할 수 있습니다. 이 저장소를 Codex marketplace로 추가한 뒤 플러그인을 설치하세요:
+
+```bash
+codex plugin marketplace add funky-eyes/best-copilot
+codex plugin add best-copilot@best-copilot
+```
+
+로컬 개발에서 현재 checkout을 사용할 때:
+
+```bash
+codex plugin marketplace add /absolute/path/to/best-copilot
+codex plugin add best-copilot@best-copilot
+```
+
+Codex는 다음을 발견합니다:
+
+- 플러그인 메타데이터: [.codex-plugin/plugin.json](.codex-plugin/plugin.json)
+- 로컬 / 저장소 marketplace 메타데이터: [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
+- marketplace plugin source: [plugins/best-copilot](plugins/best-copilot). 패키지 루트로 돌아가는 symlink입니다
+- plugin manifest를 통해 노출되는 공유 skills: [skills/](skills/)
+- [.agents/skills](.agents/skills)를 통한 repo-scoped 공유 skills
+
+설치하거나 수정한 뒤에는 새로운 Codex thread/session을 시작하세요. 이 workflow를 사용할 때는 `@best-copilot` 또는 bundled `$skill`을 명시적으로 호출합니다.
+
 ### Copilot CLI
 
 이 저장소를 Copilot CLI 플러그인 마켓플레이스로 등록합니다:
