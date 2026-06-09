@@ -48,7 +48,7 @@ Codex discovers:
 
 - plugin metadata from [.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - local/repo marketplace metadata from [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
-- marketplace plugin source from [plugins/best-copilot](plugins/best-copilot), a symlink back to this package root
+- marketplace plugin source from [plugins/best-copilot](plugins/best-copilot), a real Codex plugin package whose `skills` folder links to the shared root [skills/](skills/)
 - shared skills from [skills/](skills/) through the plugin manifest
 - direct repo-scoped shared skills through [.agents/skills](.agents/skills)
 

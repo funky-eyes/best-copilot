@@ -1,0 +1,22 @@
+{
+  "name": "best-copilot",
+  "version": "0.7.0",
+  "description": "A senior multi-agent engineering workflow plugin for Codex, Claude Code, and GitHub Copilot CLI.",
+  "author": {
+    "name": "best-copilot maintainers"
+  },
+  "license": "Apache-2.0",
+  "repository": "https://github.com/funky-eyes/best-copilot",
+  "keywords": [
+    "codex",
+    "agents",
+    "skills",
+    "multi-agent",
+    "software-engineering",
+    "workflow",
+    "spec",
+    "memory",
+    "verification"
+  ],
+  "skills": "./skills/"
+}

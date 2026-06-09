@@ -48,7 +48,7 @@ Codex は次を検出します：
 
 - プラグインメタデータ：[.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - ローカル / リポジトリ marketplace メタデータ：[.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
-- marketplace の plugin source：[plugins/best-copilot](plugins/best-copilot)。これはパッケージルートへ戻る symlink です
+- marketplace の plugin source：[plugins/best-copilot](plugins/best-copilot)。これは実体のある Codex プラグインサブパッケージで、`skills` ディレクトリはルートの共有 [skills/](skills/) にリンクします
 - plugin manifest 経由の共有 skills：[skills/](skills/)
 - [.agents/skills](.agents/skills) 経由の repo-scoped 共有 skills
 

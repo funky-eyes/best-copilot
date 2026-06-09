@@ -48,7 +48,7 @@ Codex는 다음을 발견합니다:
 
 - 플러그인 메타데이터: [.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - 로컬 / 저장소 marketplace 메타데이터: [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
-- marketplace plugin source: [plugins/best-copilot](plugins/best-copilot). 패키지 루트로 돌아가는 symlink입니다
+- marketplace plugin source: [plugins/best-copilot](plugins/best-copilot). 실제 Codex 플러그인 서브패키지이며, `skills` 디렉터리는 루트의 공유 [skills/](skills/)로 연결됩니다
 - plugin manifest를 통해 노출되는 공유 skills: [skills/](skills/)
 - [.agents/skills](.agents/skills)를 통한 repo-scoped 공유 skills
 

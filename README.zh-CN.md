@@ -48,7 +48,7 @@ Codex 会发现：
 
 - 插件元数据：[.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - 本地/仓库 marketplace 元数据：[.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
-- marketplace 插件 source：[plugins/best-copilot](plugins/best-copilot)，这是指回当前包根目录的 symlink
+- marketplace 插件 source：[plugins/best-copilot](plugins/best-copilot)，这是一个真实的 Codex 插件子包，其中 `skills` 目录链接到根目录共享 [skills/](skills/)
 - 通过插件 manifest 暴露的共享技能：[skills/](skills/)
 - 通过 [.agents/skills](.agents/skills) 直接暴露的 repo-scoped 共享技能
 
