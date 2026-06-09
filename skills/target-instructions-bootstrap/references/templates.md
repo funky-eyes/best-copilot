@@ -203,6 +203,23 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Detect the user's primary language and answer in that language unless asked otherwise.
 ```
 
+## `.codex/agents/*.toml`
+
+Create these only when Codex custom-agent compatibility is requested or current runtime needs target-local Codex agents. Each file must include `name`, `description`, `nickname_candidates`, and `developer_instructions`.
+
+Required files:
+
+- `.codex/agents/senior-project-expert.toml`
+- `.codex/agents/technical-architect.toml`
+- `.codex/agents/developer.toml`
+- `.codex/agents/frontend-designer.toml`
+- `.codex/agents/quality-assurance-expert.toml`
+- `.codex/agents/security-reviewer.toml`
+- `.codex/agents/specification-writer.toml`
+- `.codex/agents/root-cause-fixer.toml`
+
+Use the exact role names in the `name` field. The deterministic shell helper contains the canonical target-local adapter bodies; inline fallbacks may use the same content from `repo-init-manual-fallback/inline-templates-reference.md`.
+
 ## `CLAUDE.md`
 
 ```markdown

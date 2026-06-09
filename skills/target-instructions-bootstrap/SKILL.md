@@ -37,6 +37,7 @@ Create when absent, repair only compatible missing sections when present:
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `AGENTS.md` when Codex compatibility is requested or current runtime needs it
+- `.codex/agents/*.toml` when Codex custom-agent compatibility is requested or current runtime needs target-local Codex agents
 - `CLAUDE.md` when Claude Code compatibility is requested or current runtime is Claude Code
 - `.claude/settings.json` when Claude Code needs a stable Senior Project Expert session entry and current-branch worktree base
 
@@ -73,7 +74,7 @@ Target `.github/instructions/must.instructions.md` must cover:
 2. Read only the listed target instruction/adapter files that exist.
 3. Create missing files from `references/templates.md`.
 4. Append compatible missing sections from the reference to existing files.
-5. Verify required paths, required headings, Claude import lines when applicable, and valid JSON when `.claude/settings.json` is present.
+5. Verify required paths, required headings, Codex TOML adapter names when applicable, Claude import lines when applicable, and valid JSON when `.claude/settings.json` is present.
 6. Return created, preserved, repaired, conflict, and missing path lists.
 
 ## Verification
@@ -86,5 +87,6 @@ Target `.github/instructions/must.instructions.md` must cover:
 - For Claude Code, confirm `CLAUDE.md` has standalone unindented imports for `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
 - For Claude Code, confirm PM coordinator dispatch, foreground/background policy, isolated worktree closeout, scoped plugin agent names, namespaced skill commands, skill-load-is-not-execution, code intelligence fallback, TypeScript LSP fallback, provider compatibility smoke check, `AskUserQuestion`, and `STATE_SYNC` are covered.
 - When a stable Claude PM entry is required, confirm `.claude/settings.json` is valid JSON and contains `"agent": "senior-project-expert"` plus `"worktree": {"baseRef": "head"}` unless a different explicit policy was preserved.
+- For Codex, confirm `AGENTS.md` references `.codex/agents/*.toml`, all eight `.codex/agents/*.toml` files exist, and each file contains its expected `name = "<role>"` field plus `developer_instructions`.
 - Confirm no generated file contains unresolved project-specific claims, secrets, plugin-cache paths, or active plugin-package state.
 - If invoked because instructions or adapters were missing and required files still do not exist, return `BLOCKED target_instructions_bootstrap_incomplete` with missing paths.

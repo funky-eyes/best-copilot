@@ -5,6 +5,14 @@ target_dir="${1:-$PWD}"
 compatibility="${2:-claude}"
 contract_version="0.7.0"
 
+is_claude_compat() {
+  [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]
+}
+
+is_codex_compat() {
+  [ "$compatibility" = "codex" ] || [ "$compatibility" = "codex-cli" ] || [ "$compatibility" = "openai-codex" ]
+}
+
 if [ ! -d "$target_dir" ]; then
   echo "status=invalid_target_dir"
   echo "target_dir=$target_dir"
@@ -690,7 +698,7 @@ append_if_missing ".github/instructions/skills-index.instructions.md" "## Claude
 Use plugin skills with namespaced slash commands such as `/best-copilot:repo-init-gate` and `/best-copilot:repo-init-scan`. A `Skill(...) Successfully loaded` trace is not completion evidence; init still needs the explicit scan report and disk verification.
 EOF
 
-if [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]; then
+if is_claude_compat; then
   write_missing "CLAUDE.md" <<'EOF'
 # Claude Code Project Entry
 
@@ -727,6 +735,104 @@ EOF
     created_paths="${created_paths}.claude/settings.json
 "
   fi
+fi
+
+if is_codex_compat; then
+  write_missing "AGENTS.md" <<'EOF'
+# Codex Repository Entry
+
+This file is the Codex adapter for the target repository. `.github/**` is the shared source of repository AI rules when it exists. System, platform, and explicit user instructions have higher priority than repository files.
+
+## Required Entries
+
+1. `.github/instructions/project.instructions.md`
+2. `.github/instructions/must.instructions.md`
+3. `.github/instructions/skills-index.instructions.md`
+4. `memories/repo/INDEX.md` and `memories/repo/current-workstreams.md`
+5. `spec/INDEX.md`
+6. `.codex/agents/*.toml` when Codex custom-agent compatibility is required
+
+## Runtime Rules
+
+- Before non-trivial work, read relevant project and must instructions.
+- When resuming multi-step work, read memory index, current workstreams, then linked spec/memory shards.
+- Use `.agents/skills` or installed plugin skills for workflow skills; use `.codex/agents/*.toml` for Codex custom agents.
+- Do not treat plugin package state as active project state.
+- Task progress changes must update `tasks.md` and `memories/repo/current-workstreams.md`.
+- Detect the user's primary language and answer in that language unless asked otherwise.
+EOF
+
+  write_missing ".codex/agents/senior-project-expert.toml" <<'EOF'
+name = "senior-project-expert"
+description = "PM/coordinator for large, ambiguous, cross-module, planning, dispatch, fan-in, closeout, and workflow-evolution work. Use when scope must be frozen before implementation."
+nickname_candidates = ["Senior Project Expert", "PM Coordinator"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract, senior-project-expert-workflow, repo-init-gate, and repo-init-scan when the gate fails. Own intent, scope, planning, dispatch, fan-in, closeout, and workflow evolution. Do not write production code for medium or large work. Run repo-init-gate before substantive target-repository work. Use Codex subagents only after the user or PM workflow explicitly asks for delegation or parallel agent work. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/technical-architect.toml" <<'EOF'
+name = "technical-architect"
+description = "Owns full-stack architecture, service boundaries, data/API contracts, SDD design, implementation strategy, parallel decomposition, and review of Developer or Frontend Designer work."
+nickname_candidates = ["Technical Architect", "Architect"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract and technical-architect-workflow. Work from the PM-frozen packet. Own architecture-sensitive decisions, SDD design, decomposition, and mainline implementation strategy. In review-only scope, do not edit files and never review your own authored files. Return NEEDS_CONTEXT when required scope, files, acceptance checks, or dependencies are missing. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/developer.toml" <<'EOF'
+name = "developer"
+description = "Implements or reviews a PM-frozen scoped slice with files, dependencies, and acceptance checks. Not for architecture, coordination, or unfrozen debugging."
+nickname_candidates = ["Developer", "Implementation Specialist"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract and developer-workflow. Implement only PM-frozen slices and stay inside assigned files and acceptance checks. Return NEEDS_CONTEXT when sub_task_id, files_involved, dependencies, or acceptance checks are missing. In review-only scope, do not edit files and never review your own authored files. Use focused tests or minimal reproducible checks when practical. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/frontend-designer.toml" <<'EOF'
+name = "frontend-designer"
+description = "Owns frontend implementation or review for pages, components, interactions, forms, responsive layout, browser behavior, visual quality, and frontend performance."
+nickname_candidates = ["Frontend Designer", "UI Specialist"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract, frontend-designer-workflow, frontend-design-guardrails, and web-experience-audit when their triggers apply. Own user-visible frontend surfaces, states, responsive behavior, accessibility, interaction quality, and browser evidence. Do not own backend authorization or final security sign-off. If browser tools are unavailable, report static verification as partial. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/quality-assurance-expert.toml" <<'EOF'
+name = "quality-assurance-expert"
+description = "Reviews completed changes for behavior, regression risk, test sufficiency, functional verification, and merge readiness. Not a replacement for security review."
+nickname_candidates = ["Quality Assurance Expert", "QA Reviewer"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract, quality-assurance-workflow, structured-review, change-verification, and web-experience-audit when their triggers apply. Prioritize findings first, ordered by severity, with file/line references where possible. Assess behavior, regression risk, test sufficiency, and merge readiness. Do not edit production files and do not replace security review. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/security-reviewer.toml" <<'EOF'
+name = "security-reviewer"
+description = "Reviews authentication, authorization, permissions, dependencies, configuration, release surfaces, sensitive data, logging, validation, CORS, secrets, and external-service risk."
+nickname_candidates = ["Security Reviewer", "Security Specialist"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract, security-reviewer-workflow, structured-review, and root-cause-investigation when their triggers apply. Review touched release surfaces, permissions, dependencies, external services, sensitive data flow, validation, CORS, secrets, and logging. Do not own general functional QA or style review. Do not edit production files unless PM explicitly assigns a fix loop. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/specification-writer.toml" <<'EOF'
+name = "specification-writer"
+description = "Creates and maintains evidence-backed requirements, design, tasks, ADRs, execution-plan status, closeout records, and memory/spec recovery entries."
+nickname_candidates = ["Specification Writer", "Spec Writer"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract, specification-writer-workflow, target-spec-bootstrap, target-memory-bootstrap, context-packet-fastpath, and writing-plans when their triggers apply. Write specs and memory into the target repository, never into the plugin package or plugin cache. Do not write production code. Keep task status, verification, batch state, and closeout synchronized with tasks.md and memories/repo/current-workstreams.md. Invoke verification-before-completion before final completion claims.
+"""
+EOF
+
+  write_missing ".codex/agents/root-cause-fixer.toml" <<'EOF'
+name = "root-cause-fixer"
+description = "Uses concrete failure evidence to find root cause, make the smallest safe fix, and prove the regression is resolved. Not for speculation-driven refactors."
+nickname_candidates = ["Root Cause Fixer", "Fix Specialist"]
+developer_instructions = """
+Use best-copilot skills when available: core-workflow-contract, root-cause-fixer-workflow, systematic-debugging, root-cause-investigation, test-driven-development, and change-verification when their triggers apply. Start from concrete failure evidence, state hypotheses, test them against source or command evidence, make the smallest safe fix, and prove the regression is resolved. Do not broaden into speculative refactors. Invoke verification-before-completion before final completion claims.
+"""
+EOF
 fi
 
 append_if_missing "CLAUDE.md" "## Best Copilot Instruction Imports" <<'EOF'
@@ -1085,8 +1191,22 @@ required_paths=(
   "spec/templates/tasks-template.md"
 )
 
-if [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]; then
+if is_claude_compat; then
   required_paths+=("CLAUDE.md")
+fi
+
+if is_codex_compat; then
+  required_paths+=(
+    "AGENTS.md"
+    ".codex/agents/senior-project-expert.toml"
+    ".codex/agents/technical-architect.toml"
+    ".codex/agents/developer.toml"
+    ".codex/agents/frontend-designer.toml"
+    ".codex/agents/quality-assurance-expert.toml"
+    ".codex/agents/security-reviewer.toml"
+    ".codex/agents/specification-writer.toml"
+    ".codex/agents/root-cause-fixer.toml"
+  )
 fi
 
 for rel_path in "${required_paths[@]}"; do
@@ -1115,11 +1235,23 @@ check_contains ".github/instructions/must.instructions.md" "target-memory-bootst
 check_contains ".github/instructions/skills-index.instructions.md" "target-memory-bootstrap"
 check_contains ".github/instructions/skills-index.instructions.md" "## Claude Code Skill Names"
 
-if [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]; then
+if is_claude_compat; then
   check_contains "CLAUDE.md" "## Best Copilot Instruction Imports"
   check_contains "CLAUDE.md" "@.github/instructions/project.instructions.md"
   check_contains "CLAUDE.md" "@.github/instructions/must.instructions.md"
   check_contains "CLAUDE.md" "@.github/instructions/skills-index.instructions.md"
+fi
+
+if is_codex_compat; then
+  check_contains "AGENTS.md" ".codex/agents/*.toml"
+  check_contains ".codex/agents/senior-project-expert.toml" 'name = "senior-project-expert"'
+  check_contains ".codex/agents/technical-architect.toml" 'name = "technical-architect"'
+  check_contains ".codex/agents/developer.toml" 'name = "developer"'
+  check_contains ".codex/agents/frontend-designer.toml" 'name = "frontend-designer"'
+  check_contains ".codex/agents/quality-assurance-expert.toml" 'name = "quality-assurance-expert"'
+  check_contains ".codex/agents/security-reviewer.toml" 'name = "security-reviewer"'
+  check_contains ".codex/agents/specification-writer.toml" 'name = "specification-writer"'
+  check_contains ".codex/agents/root-cause-fixer.toml" 'name = "root-cause-fixer"'
 fi
 
 if [ -z "$missing_paths" ] && [ -z "$content_errors" ]; then

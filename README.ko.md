@@ -14,7 +14,7 @@
 
 `best-copilot`은(는) Codex, Copilot CLI, Claude Code에서 사용할 수 있는 설치형 에이전트 팀 workflow입니다. 이 프로젝트는 저장소에 다음과 같은 시니어급 전달 흐름을 제공합니다: 사실 초기화, 범위 고정, 설계 후 구현, 전문 역할을 통한 구현, 독립적 검토, 증거 기반 검증, 그리고 다음 세션을 위한 복구 지점 보존.
 
-Codex는 `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.agents/skills -> ../skills`를 사용합니다. Copilot CLI는 `plugin.json`을 통해 루트 `agents/`와 `skills/`를 사용합니다. Claude Code는 `claude-plugin/` 패키지를 사용합니다: `claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/skills -> ../skills`, `claude-plugin/agents -> ../claude-agents`. 저장소 수준 규칙은 `.github/instructions/**`에 보관됩니다.
+Codex는 `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.agents/skills -> ../skills`, `.codex/agents/*.toml`을 사용합니다. Copilot CLI는 `plugin.json`을 통해 루트 `agents/`와 `skills/`를 사용합니다. Claude Code는 `claude-plugin/` 패키지를 사용합니다: `claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/skills -> ../skills`, `claude-plugin/agents -> ../claude-agents`. 저장소 수준 규칙은 `.github/instructions/**`에 보관됩니다.
 
 ## 존재 이유
 
@@ -49,10 +49,13 @@ Codex는 다음을 발견합니다:
 - 플러그인 메타데이터: [.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - 로컬 / 저장소 marketplace 메타데이터: [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
 - marketplace plugin source: [plugins/best-copilot](plugins/best-copilot). 실제 Codex 플러그인 서브패키지이며, `skills` 디렉터리는 루트의 공유 [skills/](skills/)로 연결됩니다
-- plugin manifest를 통해 노출되는 공유 skills: [skills/](skills/)
-- [.agents/skills](.agents/skills)를 통한 repo-scoped 공유 skills
+- plugin manifest를 통해 노출되는 공유 skills: [skills/](skills/). 설치된 플러그인 상세 화면에 표시됩니다
+- [.agents/skills](.agents/skills)를 통한 repo-scoped 공유 skills. 이 checkout에서 작업할 때 일반 `$` skill selector에 표시되게 하는 경로입니다
+- [.codex/agents](.codex/agents)를 통한 Codex custom agents. 이 checkout에서 작업하거나, 해당 adapter 디렉터리를 대상 저장소로 복사하거나, Codex compatibility로 `repo-init-scan`을 실행한 뒤 사용할 수 있습니다
 
-설치하거나 수정한 뒤에는 새로운 Codex thread/session을 시작하세요. 이 workflow를 사용할 때는 `@best-copilot` 또는 bundled `$skill`을 명시적으로 호출합니다.
+설치하거나 수정한 뒤에는 새로운 Codex thread/session을 시작하세요. 설치된 플러그인에서 이 workflow를 사용할 때는 `@best-copilot`을 명시적으로 호출합니다. 개별 workflow skill을 일반 `$` skill selector에 표시하려면 `.agents/skills` 또는 `~/.agents/skills` 같은 repo/user skill 위치로 노출하세요.
+
+Codex subagent는 플러그인과 별도로 설정됩니다. Copilot의 `agents/*.agent.md` 파일과 Claude의 `claude-agents/*.md` 어댑터는 플러그인 설치 후 Codex custom agent로 자동 등록되지 않으므로, 이 저장소는 [.codex/agents](.codex/agents)에 네이티브 Codex TOML adapter도 제공합니다. 대상 저장소에서는 Codex compatibility를 요청하면 init helper가 `AGENTS.md`와 동일한 8개의 `.codex/agents/*.toml` adapter를 생성합니다.
 
 ### Copilot CLI
 
@@ -128,6 +131,7 @@ Claude Code는 다음을 발견합니다:
 - **Copilot CLI**: `/agent`를 실행하고 **Senior Project Expert**를 선택한 뒤 작업을 설명합니다. Copilot은 `handoffs:` 선언을 사용하여 전문가를 라우팅합니다.
 - **VS Code 확장**: 채팅 에이전트를 **Senior Project Expert**로 수동 전환한 뒤 작업을 시작합니다.
 - **Claude Code**: PM이 메인 세션으로서 **Agent tool**을 통해 전문가 서브에이전트를 호출합니다.
+- **Codex**: `@best-copilot`을 호출한 뒤 workflow 실행을 요청합니다. 이 checkout에서는 `.agents/skills`가 호환 진입점 `$senior-project-expert`도 일반 `$` skill selector에 노출합니다. 병렬 작업이 필요하면 Codex에 subagent spawn을 명시적으로 요청해야 하며, 플러그인 설치만으로 subagent가 자동 spawn되지는 않습니다.
 
 ### Claude Code 시작 방법
 

@@ -14,7 +14,7 @@ English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japa
 
 `best-copilot` is an installable agent-team workflow for serious engineering work in Codex, Copilot CLI, and Claude Code. It gives a repository a senior delivery flow: initialize facts, freeze scope, design before building, implement through specialist roles, review independently, verify with evidence, and preserve a resume point for the next session.
 
-Codex uses `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, and `.agents/skills -> ../skills`. Copilot CLI uses root `agents/` and `skills/` through `plugin.json`. Claude Code uses the `claude-plugin/` package: `claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/skills -> ../skills`, and `claude-plugin/agents -> ../claude-agents`. Repository-level rules live in `.github/instructions/**`.
+Codex uses `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.agents/skills -> ../skills`, and `.codex/agents/*.toml`. Copilot CLI uses root `agents/` and `skills/` through `plugin.json`. Claude Code uses the `claude-plugin/` package: `claude-plugin/.claude-plugin/plugin.json`, `claude-plugin/skills -> ../skills`, and `claude-plugin/agents -> ../claude-agents`. Repository-level rules live in `.github/instructions/**`.
 
 ## Why It Exists
 
@@ -49,10 +49,13 @@ Codex discovers:
 - plugin metadata from [.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - local/repo marketplace metadata from [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
 - marketplace plugin source from [plugins/best-copilot](plugins/best-copilot), a real Codex plugin package whose `skills` folder links to the shared root [skills/](skills/)
-- shared skills from [skills/](skills/) through the plugin manifest
-- direct repo-scoped shared skills through [.agents/skills](.agents/skills)
+- shared skills from [skills/](skills/) through the plugin manifest, visible on the installed plugin details page
+- direct repo-scoped shared skills through [.agents/skills](.agents/skills), which is the path that makes these skills appear in the normal `$` skill selector when working from this checkout
+- Codex custom agents from [.codex/agents](.codex/agents) when working from this checkout, after copying that adapter directory into a target repo, or after `repo-init-scan` runs with Codex compatibility
 
-After installing or editing the plugin, start a new Codex thread/session. Use `@best-copilot` or invoke a bundled `$skill` explicitly when you want this workflow.
+After installing or editing the plugin, start a new Codex thread/session. Use `@best-copilot` when you want this workflow from the installed plugin. If you want the individual workflow skills to appear in the normal `$` skill selector, expose them through a repo or user skill location such as `.agents/skills` or `~/.agents/skills`.
+
+Codex subagents are configured separately from plugins. The Copilot `agents/*.agent.md` files and Claude `claude-agents/*.md` adapters do not become Codex custom agents after plugin installation, so this repository also ships native Codex TOML adapters under [.codex/agents](.codex/agents). For target repositories, the init helper creates `AGENTS.md` and the same eight `.codex/agents/*.toml` adapters when Codex compatibility is requested.
 
 ### Copilot CLI
 
@@ -128,7 +131,7 @@ Start requirement orchestration with the **Senior Project Expert** PM coordinato
 - **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work. Copilot uses `handoffs:` declarations for specialist routing.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
 - **Claude Code**: the PM is the main session, dispatching to specialists via the **Agent tool**.
-- **Codex**: invoke `@best-copilot` or the compatibility `$senior-project-expert` skill, then ask for the workflow. For parallel work, explicitly ask Codex to spawn subagents; Codex does not auto-spawn subagents only because a plugin is installed.
+- **Codex**: invoke `@best-copilot`, then ask for the workflow. From this checkout, `.agents/skills` also exposes the compatibility `$senior-project-expert` skill to the normal `$` skill selector. For parallel work, explicitly ask Codex to spawn subagents; Codex does not auto-spawn subagents only because a plugin is installed.
 
 ### Claude Code Entry Points
 
@@ -191,7 +194,7 @@ core-workflow-contract + role-*-workflow per role
             claude-plugin/{agents,skills} symlinks
 ```
 
-Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Codex-only details stay in [.codex-plugin/](.codex-plugin/) and [.agents/](.agents/): plugin metadata, marketplace metadata, and direct repo-scoped skill discovery. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, Claude model aliases (`opus`, `sonnet`, `haiku`), read-only restrictions, `isolation: worktree`, and PM-owned foreground/background dispatch policy.
+Common cross-role rules live in [skills/core-workflow-contract/SKILL.md](skills/core-workflow-contract/SKILL.md). Each role has its own workflow skill under `skills/*-workflow/`: `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, and `root-cause-fixer-workflow`. Codex-only details stay in [.codex-plugin/](.codex-plugin/), [.agents/](.agents/), and [.codex/agents](.codex/agents): plugin metadata, marketplace metadata, direct repo-scoped skill discovery, and Codex custom agent adapters. Copilot-only details stay in [agents/](agents/): model names, Copilot tools, `user-invocable`, `agents`, and `handoffs`. Claude-only details stay in matching files under [claude-agents/](claude-agents/): runtime-displayed agent names, Claude model aliases (`opus`, `sonnet`, `haiku`), read-only restrictions, `isolation: worktree`, and PM-owned foreground/background dispatch policy.
 
 This keeps shared behavior, role-specific behavior, and incompatible runtime metadata isolated while requiring every agent to load both the shared contract and its role workflow.
 
@@ -199,8 +202,8 @@ This keeps shared behavior, role-specific behavior, and incompatible runtime met
 
 | Scenario | Behavior |
 |----------|----------|
-| Codex plugin session | Skills are bundled by `.codex-plugin/plugin.json`; invoke `@best-copilot` or `$skill`, and explicitly request subagents for parallel work |
-| Codex repo checkout | `.agents/skills -> ../skills` makes the same shared skills available without copying them |
+| Codex plugin session | Skills are bundled by `.codex-plugin/plugin.json` and shown on plugin details; invoke `@best-copilot`, and explicitly request subagents for parallel work |
+| Codex repo checkout | `.agents/skills -> ../skills` exposes shared skills; `.codex/agents/*.toml` exposes Codex custom agents |
 | Claude PM main session | PM's `skills:` frontmatter declarative preloading |
 | Claude subagent (PM spawn) | Subagent loads from its own `skills:` frontmatter; PM must include task context and required skills in spawn prompt |
 | Claude base session | Agent's `skills:` not activated, must call manually |
@@ -212,14 +215,14 @@ Claude agent frontmatter normally preloads only `core-workflow-contract` and the
 
 | Dimension | Codex | Copilot CLI | Claude Code |
 |-----------|-------|-------------|-------------|
-| Entry | `@best-copilot` or bundled `$senior-project-expert` skill | `agents/pm-coordinator.agent.md` | `claude-agents/senior-project-expert.md` (via `--agent` or `.claude/settings.json`) |
+| Entry | `@best-copilot` for the installed plugin, or `senior-project-expert` from `.codex/agents` in repo/custom-agent mode | `agents/pm-coordinator.agent.md` | `claude-agents/senior-project-expert.md` (via `--agent` or `.claude/settings.json`) |
 | Model specification | Codex runtime/config chooses model unless prompted | Concrete names like `GPT-5.4 (copilot)` | `model: opus` / `haiku` / `sonnet` role-tier aliases |
 | Specialist dispatch | Explicit Codex subagent/delegation prompts through workflow skills | `handoffs:` declarations + `agent` tool | PM main session spawns via **Agent tool** |
 | Parallel execution | Explicit user/PM request required | Handoff declarations handle automatically | PM chooses background only for safe independent research/review |
 | File isolation | Codex sandbox/worktree behavior | Copilot built-in | `isolation: "worktree"` plus PM closeout |
 | User interaction | Current Codex ask/approval surface | `vscode_askQuestions` / `Asking user` | Built-in `AskUserQuestion` |
-| Skill discovery | `.codex-plugin` skills plus `.agents/skills` symlink | Directly reads root `skills/` | `claude-plugin/skills -> ../skills` symlink |
-| Agent discovery | No installed role adapter equivalent; use skills and explicit subagents | Directly reads root `agents/` | `claude-plugin/agents -> ../claude-agents` symlink |
+| Skill discovery | Plugin details from `.codex-plugin`; normal `$` selector from `.agents/skills` or other skill locations | Directly reads root `skills/` | `claude-plugin/skills -> ../skills` symlink |
+| Agent discovery | `.codex/agents/*.toml` custom agents | Directly reads root `agents/` | `claude-plugin/agents -> ../claude-agents` symlink |
 | Cross-model routing | Codex runtime/config controlled | Supported (GPT / Gemini / Claude mixed) | Claude model-tier aliases only |
 
 Copilot handoffs are fail-closed: each PM handoff prompt requires `core-workflow-contract` plus the target role workflow skill. If the runtime cannot load those skills, the handoff includes a minimal role checklist fallback; without either, the specialist returns `NEEDS_CONTEXT missing_required_skill`.

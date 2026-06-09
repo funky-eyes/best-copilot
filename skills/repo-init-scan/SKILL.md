@@ -29,7 +29,7 @@ Do not hand-create a shortened scaffold, search/read business source, inspect mo
 
 - This skill is fail-closed. Do not continue to substantive planning or implementation until required scaffolds are verified and `best-copilot.md` has been rewritten for version `0.7.0`.
 - Loading this skill is not execution. In Claude Code, `Skill(best-copilot:repo-init-scan) Successfully loaded` is only a preload trace. A valid `INIT_SCAN` requires running the preflight or scan bootstrap helper, or running the stages below inline, creating or repairing target-local files when needed, checking them on disk, and returning the init summary.
-- In shell-capable Claude Code, a missing-sentinel scan should show either `repo-init-gate/scripts/run-preflight.sh` or the bundled `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` command. If shell execution is blocked but file tools work, a strict inline fallback is valid only when all 17 Claude-compatible paths are created/repaired and verified. A hand-written two-file or four-file scaffold is invalid.
+- In shell-capable Claude Code, a missing-sentinel scan should show either `repo-init-gate/scripts/run-preflight.sh` or the bundled `repo-init-scan/scripts/bootstrap-after-gate-failure.sh` command. If shell execution is blocked but file tools work, a strict inline fallback is valid only when all Claude-compatible paths are created/repaired and verified. A hand-written two-file or four-file scaffold is invalid.
 - Do not dispatch specialist agents, run broad code search, or produce architecture/implementation plans while `required_artifacts_verified` is not `yes`.
 - The next observable assistant action after loading this skill must be either the staged init work or a `BLOCKED` init report. A code intelligence call, business-source read/search, architecture summary, or specialist dispatch before the init summary is invalid.
 - A valid missing-sentinel scan transcript contains `## Repo Init Gate` first, then real stage work, then the structured `## Init Summary` fields below. A narrative claim that files were created without verified paths is invalid.
@@ -39,12 +39,21 @@ Do not hand-create a shortened scaffold, search/read business source, inspect mo
 
 For `required_artifacts_verified: yes`, `verified_paths` must include these exact target-root paths. Similar paths do not count.
 
-Claude-compatible first-use init has 17 required paths. Fewer verified paths means `required_artifacts_verified: no`, even if `best-copilot.md` and `.github/instructions/project.instructions.md` exist.
+Base first-use init has 16 required paths including the sentinel. Claude-compatible first-use init has 17 required paths. Codex-compatible first-use init has 25 required paths because Codex custom-agent adapters are target-local `.codex/agents/*.toml` files. Fewer verified paths means `required_artifacts_verified: no`, even if `best-copilot.md` and `.github/instructions/project.instructions.md` exist.
 
 - `.github/instructions/project.instructions.md`
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `CLAUDE.md` when the active target runtime is Claude Code or Claude compatibility is requested
+- `AGENTS.md` when the active target runtime is Codex or Codex compatibility is requested
+- `.codex/agents/senior-project-expert.toml` when Codex compatibility is requested
+- `.codex/agents/technical-architect.toml` when Codex compatibility is requested
+- `.codex/agents/developer.toml` when Codex compatibility is requested
+- `.codex/agents/frontend-designer.toml` when Codex compatibility is requested
+- `.codex/agents/quality-assurance-expert.toml` when Codex compatibility is requested
+- `.codex/agents/security-reviewer.toml` when Codex compatibility is requested
+- `.codex/agents/specification-writer.toml` when Codex compatibility is requested
+- `.codex/agents/root-cause-fixer.toml` when Codex compatibility is requested
 - `memories/README.md`
 - `memories/repo/INDEX.md`
 - `memories/repo/current-workstreams.md`
@@ -61,7 +70,7 @@ Claude-compatible first-use init has 17 required paths. Fewer verified paths mea
 
 Do not accept substitutes such as `memory/current-state.md`, `MEMORY.md`, `spec/requirements.md`, or `spec/templates/spec-template.md`. If any exact required path is absent or content-invalid, set `missing_paths` to those paths, `required_artifacts_verified: no`, `next_task_ready: no`, and return `BLOCKED first_use_gate_incomplete`.
 
-The `verified_paths` output field must enumerate the exact relative path names. A phrase such as `all 17 required paths`, `created successfully`, or an absolute temp directory path is not valid evidence.
+The `verified_paths` output field must enumerate the exact relative path names. A phrase such as `all required paths`, `created successfully`, or an absolute temp directory path is not valid evidence.
 
 ## Inline Fallback: Canonical Sentinel Content
 
@@ -113,6 +122,6 @@ Return a short initialization report:
 
 `official_attempted` may be a comma-separated chain when a target-local `init` skill exists but does not write a recognized artifact and the helper continues to the runtime command fallback.
 
-`sentinel_written: yes` means the current `best-copilot.md` sentinel is present and current, whether it was newly written or already present. `required_artifacts_verified: yes` may be used only when `missing_paths` is `none` and `verified_paths` covers the full Required Artifact Set above, including Claude `CLAUDE.md` when Claude compatibility is active. `next_task_ready` may be `yes` only when `required_artifacts_verified` is `yes` and `sentinel_written` is `yes`. If any path is missing or unverified, the PM must stop at the first-use gate and return `BLOCKED first_use_gate_incomplete`, not a normal plan or implementation summary.
+`sentinel_written: yes` means the current `best-copilot.md` sentinel is present and current, whether it was newly written or already present. `required_artifacts_verified: yes` may be used only when `missing_paths` is `none` and `verified_paths` covers the full Required Artifact Set above, including Claude `CLAUDE.md` when Claude compatibility is active and Codex `AGENTS.md` plus `.codex/agents/*.toml` when Codex compatibility is active. `next_task_ready` may be `yes` only when `required_artifacts_verified` is `yes` and `sentinel_written` is `yes`. If any path is missing or unverified, the PM must stop at the first-use gate and return `BLOCKED first_use_gate_incomplete`, not a normal plan or implementation summary.
 
 `manual_fallback_stage: skipped` is allowed only when this skill was called directly and the current sentinel already matched before any gate failure. After `repo-init-gate` reports a missing, invalid, or stale sentinel, the manual fallback stage must run because it owns scaffold verification and sentinel rewrite.

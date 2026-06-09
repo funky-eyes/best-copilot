@@ -73,6 +73,51 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 - Keep this file short. Facts → `.github/instructions/`, memory → `memories/repo/**`, specs → `spec/**`.
 ```
 
+## Codex Runtime Adapter
+
+Create these files only when Codex compatibility is required.
+
+### `AGENTS.md`
+
+```md
+# Codex Repository Entry
+
+This file is the Codex adapter for the target repository. `.github/**` is the shared source of repository AI rules when it exists. System, platform, and explicit user instructions have higher priority than repository files.
+
+## Required Entries
+
+1. `.github/instructions/project.instructions.md`
+2. `.github/instructions/must.instructions.md`
+3. `.github/instructions/skills-index.instructions.md`
+4. `memories/repo/INDEX.md` and `memories/repo/current-workstreams.md`
+5. `spec/INDEX.md`
+6. `.codex/agents/*.toml` when Codex custom-agent compatibility is required
+
+## Runtime Rules
+
+- Before non-trivial work, read relevant project and must instructions.
+- When resuming multi-step work, read memory index, current workstreams, then linked spec/memory shards.
+- Use `.agents/skills` or installed plugin skills for workflow skills; use `.codex/agents/*.toml` for Codex custom agents.
+- Do not treat plugin package state as active project state.
+- Task progress changes must update `tasks.md` and `memories/repo/current-workstreams.md`.
+- Detect the user's primary language and answer in that language unless asked otherwise.
+```
+
+### `.codex/agents/*.toml`
+
+Create all eight files with these exact `name` fields and include `description`, `nickname_candidates`, and `developer_instructions` in each file:
+
+- `.codex/agents/senior-project-expert.toml`: `name = "senior-project-expert"`
+- `.codex/agents/technical-architect.toml`: `name = "technical-architect"`
+- `.codex/agents/developer.toml`: `name = "developer"`
+- `.codex/agents/frontend-designer.toml`: `name = "frontend-designer"`
+- `.codex/agents/quality-assurance-expert.toml`: `name = "quality-assurance-expert"`
+- `.codex/agents/security-reviewer.toml`: `name = "security-reviewer"`
+- `.codex/agents/specification-writer.toml`: `name = "specification-writer"`
+- `.codex/agents/root-cause-fixer.toml`: `name = "root-cause-fixer"`
+
+When the shell helper is unavailable, copy the role descriptions and `developer_instructions` from the deterministic helper in `repo-init-manual-fallback/scripts/bootstrap-target-scaffold.sh`; do not invent new role behavior.
+
 ## Memories Templates
 
 All memory files use YAML frontmatter: `---\nid: <name>\ntype: <type>\nupdated_at: unknown\nstatus: initialized\ntags: [<tags>]\n---`
