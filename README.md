@@ -34,22 +34,21 @@ Codex supports plugins as installable bundles for reusable skills, apps, and MCP
 
 ```bash
 codex plugin marketplace add funky-eyes/best-copilot
-codex
-/plugins
+codex plugin add best-copilot@best-copilot
 ```
 
 For local development from this checkout:
 
 ```bash
 codex plugin marketplace add /absolute/path/to/best-copilot
-codex
-/plugins
+codex plugin add best-copilot@best-copilot
 ```
 
 Codex discovers:
 
 - plugin metadata from [.codex-plugin/plugin.json](.codex-plugin/plugin.json)
 - local/repo marketplace metadata from [.agents/plugins/marketplace.json](.agents/plugins/marketplace.json)
+- marketplace plugin source from [plugins/best-copilot](plugins/best-copilot), a symlink back to this package root
 - shared skills from [skills/](skills/) through the plugin manifest
 - direct repo-scoped shared skills through [.agents/skills](.agents/skills)
 
