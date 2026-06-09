@@ -23,6 +23,10 @@ is_claude_compat() {
   [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]
 }
 
+is_codex_compat() {
+  [ "$compatibility" = "codex" ] || [ "$compatibility" = "codex-cli" ] || [ "$compatibility" = "openai-codex" ]
+}
+
 frontmatter_is_valid() {
   [ -f "best-copilot.md" ] && [ -r "best-copilot.md" ] && awk '
     NR == 1 && $0 != "---" { exit 1 }
@@ -89,6 +93,20 @@ required_paths=(
 
 if is_claude_compat; then
   required_paths+=("CLAUDE.md")
+fi
+
+if is_codex_compat; then
+  required_paths+=(
+    "AGENTS.md"
+    ".codex/agents/senior-project-expert.toml"
+    ".codex/agents/technical-architect.toml"
+    ".codex/agents/developer.toml"
+    ".codex/agents/frontend-designer.toml"
+    ".codex/agents/quality-assurance-expert.toml"
+    ".codex/agents/security-reviewer.toml"
+    ".codex/agents/specification-writer.toml"
+    ".codex/agents/root-cause-fixer.toml"
+  )
 fi
 
 collect_artifact_evidence() {

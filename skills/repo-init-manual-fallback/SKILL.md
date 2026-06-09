@@ -20,7 +20,7 @@ When this stage has just been loaded inside `repo-init-scan`, the next assistant
 - In shell-capable runtimes, first run the bundled deterministic helper when its path is discoverable. If it cannot be located, perform the documented create-or-repair fallback inline instead of blocking.
 - If `target-instructions-bootstrap`, `target-memory-bootstrap`, or `target-spec-bootstrap` cannot be invoked mechanically, read their `SKILL.md` templates and perform the documented create-only repair inline.
 - Do not hand-write improvised versions of scaffold files. When creating files inline (no shell helper), use the exact template content from `inline-templates-reference.md`. When a template is not there, read the corresponding bootstrap skill for the full template before writing.
-- The `best-copilot.md` sentinel must be written ONLY after all other 16 required artifacts exist and pass content verification.
+- The `best-copilot.md` sentinel must be written ONLY after all runtime-required artifacts exist and pass content verification.
 - **PM inline analysis requirement**: When creating `.github/instructions/project.instructions.md` inline (no shell helper), the PM MUST analyze the target repository before writing. Do NOT write "unknown" for fields that can be determined by reading the repository:
   1. Read the root build file (`pom.xml`, `build.gradle`, `package.json`, `go.mod`, etc.) for build system, modules, dependencies.
   2. For Maven: parse `<modules>` from root pom.xml, identify main module, find `@SpringBootApplication` or `main()`.
@@ -43,16 +43,19 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 - `.github/instructions/must.instructions.md`
 - `.github/instructions/skills-index.instructions.md`
 - `CLAUDE.md` (when Claude Code compatibility is required)
+- `AGENTS.md` (when Codex compatibility is required)
+- `.codex/agents/senior-project-expert.toml`, `.codex/agents/technical-architect.toml`, `.codex/agents/developer.toml`, `.codex/agents/frontend-designer.toml`, `.codex/agents/quality-assurance-expert.toml`, `.codex/agents/security-reviewer.toml`, `.codex/agents/specification-writer.toml`, `.codex/agents/root-cause-fixer.toml` (when Codex compatibility is required)
 - `memories/README.md`, `memories/repo/INDEX.md`, `memories/repo/current-workstreams.md`, `memories/repo/project-state.md`, `memories/repo/workflow-rules.md`, `memories/repo/decisions.md`, `memories/repo/logs/README.md`, `memories/repo/archive/deprecated-decisions.md`
 - `spec/INDEX.md`, `spec/templates/requirements-template.md`, `spec/templates/design-template.md`, `spec/templates/tasks-template.md`
 
-`best-copilot.md` is the verified-init sentinel for contract version `0.7.0`. Must be written only after the other 16 artifacts and content checks pass. The canonical write content is the exact 3-line YAML frontmatter block — no headings, descriptions, or dates. Repeat-request readers use only the frontmatter version for the cheap skip decision.
+`best-copilot.md` is the verified-init sentinel for contract version `0.7.0`. Must be written only after the other runtime-required artifacts and content checks pass. The canonical write content is the exact 3-line YAML frontmatter block -- no headings, descriptions, or dates. Repeat-request readers use only the frontmatter version for the cheap skip decision.
 
 ## Required Content Checks
 
 - `must.instructions.md` contains: `## Request Flow`, `## Per-Request Hard Gates`, `### PM Native Ask Trigger Gate`, `## Shared State Contracts`, `## Search Precision`, `## Command Output Budget`, `## Memory And Spec`, `## Agents and Dispatch`, `## Implementation and Verification`, plus `NEEDS_USER_INPUT`, `BLOCKED`, `work_mode`, `task_type`, `pm_action`, `fixed-string-before-regex`, `vscode_askQuestions`.
 - `skills-index.instructions.md` contains bootstrap routing and `## Claude Code Skill Names`.
 - `CLAUDE.md` references all three `.github/instructions/` files (when Claude Code compatibility is required).
+- `AGENTS.md` references `.codex/agents/*.toml`, and every Codex TOML adapter has the expected `name = "<role>"` field (when Codex compatibility is required).
 
 ## Steps
 
@@ -77,7 +80,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 8. Re-check the required artifact paths on disk.
 9. Re-check the required instruction content.
 10. After all other artifacts and content checks pass, write `best-copilot.md` with the exact sentinel.
-11. Verify: `project.instructions.md` exists and is not placeholder-heavy, `Init Status` has version `0.7.0`, `best-copilot.md` matches sentinel, `verified_paths` covers all 17 paths.
+11. Verify: `project.instructions.md` exists and is not placeholder-heavy, `Init Status` has version `0.7.0`, `best-copilot.md` matches sentinel, and `verified_paths` covers the full runtime-required path set.
 
 ## Inline Fallback Templates
 
