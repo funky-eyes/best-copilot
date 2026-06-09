@@ -28,7 +28,7 @@ The project serves three runtimes from shared sources using an adapter pattern:
 - **Shared layer** — `skills/core-workflow-contract/SKILL.md`: cross-role contracts (source priority, dispatch packets, review/verification gates, memory/spec rules, closeout). Role-specific behavior lives in `skills/*-workflow/SKILL.md`.
 - **Copilot CLI layer** — `agents/*.agent.md`: Copilot-specific metadata (model names, `user_invocable`, `agents`, `handoffs`). Skills loaded from root `skills/`.
 - **Claude Code layer** — `claude-agents/*.md`: Claude-specific metadata (Claude model aliases `opus` / `sonnet` / `haiku`, agent-team rules, read-only restrictions). Skills exposed via `claude-plugin/skills -> ../skills` symlink. Agents via `claude-plugin/agents -> ../claude-agents` symlink.
-- **Codex layer** — `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, and `plugins/best-copilot -> ..`: Codex plugin/marketplace metadata. Skills are declared from root `skills/`, and `.agents/skills -> ../skills` exposes the same skills for direct repo-scoped Codex use.
+- **Codex layer** — `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, and `plugins/best-copilot/`: Codex plugin/marketplace metadata. The installable Codex subpackage has its own `.codex-plugin/plugin.json` and `skills -> ../../skills`; `.agents/skills -> ../skills` exposes the same skills for direct repo-scoped Codex use.
 
 Key rule: shared behavior stays in `skills/`, incompatible runtime metadata stays in `agents/`, `claude-agents/`, `.codex-plugin/`, or `.agents/`. Never mix them.
 
