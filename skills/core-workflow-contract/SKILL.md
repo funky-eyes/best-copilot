@@ -54,6 +54,20 @@ If a task touches public APIs, message formats, schemas, auth/security boundarie
 9. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
 10. Invoke `verification-before-completion` and native continuation/closeout UI when available.
 
+## Self-Evolution Loop
+
+The multi-agent workflow is a learning loop, not a one-shot prompt. Keep the seven responsibilities separate so each part can improve without turning the system into an untestable giant prompt:
+
+1. `Planner`: PM/coordinator or Specification Writer understands the goal, freezes scope, decomposes work, chooses lanes/tools, and records acceptance checks.
+2. `Executor`: the assigned owner lane performs only the approved implementation, verification, spec, or review action inside the frozen scope.
+3. `Observer`: every lane records concrete evidence: files read or changed, commands, tool results, errors, durations when available, handbacks, and user corrections.
+4. `Evaluator`: QA, reviewers, or PM evaluate result quality against acceptance checks, review findings, verification evidence, user satisfaction signals, and residual risk.
+5. `Reflector`: PM or `evolution-loop` extracts the smallest reusable lesson from verified signals, separating root cause, future action, rollback, and validation.
+6. `Memory`: only durable, verified recovery state, decisions, task progress, and accepted/rejected evolution events are written to target `memories/repo/**`, target `spec/**`, or plugin-owned files when the plugin itself evolves.
+7. `Policy`: accepted lessons update routing, prompts, templates, tool priority, review gates, or workflow rules through auditable file changes. Policy changes must stay bounded, reversible, and verified.
+
+`Observer`, `Evaluator`, `Reflector`, `Memory`, and `Policy` are not optional cleanup labels for standard/full work. If there is no reusable lesson, record `evolution_signal: none` in the self-review or PM handback rather than inventing one.
+
 ## State Sync
 
 For persistent work, chat-only progress is invalid. Load `references/state-persistence.md` when any of these happen:

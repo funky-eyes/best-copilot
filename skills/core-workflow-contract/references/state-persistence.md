@@ -71,6 +71,7 @@ Active workstreams should be compact and resumable:
 - last_verified: `<YYYY-MM-DD command/check/evidence>`
 - last_state_sync: `<YYYY-MM-DD>`
 - owner_lane: `<PM or specialist lane>`
+- evolution_signal: `<none | accepted | rejected | deferred | proposed>`
 - residual_risk: `<none | concise risk>`
 ```
 
@@ -103,10 +104,13 @@ Accepted or rejected workflow evolution must leave an auditable record:
 - mutation:
 - validation:
 - rollback:
+- seven_module_trace:
+- ten_pass_review:
 - status: proposed|accepted|rejected|deprecated
 ```
 
 Target-repository evolution belongs in target `memories/repo/**`, target `spec/**`, or target instructions. Plugin evolution belongs in this plugin checkout's root `agents/`, root `skills/`, `.github/instructions/**`, and associated references. Never store target project state in the plugin package or plugin cache.
+Every accepted policy change must be traceable from observed signal to evaluation, reflection, memory writeback, and policy delta. If no reusable lesson exists, write `evolution_signal: none` rather than a speculative event.
 
 ## Resume Algorithm
 

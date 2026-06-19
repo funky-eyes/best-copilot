@@ -528,8 +528,10 @@ System, platform, and explicit user instructions outrank repository files. Curre
 ## Memory And Spec
 
 - Persistent memory belongs under `memories/repo/**`; specs belong under `spec/**`.
+- Self-evolution is a seven-part loop: Planner freezes scope, Executor performs the approved action, Observer records evidence, Evaluator judges quality and risk, Reflector extracts verified lessons, Memory stores durable learning, and Policy updates bounded workflow rules.
 - On first substantial plugin use, create missing scaffolds through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify paths on disk.
 - Use progressive disclosure: read indexes first, then only relevant shards.
+- Evolution writeback requires verified signal, validation, rollback, and accepted/rejected/deferred status; otherwise record `evolution_signal: none`.
 
 ## Interaction
 
@@ -609,8 +611,10 @@ append_if_missing ".github/instructions/must.instructions.md" "## Memory And Spe
 ## Memory And Spec
 
 - Persistent memory belongs under `memories/repo/**`; specs belong under `spec/**`.
+- Self-evolution is a seven-part loop: Planner freezes scope, Executor performs the approved action, Observer records evidence, Evaluator judges quality and risk, Reflector extracts verified lessons, Memory stores durable learning, and Policy updates bounded workflow rules.
 - On first substantial plugin use, create missing scaffolds through `target-instructions-bootstrap`, `target-memory-bootstrap`, and `target-spec-bootstrap`, then verify paths on disk.
 - Use progressive disclosure: read indexes first, then only relevant shards.
+- Evolution writeback requires verified signal, validation, rollback, and accepted/rejected/deferred status; otherwise record `evolution_signal: none`.
 EOF
 
 append_if_missing ".github/instructions/must.instructions.md" "## Agents and Dispatch" <<'EOF'
@@ -878,7 +882,7 @@ This directory stores target-local AI memory for this repository. Memory helps f
 - `repo/INDEX.md`: routing table.
 - `repo/current-workstreams.md`: active work and next resume action.
 - `repo/project-state.md`: compact current state and constraints.
-- `repo/workflow-rules.md`: memory/spec coordination rules.
+- `repo/workflow-rules.md`: memory/spec coordination rules and the self-evolution loop.
 - `repo/decisions.md`: durable dated decisions.
 - `repo/logs/`: compressed logs loaded only on demand.
 - `repo/archive/`: deprecated or historical memory.
@@ -891,7 +895,7 @@ write_missing "memories/repo/INDEX.md" <<'EOF'
 | --- | --- | --- | --- | --- | --- | --- |
 | `current-workstreams.md` | task-active | resume, progress | Resume current work and find next action | `spec/INDEX.md` | unknown | Active workstream summary |
 | `project-state.md` | task-reference | project, status | Current state and constraints | `spec/INDEX.md` | unknown | Compact project state |
-| `workflow-rules.md` | task-reference | workflow, memory, spec | Memory retrieval and spec coordination | `spec/INDEX.md` | unknown | Workflow rules |
+| `workflow-rules.md` | task-reference | workflow, memory, spec, evolution | Memory retrieval, spec coordination, and bounded evolution rules | `spec/INDEX.md` | unknown | Workflow and evolution rules |
 | `decisions.md` | task-reference | decisions | Durable decisions | `spec/INDEX.md` | unknown | Date-stamped decisions |
 | `logs/README.md` | archive-reference | logs | Compressed logs loaded on demand | none | unknown | Archive logs |
 | `archive/deprecated-decisions.md` | archive-reference | archive, deprecated | Historical decisions | none | unknown | Deprecated decisions |
@@ -904,7 +908,7 @@ type: active-state
 updated_at: unknown
 status: initialized
 load_tier: task-active
-tags: [resume, progress]
+tags: [resume, progress, evolution]
 ---
 
 # Current Workstreams
@@ -916,6 +920,10 @@ tags: [resume, progress]
 ## Closed Topics
 
 - None yet.
+
+## Workstream Entry Format
+
+- `evolution_signal`: `<none | accepted | rejected | deferred | proposed>`
 EOF
 
 write_missing "memories/repo/project-state.md" <<'EOF'
@@ -946,12 +954,16 @@ id: workflow-rules
 type: repo-memory
 updated_at: unknown
 status: initialized
-tags: [workflow, memory, spec]
+tags: [workflow, memory, spec, evolution]
 ---
 
 # Workflow Rules
 
 Memory never overrides current repo files, command output, system instructions, or explicit user instructions. Spec remains authoritative for requirements, design, and task acceptance.
+
+Self-evolution follows seven separated responsibilities: Planner freezes scope, Executor performs the approved action, Observer records evidence, Evaluator judges quality and risk, Reflector extracts verified lessons, Memory stores only durable learning, and Policy updates bounded workflow rules.
+
+Evolution writeback requires evidence, validation, rollback, and an accepted/rejected/deferred status. Do not store raw chat, secrets, PII, private logs, or speculative prompt ideas as policy.
 EOF
 
 write_missing "memories/repo/decisions.md" <<'EOF'
@@ -1231,6 +1243,8 @@ check_contains ".github/instructions/must.instructions.md" "task_type"
 check_contains ".github/instructions/must.instructions.md" "pm_action"
 check_contains ".github/instructions/must.instructions.md" "fixed-string-before-regex"
 check_contains ".github/instructions/must.instructions.md" "vscode_askQuestions"
+check_contains ".github/instructions/must.instructions.md" "Self-evolution"
+check_contains ".github/instructions/must.instructions.md" "evolution_signal"
 check_contains ".github/instructions/must.instructions.md" "target-memory-bootstrap"
 check_contains ".github/instructions/skills-index.instructions.md" "target-memory-bootstrap"
 check_contains ".github/instructions/skills-index.instructions.md" "## Claude Code Skill Names"

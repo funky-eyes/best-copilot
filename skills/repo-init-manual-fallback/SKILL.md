@@ -52,7 +52,7 @@ Before `next_task_ready: yes`, verify these paths in the target repository:
 
 ## Required Content Checks
 
-- `must.instructions.md` contains: `## Request Flow`, `## Per-Request Hard Gates`, `### PM Native Ask Trigger Gate`, `## Shared State Contracts`, `## Search Precision`, `## Command Output Budget`, `## Memory And Spec`, `## Agents and Dispatch`, `## Implementation and Verification`, plus `NEEDS_USER_INPUT`, `BLOCKED`, `work_mode`, `task_type`, `pm_action`, `fixed-string-before-regex`, `vscode_askQuestions`.
+- `must.instructions.md` contains: `## Request Flow`, `## Per-Request Hard Gates`, `### PM Native Ask Trigger Gate`, `## Shared State Contracts`, `## Search Precision`, `## Command Output Budget`, `## Memory And Spec`, `## Agents and Dispatch`, `## Implementation and Verification`, plus `NEEDS_USER_INPUT`, `BLOCKED`, `work_mode`, `task_type`, `pm_action`, `fixed-string-before-regex`, `vscode_askQuestions`, `Self-evolution`, and `evolution_signal`.
 - `skills-index.instructions.md` contains bootstrap routing and `## Claude Code Skill Names`.
 - `CLAUDE.md` references all three `.github/instructions/` files (when Claude Code compatibility is required).
 - `AGENTS.md` references `.codex/agents/*.toml`, and every Codex TOML adapter has the expected `name = "<role>"` field (when Codex compatibility is required).
