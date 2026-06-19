@@ -5,7 +5,7 @@ description: "Use after meaningful task closeout, repeated failure, review loops
 
 # Evolution Loop
 
-This skill gives `best-copilot` a lightweight, auditable evolution cycle inspired by Evolver and Memento-style reflective learning.
+This skill gives `best-copilot` a lightweight, auditable evolution cycle inspired by Evolver, Memento-style reflective learning, and the seven-module self-evolving agent loop: Planner, Executor, Observer, Evaluator, Reflector, Memory, and Policy.
 
 ## Core Principle
 
@@ -17,6 +17,18 @@ Evolution is not free-form rewriting. It is a bounded loop:
 4. **Validate** with static checks, eval prompts, review, or command evidence.
 5. **Write** only accepted learnings back to the canonical owner: plugin changes go to root `agents/`, root `skills/`, `.github/instructions/**`, and references in this plugin checkout; target-repository learnings go to target `memories/repo/**`, target `spec/**`, or target instructions.
 6. **Record** the accepted, rejected, or deferred event durably. Chat-only evolution is not an evolution event.
+
+## Seven-Module Mapping
+
+- `Planner`: identify the improvement goal, trigger, affected workflow surface, non-goals, validation plan, and rollback plan.
+- `Executor`: make the smallest approved file change or return a proposal when approval/review is missing.
+- `Observer`: capture the concrete signal: failed check, review finding, repeated blocker, stale trigger, user correction, or verified success pattern.
+- `Evaluator`: score the signal against acceptance impact, recurrence, severity, confidence, blast radius, and whether current rules already cover it.
+- `Reflector`: extract the reusable lesson as `root_cause`, `lesson`, `future_action`, and `anti_pattern_to_avoid`.
+- `Memory`: write only verified accepted/rejected/deferred evolution events and compact recovery notes to the canonical target.
+- `Policy`: update routing rules, prompt clauses, templates, tool priority, review gates, or workflow guidance only after validation and rollback are clear.
+
+Do not merge these roles into one prompt blob. If a step has no evidence, mark it `not_applicable` or return a proposal instead of inventing durable learning.
 
 ## EvolutionEvent
 
@@ -54,6 +66,21 @@ Accepted plugin evolution events are logged in `references/events.md` when no ta
 - If the proposal is accepted but no canonical file is writable, return `BLOCKED evolution_writeback_unavailable`.
 - After accepted evolution, run the relevant static checks and include rollback instructions.
 
+## Ten-Pass Review Checklist
+
+Before accepting a workflow evolution, review it through these ten passes and record the result as `pass | concern | blocked`:
+
+1. `source_priority`: current repo files and explicit user intent outrank external references and memory.
+2. `module_separation`: Planner, Executor, Observer, Evaluator, Reflector, Memory, and Policy stay separable.
+3. `scope_minimality`: the mutation is the smallest reusable change, not a broad rewrite.
+4. `no_capability_loss`: existing init gates, native ask gates, review lanes, and verification requirements are not weakened.
+5. `evidence_quality`: the signal is verified or explicitly marked as proposal-only.
+6. `memory_hygiene`: no secrets, PII, raw logs, chat transcripts, or unverified guesses are stored.
+7. `policy_reversibility`: rollback is clear and does not depend on hidden state.
+8. `runtime_compatibility`: Codex, Copilot, and Claude packaging boundaries are not broken.
+9. `verification_fit`: static checks, schema checks, eval prompts, or command evidence match the change type.
+10. `future_reuse`: the lesson helps future tasks without forcing unrelated tasks through heavier workflow.
+
 ## Output
 
 ```markdown
@@ -67,4 +94,6 @@ Accepted plugin evolution events are logged in `references/events.md` when no ta
 - rollback_plan:
 - writeback_files:
 - state_sync:
+- seven_module_trace:
+- ten_pass_review:
 ```

@@ -53,6 +53,7 @@ Target `.github/instructions/must.instructions.md` must cover:
 - shared `work_mode`, `task_type`, and specialist handback vocabulary
 - search precision and command output budget
 - memory/spec progressive disclosure
+- seven-part self-evolution loop and `evolution_signal`
 - first-use scaffold gate
 - Spec Bundle rule for MEDIUM/LARGE work
 - `STATE_SYNC`: task status changes update `tasks.md` and `memories/repo/current-workstreams.md` before continuing
@@ -82,7 +83,7 @@ Target `.github/instructions/must.instructions.md` must cover:
 - Confirm generated files exist in the target repository.
 - Confirm path existence plus required sections; path existence alone is insufficient.
 - Confirm existing files were not overwritten.
-- Confirm `.github/instructions/must.instructions.md` contains request flow, reliability gates, native ask, memory/spec, `STATE_SYNC`, agents/dispatch, implementation/verification, and mixed-language rules.
+- Confirm `.github/instructions/must.instructions.md` contains request flow, reliability gates, native ask, memory/spec, `STATE_SYNC`, self-evolution, `evolution_signal`, agents/dispatch, implementation/verification, and mixed-language rules.
 - Confirm `.github/instructions/skills-index.instructions.md` contains Claude Code skill-name guidance when relevant.
 - For Claude Code, confirm `CLAUDE.md` has standalone unindented imports for `.github/instructions/project.instructions.md`, `.github/instructions/must.instructions.md`, and `.github/instructions/skills-index.instructions.md`.
 - For Claude Code, confirm PM coordinator dispatch, foreground/background policy, isolated worktree closeout, scoped plugin agent names, namespaced skill commands, skill-load-is-not-execution, code intelligence fallback, TypeScript LSP fallback, provider compatibility smoke check, `AskUserQuestion`, and `STATE_SYNC` are covered.

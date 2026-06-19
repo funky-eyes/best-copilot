@@ -116,6 +116,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 
 - Spec is authoritative for requirements, design, tasks, acceptance checks, and task status.
 - Memory is the recovery entry: current focus, decisions, last verification, next action, and links.
+- Self-evolution is a seven-part loop: Planner freezes scope, Executor performs the approved action, Observer records evidence, Evaluator judges quality and risk, Reflector extracts verified lessons, Memory stores durable learning, and Policy updates bounded workflow rules.
 - Read `memories/repo/INDEX.md`, then `current-workstreams.md`, then linked spec/memory shards when resuming.
 - On first substantial plugin use, if `.github/instructions/**`, runtime adapters, `memories/repo/**`, or `spec/**` scaffolds are missing, create them through the bootstrap skills and verify paths before substantive work.
 - MEDIUM/LARGE work uses a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`. Single-file SDD/design/plan notes are evidence only.
@@ -123,6 +124,7 @@ System, platform, and explicit user instructions outrank repository files. Curre
 - STATE_SYNC: when task status, verification, batch state, or closeout changes, update `tasks.md` and `memories/repo/current-workstreams.md` before continuing. Update `spec/INDEX.md` and `memories/repo/INDEX.md` when linked spec or memory rows change.
 - If writable state files cannot be updated, return `BLOCKED state_sync_unavailable` or `DONE_WITH_CONCERNS state_sync_blocked` with missing paths.
 - Do not store secrets, tokens, private logs, PII, raw transcripts, or unverified guesses.
+- Evolution writeback requires verified signal, validation, rollback, and accepted/rejected/deferred status; otherwise record `evolution_signal: none`.
 
 ## Agents And Dispatch
 

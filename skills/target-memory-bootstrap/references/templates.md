@@ -16,7 +16,7 @@ Memory helps future sessions resume verified work without rereading every file. 
 - `repo/INDEX.md`: routing table.
 - `repo/current-workstreams.md`: active work and next resume action.
 - `repo/project-state.md`: compact current state and constraints.
-- `repo/workflow-rules.md`: memory/spec coordination rules.
+- `repo/workflow-rules.md`: memory/spec coordination rules and the self-evolution loop.
 - `repo/decisions.md`: durable dated decisions.
 - `repo/logs/`: compressed logs loaded only on demand.
 - `repo/archive/`: deprecated or historical memory.
@@ -43,7 +43,7 @@ Memory helps future sessions resume verified work without rereading every file. 
 | --- | --- | --- | --- | --- | --- | --- |
 | `current-workstreams.md` | task-active | resume, progress, active-spec | Resume current work and find next action | `spec/INDEX.md` | unknown | Active workstream summary |
 | `project-state.md` | task-reference | project, status, constraints | Current project state and important constraints | `spec/INDEX.md` | unknown | Compact project state |
-| `workflow-rules.md` | task-reference | workflow, prompt, memory, spec | Memory retrieval, prompt assembly, and spec-memory coordination rules | `spec/INDEX.md` | unknown | Memory workflow rules |
+| `workflow-rules.md` | task-reference | workflow, prompt, memory, spec, evolution | Memory retrieval, prompt assembly, spec-memory coordination, and bounded evolution rules | `spec/INDEX.md` | unknown | Memory workflow and evolution rules |
 | `decisions.md` | task-reference | decisions, deprecated | Durable decisions and superseded decisions | `spec/INDEX.md` | unknown | Date-stamped decisions |
 | `logs/README.md` | archive-reference | logs, recovery | Compressed logs loaded only on demand | none | unknown | Archive area for compressed logs |
 | `archive/deprecated-decisions.md` | archive-reference | archive, deprecated | Historical decisions that should not guide new work by default | none | unknown | Deprecated decisions and replacement links |
@@ -98,6 +98,7 @@ tags: [resume, progress, active-spec]
 - `last_verified`: `<YYYY-MM-DD command/check/evidence>`
 - `last_state_sync`: `<YYYY-MM-DD>`
 - `owner_lane`: `<PM or specialist lane>`
+- `evolution_signal`: `<none | accepted | rejected | deferred | proposed>`
 - `residual_risk`: `<none | concise risk>`
 ```
 
@@ -143,14 +144,14 @@ type: repo-memory
 updated_at: unknown
 status: initialized
 priority: high
-tags: [workflow, memory, prompt, spec, token-budget]
+tags: [workflow, memory, prompt, spec, token-budget, evolution]
 ---
 
 # Workflow Rules
 
 ## One-line Summary
 
-Use Markdown-based memory routing and stable-prefix prompt assembly to keep context small while preserving current progress.
+Use Markdown-based memory routing, stable-prefix prompt assembly, and the seven-module self-evolution loop to keep context small while preserving current progress and reusable learning.
 
 ## Current State
 
@@ -158,6 +159,7 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - `INDEX.md` routes by tags, use_for, load_tier, and linked_spec.
 - `current-workstreams.md` stores current focus, next action, last verified evidence, and links to spec/memory.
 - Memory retrieval follows progressive disclosure: index first, current state second, exact shard only when needed.
+- Self-evolution follows seven separated responsibilities: Planner freezes scope, Executor performs the approved action, Observer records evidence, Evaluator judges quality and risk, Reflector extracts verified lessons, Memory stores only durable learning, and Policy updates bounded workflow rules.
 
 ## Constraints
 
@@ -165,6 +167,7 @@ Use Markdown-based memory routing and stable-prefix prompt assembly to keep cont
 - Spec remains the authoritative source for requirements, design, task status, and acceptance.
 - Memory stores status, decisions, recovery hints, and verified learnings only.
 - Exclude secrets, tokens, private logs, and PII from durable memory.
+- Evolution writeback requires evidence, validation, rollback, and an accepted/rejected/deferred status. Do not store raw chat or speculative prompt ideas as policy.
 ```
 
 ## `memories/repo/decisions.md`
