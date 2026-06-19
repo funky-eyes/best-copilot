@@ -20,7 +20,7 @@ Codex uses `.codex-plugin/plugin.json`, `.agents/plugins/marketplace.json`, `.ag
 
 Large AI coding tasks fail when they jump straight from a vague request to a patch. `best-copilot` adds the missing delivery discipline:
 
-- **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable workflow signals.
+- **One senior entry point**: Senior Project Expert owns intent, scope, dispatch, fan-in, closeout, and reusable reflection/memory/policy signals.
 - **Eight specialist agents**: planning, architecture, implementation, frontend, QA, security, root-cause fixing, and specification work have separate ownership.
 - **Thirty-nine skills**: role workflows, bootstrap, search, planning, workspace isolation, TDD, design review, execution, Java/Python coding guidelines, verification, branch closeout, frontend audit, workflow evolution, and a Senior Project Expert compatibility entrypoint are installable skills.
 - **Target-local memory and spec**: installed projects keep facts, workstreams, memory, and specs inside the target repository, not in the plugin package.
@@ -126,7 +126,7 @@ After local edits or plugin updates, run `/reload-plugins` inside Claude Code or
 
 ## Usage
 
-Start requirement orchestration with the **Senior Project Expert** PM coordinator. It owns intent, scope, planning, dispatch, review fan-in, and closeout.
+Start requirement orchestration with the **Senior Project Expert** PM coordinator. It owns intent, scope, planning, dispatch, review fan-in, reflection, memory sync, policy-delta routing, and closeout.
 
 - **Copilot CLI**: run `/agent`, select **Senior Project Expert**, then describe the work. Copilot uses `handoffs:` declarations for specialist routing.
 - **VS Code extension**: manually switch the chat agent to **Senior Project Expert**, then start the task.
@@ -160,12 +160,13 @@ The PM (`senior-project-expert`) as the main session receives user requirements 
 5. Runs implementation, fixes, spec/memory writes, and permission-gated verification foreground by default
 6. Uses `isolation: "worktree"` for implementation tasks that might conflict, then collects the worktree path, branch, changed files, and verification evidence
 7. Performs `/best-copilot:development-branch-closeout` or an equivalent keep / merge / PR / discard decision before claiming isolated worktree changes have landed
-8. Collects results from all subagents, performs fan-in arbitration
-9. Calls `/best-copilot:verification-before-completion` before final delivery
+8. Collects results from all subagents as `OBSERVER_FAN_IN`, then performs `EVALUATOR_ARBITRATION`
+9. Records `REFLECTOR_SIGNAL`, runs `MEMORY_STATE_SYNC`, and applies `POLICY_DELTA_OR_NONE` only for accepted, verified learnings
+10. Calls `/best-copilot:verification-before-completion` before final delivery
 
 Available plugin subagents appear scoped in Claude Code: `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, `best-copilot:root-cause-fixer`.
 
-Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. In native Claude Code these aliases preserve the Copilot role tiers inside Claude's model families. If `cc-switch`, `new-api`, or another Anthropic-compatible proxy routes those aliases to DeepSeek, Qwen, or another non-Claude backend, first verify the plugin is enabled in that routed session. `/plugin list` should show `best-copilot@best-copilot`, `/agents` should show scoped agents such as `best-copilot:senior-project-expert`, and proxy allowlists must include `"enabledPlugins": {"best-copilot@best-copilot": true}` when required. Then treat the backend as degraded until the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, names the required specialist lanes, and reaches `repo-init-gate` / `repo-init-scan` before source reading or implementation.
+Claude adapters use Claude model aliases in `claude-agents/*.md`: GPT-5.4-mapped roles use `opus`, Gemini-mapped roles use `haiku`, and Claude Sonnet roles use `sonnet`. In native Claude Code these aliases preserve the Copilot role tiers inside Claude's model families. If `cc-switch`, `new-api`, or another Anthropic-compatible proxy routes those aliases to DeepSeek, Qwen, or another non-Claude backend, first verify the plugin is enabled in that routed session. `/plugin list` should show `best-copilot@best-copilot`, `/agents` should show scoped agents such as `best-copilot:senior-project-expert`, and proxy allowlists must include `"enabledPlugins": {"best-copilot@best-copilot": true}` when required. Then treat the backend as degraded until the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> PLANNER_FREEZE_PACKET -> LANE_SELECTION -> EXECUTOR_LANES`, names the required specialist lanes, and reaches `repo-init-gate` / `repo-init-scan` before source reading or implementation.
 
 ## Runtime Adapter Architecture
 
@@ -283,14 +284,15 @@ best-copilot
 Every task passes through an observable stage chain visible in the transcript:
 
 ```
-INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → FREEZE_PACKET → LANE_SELECTION
-  → [ARCHITECT_SDD if full/ambiguous/high-risk] → REVIEW_OR_DISPATCH
-  → FAN_IN_ARBITRATION → NEXT_GATE
+INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → PLANNER_FREEZE_PACKET
+  → [ARCHITECT_SDD if full/ambiguous/high-risk] → LANE_SELECTION
+  → EXECUTOR_LANES → OBSERVER_FAN_IN → EVALUATOR_ARBITRATION
+  → REFLECTOR_SIGNAL → MEMORY_STATE_SYNC → POLICY_DELTA_OR_NONE → NEXT_GATE
 ```
 
 ### Behavioral Reliability Gates
 
-`FREEZE_PACKET` and execution preserve these constraints:
+`PLANNER_FREEZE_PACKET` and execution preserve these constraints:
 
 - State assumptions, tradeoffs, and the simplest viable option; if uncertainty changes implementation, routing, or acceptance criteria, ask instead of guessing.
 - Choose the smallest change that satisfies success criteria; do not add speculative features or abstractions for one-time code.
@@ -339,7 +341,7 @@ The system classifies each task into three levels:
 
 `task_type` tracks behavior independently of size: `implementation` (write/update), `design_review` (evaluate without implementing), `verification` (review risk/merge readiness), `fix` (bounded fix), `spec` (requirements/design/tasks, no production code).
 
-### Stage 3: Freeze Context (Six-Block Dispatch Packet)
+### Stage 3: Planner Freeze Context (Six-Block Dispatch Packet)
 
 The PM freezes intent into a standard **six-block dispatch packet** (PM Dispatch Packet), the unified cross-role communication protocol:
 
@@ -394,9 +396,9 @@ For each ready task:
 
 **Key rule: Stage 1 and Stage 2 reviewers cannot be the implementer.** Review lanes follow cross-review rules (see below).
 
-### Stage 6: Fan-In Arbitration
+### Stage 6: Observer Fan-In and Evaluator Arbitration
 
-PM adjudicates all specialist results by priority:
+PM first records all specialist handbacks as observable evidence, then adjudicates results by priority:
 
 1. **Blockers**: `BLOCKED`, `NEEDS_USER_INPUT`, invalid handback, repeated `NEEDS_CONTEXT`
 2. **Security**: security, privacy, data loss, auth, dependencies, release, destructive operation risks
@@ -418,9 +420,15 @@ When reviewers disagree, PM records `decision_provenance` (evidence, blocking st
 | All code (final) | QA (merge readiness) |
 | Security-sensitive surfaces | Security Reviewer (mandatory) |
 
-### Stage 7: Verification and Closeout
+### Stage 7: Reflection, Memory Sync, Policy Delta, Verification, and Closeout
 
-Before closing, the system runs `verification-before-completion` final checks:
+Before closing, PM must complete the self-evolution tail:
+
+- `REFLECTOR_SIGNAL`: extract a verified reusable lesson, or record `evolution_signal: none`
+- `MEMORY_STATE_SYNC`: update task/spec/memory state when progress, verification, closeout, or evolution status changes
+- `POLICY_DELTA_OR_NONE`: update routing, prompts, templates, tool priority, or workflow rules only for accepted, validated, rollback-capable lessons
+
+Then the system runs `verification-before-completion` final checks:
 
 - Requirements/user requests have been satisfied
 - Changes are bounded within task scope
@@ -506,7 +514,7 @@ Target Repository
 │   ├── current-workstreams.md     ← Currently active work
 │   ├── project-state.md           ← Project state snapshot
 │   ├── decisions.md               ← Decision records
-│   └── workflow-rules.md          ← Memory/spec coordination rules
+│   └── workflow-rules.md          ← Memory/spec/evolution coordination rules
 │
 ├── .github/instructions/          ← Repository-level rules
 │   ├── project.instructions.md    ← Project facts (build/test/framework/entry)
@@ -545,7 +553,7 @@ Medium-to-large work establishes bidirectional links between spec and memory:
 
 - Each workflow in `current-workstreams.md` has `linked_spec` pointing to the corresponding spec
 - Each spec in `spec/INDEX.md` can back-reference related memory
-- EvolutionEvent records require all fields: signal, target, mutation, validation, rollback, status
+- EvolutionEvent records require all fields: signal, target, mutation, validation, rollback, seven_module_trace, ten_pass_review, status
 
 ## Skill Map
 
@@ -602,7 +610,7 @@ Each agent declares a model in `agents/*.agent.md`, and the routing policy is pa
 | Security Reviewer | Gemini 3.1 Pro (Preview) |
 | Root Cause Fixer | Claude Sonnet 4.6 |
 
-Native Claude Code uses Claude model aliases. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`. Proxy routes such as `cc-switch` or `new-api` may map those aliases to non-Claude models; that is API compatibility only. For DeepSeek, Qwen, or unknown backends, verify plugin enablement first: `/plugin list` should include `best-copilot@best-copilot`, `/agents` should show scoped plugin agents, and `cc-switch` / `new-api` allowlists should contain `"enabledPlugins": {"best-copilot@best-copilot": true}` when that setting is used. Then run a non-destructive workflow smoke check before real work. Expected behavior: the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> FREEZE_PACKET -> LANE_SELECTION`, then dispatches the required lanes for the request. If it starts coding, skips init, or skips lanes even with the plugin enabled, use a model/provider that passes the smoke check.
+Native Claude Code uses Claude model aliases. The Claude adapters in `claude-agents/*.md` preserve role separation and map Copilot tiers to Claude aliases: GPT-5.4 -> `opus`, Gemini 3.1 Pro (Preview) -> `haiku`, and Claude Sonnet 4.6 -> `sonnet`. Proxy routes such as `cc-switch` or `new-api` may map those aliases to non-Claude models; that is API compatibility only. For DeepSeek, Qwen, or unknown backends, verify plugin enablement first: `/plugin list` should include `best-copilot@best-copilot`, `/agents` should show scoped plugin agents, and `cc-switch` / `new-api` allowlists should contain `"enabledPlugins": {"best-copilot@best-copilot": true}` when that setting is used. Then run a non-destructive workflow smoke check before real work. Expected behavior: the PM outputs `PROVIDER_COMPAT -> INIT_GATE -> CLASSIFY -> PLANNER_FREEZE_PACKET -> LANE_SELECTION -> EXECUTOR_LANES`, then dispatches the required lanes for the request. Before closeout it should continue through `OBSERVER_FAN_IN -> EVALUATOR_ARBITRATION -> REFLECTOR_SIGNAL -> MEMORY_STATE_SYNC -> POLICY_DELTA_OR_NONE -> NEXT_GATE`. If it starts coding, skips init, skips lanes, or closes without the tail gates even with the plugin enabled, use a model/provider that passes the smoke check.
 
 ## Search Discipline
 
@@ -668,26 +676,13 @@ The system produces evolution signals in these scenarios:
 ### Evolution Closed Loop
 
 ```
-Execute task → produce signals (failures/corrections/friction)
-    │
-    ▼
-evolution-loop skill intervenes
-    │
-    ▼
-Select minimum improvement target
-(agent / skill / instruction / memory / spec template)
-    │
-    ▼
-Propose bounded mutation (Evolution Proposal)
-    │
-    ▼
-Validate (static check / eval prompt / review / command evidence)
-    │
-    ├── accepted → write to canonical root
-    │               agents/ / skills/ / .github/instructions/
-    │               / memories/repo/ / spec/
-    │
-    └── rejected → record rejection reason, keep original
+Planner → freeze improvement goal, target, validation, rollback
+Executor → make the smallest approved change or return a proposal
+Observer → capture concrete signal and replayable evidence
+Evaluator → judge severity, recurrence, confidence, and blast radius
+Reflector → extract root cause, lesson, future action, anti-pattern
+Memory → record accepted/rejected/deferred event in the canonical owner
+Policy → update bounded workflow rules only after validation
 ```
 
 Each accepted evolution is recorded as an EvolutionEvent:
@@ -699,6 +694,8 @@ Each accepted evolution is recorded as an EvolutionEvent:
 - mutation:  ← How to change (bounded modification)
 - validation: ← How to verify (check method)
 - rollback:  ← How to revert (recovery plan)
+- seven_module_trace: ← Planner/Executor/Observer/Evaluator/Reflector/Memory/Policy evidence
+- ten_pass_review: ← source priority, separation, scope, no capability loss, evidence, memory hygiene, reversibility, runtime compatibility, verification fit, future reuse
 - status: proposed | accepted | rejected | deprecated
 ```
 
