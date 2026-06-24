@@ -56,7 +56,7 @@ applyTo: "**"
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.7.0
+- Bootstrap contract version: 0.7.1
 - Last full verification: unknown
 - Reentry rule: best-copilot-version-sentinel-first
 ```

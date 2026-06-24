@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.7.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.7.1-1d9bf0)](plugin.json)
 [![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
@@ -208,7 +208,7 @@ Claude アダプターは `claude-agents/*.md` で Claude モデル alias を使
 | Claude ベースセッション | agent の `skills:` 未活性化、手動呼び出し必要 |
 | Copilot CLI | 本文参照は機械的プリロードではない、パケットに最小チェックリスト含む必要 |
 
-Claude agent の frontmatter は通常 `core-workflow-contract` と対応ロール workflow のみプリロードします。Senior Project Expert は init preflight が必須の起動ゲートであるため、`repo-init-gate` と `repo-init-scan` もプリロードします。`structured-review`、`test-driven-development`、`web-experience-audit` などの他の focused skills は agent 本文で必要時に呼び出す形にして、起動時コンテキストを削減します。
+Claude agent の frontmatter は通常 `core-workflow-contract` と対応ロール workflow のみプリロードします。Senior Project Expert は追加で `repo-init-gate` だけをプリロードし、`repo-init-scan` は sentinel gate が失敗した場合だけオンデマンドでロードします。`structured-review`、`test-driven-development`、`web-experience-audit` などの他の focused skills は agent 本文で必要時に呼び出す形にして、起動時コンテキストを削減します。
 
 ### デュアルランタイム比較
 
@@ -294,7 +294,7 @@ INIT_GATE → [必要に応じて INIT_SCAN] → CLASSIFY → PLANNER_FREEZE_PAC
 
 ### ステージ 1: Init ゲート（必須プリフライト）
 
-ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.7.0"` と一致するか確認します。
+ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.7.1"` と一致するか確認します。
 
 ```
 repo-init-gate
@@ -512,7 +512,7 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 │   ├── must.instructions.md       ← コアルール
 │   └── skills-index.instructions.md ← スキルルーティング
 │
-└── best-copilot.md               ← Init sentinel（version: "0.7.0"）
+└── best-copilot.md               ← Init sentinel（version: "0.7.1"）
 ```
 
 ### Spec vs Memory の分担
@@ -562,7 +562,7 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 
 ## 初回のターゲットリポジトリでの使用
 
-初期化は**自動的**に行われます——手動で `/init` や `copilot init` を実行する必要はありません。PM agent が起動すると、[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト) が自動的に `repo-init-gate` → `repo-init-scan` を実行し、リポジトリ事実の収集とスキャフォールドの作成を完了します。
+初期化は**自動的**に行われます——手動で `/init` や `copilot init` を実行する必要はありません。PM agent が起動すると、[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト) がまず `repo-init-gate` を実行し、`best-copilot.md` sentinel が最新なら `repo-init-scan` をスキップします。sentinel が欠落、無効、読み取り不可、または古い場合だけ scan パスに入り、リポジトリ事実の収集とスキャフォールドの作成を行います。
 
 Claude Code で PM を直接起動するだけです：
 
@@ -581,7 +581,7 @@ memories/repo/INDEX.md                           ← 復帰インデックスル
 memories/repo/current-workstreams.md             ← 現在のアクティブな作業
 spec/INDEX.md                                    ← スペックルーティングテーブル
 spec/templates/                                  ← 再利用可能なテンプレート
-best-copilot.md                                  ← Init sentinel（version: "0.7.0"）
+best-copilot.md                                  ← Init sentinel（version: "0.7.1"）
 ```
 
 必要な事実やスキャフォールドを作成できない場合、推測に基づく継続ではなく `BLOCKED first_use_gate_incomplete` として停止します——完全な説明は[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト)を参照してください。

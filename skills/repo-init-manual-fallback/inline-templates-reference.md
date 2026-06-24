@@ -6,7 +6,7 @@ Canonical templates for `repo-init-manual-fallback` when the shell helper and bo
 
 ```md
 ---
-version: "0.7.0"
+version: "0.7.1"
 ---
 ```
 
@@ -51,7 +51,7 @@ applyTo: "**"
 ## Verification Notes
 - Init source: manual_fallback / Last verified: <timestamp>
 ## Init Status
-- Init ready: no / Verified: no / Bootstrap contract version: 0.7.0
+- Init ready: no / Verified: no / Bootstrap contract version: 0.7.1
 - Last full verification: pending / Reentry: best-copilot-version-sentinel-first
 ```
 

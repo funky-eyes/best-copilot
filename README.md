@@ -2,7 +2,7 @@
 
 English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.7.0-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.7.1-1d9bf0)](plugin.json)
 [![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
@@ -210,7 +210,7 @@ This keeps shared behavior, role-specific behavior, and incompatible runtime met
 | Claude base session | Agent's `skills:` not activated, must call manually |
 | Copilot CLI | Body reference is not mechanical preload, packet must include minimal checklist |
 
-Claude agent frontmatter normally preloads only `core-workflow-contract` and the matching role workflow skill. Senior Project Expert also preloads `repo-init-gate` and `repo-init-scan` because the init preflight is a mandatory boot gate. Other focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
+Claude agent frontmatter normally preloads only `core-workflow-contract` and the matching role workflow skill. Senior Project Expert additionally preloads only `repo-init-gate`; `repo-init-scan` stays on-demand and is loaded only when the sentinel gate fails. Other focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
 
 ### Multi-Runtime Comparison
 
@@ -302,7 +302,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → PLANNER_FREEZE_PACKET
 
 ### Stage 1: Init Gate (Mandatory Preflight)
 
-Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.7.0"`.
+Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.7.1"`.
 
 ```
 repo-init-gate
@@ -521,7 +521,7 @@ Target Repository
 │   ├── must.instructions.md       ← Core rules
 │   └── skills-index.instructions.md ← Skill routing
 │
-└── best-copilot.md               ← Init sentinel (version: "0.7.0")
+└── best-copilot.md               ← Init sentinel (version: "0.7.1")
 ```
 
 ### Spec vs Memory Division
@@ -571,7 +571,7 @@ Medium-to-large work establishes bidirectional links between spec and memory:
 
 ## First Use In A Target Repository
 
-Initialization is **automatic** — there is no need to manually run `/init` or `copilot init`. When the PM agent starts, [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) automatically executes `repo-init-gate` → `repo-init-scan`; in Claude Code the official stage attempts native `/init` through the bundled helper before best-copilot creates target instructions, memory, spec scaffolds, and the sentinel.
+Initialization is **automatic** — there is no need to manually run `/init` or `copilot init`. When the PM agent starts, [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) runs `repo-init-gate` first and skips `repo-init-scan` when the `best-copilot.md` sentinel is current; only a missing, invalid, unreadable, or stale sentinel enters the scan path. In Claude Code the failed-gate scan path attempts native `/init` through the bundled helper before best-copilot creates target instructions, memory, spec scaffolds, and the sentinel.
 
 Just start the PM in Claude Code:
 
@@ -590,7 +590,7 @@ memories/repo/INDEX.md                           ← Resume index routing table
 memories/repo/current-workstreams.md             ← Currently active work
 spec/INDEX.md                                    ← Spec routing table
 spec/templates/                                  ← Reusable templates
-best-copilot.md                                  ← Init sentinel (version: "0.7.0")
+best-copilot.md                                  ← Init sentinel (version: "0.7.1")
 ```
 
 If required facts or scaffolds cannot be created, the workflow stops as `BLOCKED first_use_gate_incomplete` — see [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) for the full explanation.

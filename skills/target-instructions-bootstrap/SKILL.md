@@ -25,7 +25,7 @@ Load `references/templates.md` for exact file contents and repair snippets.
 
 ```md
 ---
-version: "0.7.0"
+version: "0.7.1"
 ---
 ```
 

@@ -1,7 +1,7 @@
 {
   "name": "best-copilot",
   "description": "A senior multi-agent engineering workflow plugin for Claude Code, Codex, and GitHub Copilot CLI.",
-  "version": "0.7.0",
+  "version": "0.7.1",
   "author": {
     "name": "best-copilot maintainers"
   },

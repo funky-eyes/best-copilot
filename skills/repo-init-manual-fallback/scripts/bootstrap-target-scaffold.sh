@@ -3,7 +3,7 @@ set -u
 
 target_dir="${1:-$PWD}"
 compatibility="${2:-claude}"
-contract_version="0.7.0"
+contract_version="0.7.1"
 
 is_claude_compat() {
   [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]
@@ -85,7 +85,7 @@ project_instructions_needs_repair() {
     "## Known Unknowns" \
     "## Verification Notes" \
     "## Init Status" \
-    "Bootstrap contract version: 0.7.0"
+    "Bootstrap contract version: 0.7.1"
   do
     if ! grep -Fq "$needle" "$rel_path"; then
       return 0
@@ -436,7 +436,7 @@ ${known_unknowns}
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.7.0
+- Bootstrap contract version: 0.7.1
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
@@ -447,15 +447,15 @@ append_if_missing ".github/instructions/project.instructions.md" "## Init Status
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.7.0
+- Bootstrap contract version: 0.7.1
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
 
-append_if_missing ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.7.0" <<'EOF'
+append_if_missing ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.7.1" <<'EOF'
 ## Best Copilot Init Repair
 
-- Bootstrap contract version: 0.7.0
+- Bootstrap contract version: 0.7.1
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
@@ -1226,7 +1226,7 @@ for rel_path in "${required_paths[@]}"; do
 done
 
 check_contains ".github/instructions/project.instructions.md" "## Init Status"
-check_contains ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.7.0"
+check_contains ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.7.1"
 check_contains ".github/instructions/must.instructions.md" "## Request Flow"
 check_contains ".github/instructions/must.instructions.md" "## Per-Request Hard Gates"
 check_contains ".github/instructions/must.instructions.md" "### PM Native Ask Trigger Gate"
