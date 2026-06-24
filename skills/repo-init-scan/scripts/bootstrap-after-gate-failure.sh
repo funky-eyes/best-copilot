@@ -3,7 +3,7 @@ set -u
 
 target_dir="${1:-$PWD}"
 compatibility="${2:-claude}"
-contract_version="0.7.0"
+contract_version="0.7.1"
 force_reinit="${BEST_COPILOT_FORCE_REINIT:-0}"
 script_dir="$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
 skills_dir="$(CDPATH= cd -- "$script_dir/../.." && pwd)"
