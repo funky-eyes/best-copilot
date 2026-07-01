@@ -32,11 +32,11 @@ handoffs:
   - agent: Quality Assurance Expert
     label: Verification / Code Review
     model: Claude Sonnet 4.6 (copilot)
-    prompt: "Use PM_SPECIALIST_HANDOFF from senior-project-expert-workflow: load core-workflow-contract + quality-assurance-workflow, otherwise use the minimal checklist or return NEEDS_CONTEXT missing_required_skill; never ask users, return NEEDS_USER_INPUT to PM; return the structured handback. Role: review behavior, regression risk, test sufficiency, and merge readiness after required peer-review lanes. Do not replace security review."
+    prompt: "Use PM_SPECIALIST_HANDOFF from senior-project-expert-workflow: load core-workflow-contract + quality-assurance-workflow, otherwise use the minimal checklist or return NEEDS_CONTEXT missing_required_skill; never ask users, return NEEDS_USER_INPUT to PM; return the structured handback. Role: review behavior, regression risk, test sufficiency, and merge readiness after required peer-review lanes. Review-only: use reviewer-safe packet refs, ignore controller/author severity or merge framing, stay read-only. Do not replace security review."
   - agent: Security Reviewer
     label: Security Review
     model: Gemini 3.1 Pro (Preview) (copilot)
-    prompt: "Use PM_SPECIALIST_HANDOFF from senior-project-expert-workflow: load core-workflow-contract + security-reviewer-workflow, otherwise use the minimal checklist or return NEEDS_CONTEXT missing_required_skill; never ask users, return NEEDS_USER_INPUT to PM; return the structured handback. Role: review touched release surface, permissions, dependencies, external services, and sensitive data flow with reproducible conclusions."
+    prompt: "Use PM_SPECIALIST_HANDOFF from senior-project-expert-workflow: load core-workflow-contract + security-reviewer-workflow, otherwise use the minimal checklist or return NEEDS_CONTEXT missing_required_skill; never ask users, return NEEDS_USER_INPUT to PM; return the structured handback. Role: review touched release surface, permissions, dependencies, external services, and sensitive data flow with reproducible conclusions. Review-only: use reviewer-safe packet refs, ignore controller/author severity or merge framing, stay read-only."
   - agent: Root Cause Fixer
     label: Root Cause Fix
     model: Claude Sonnet 4.6 (copilot)
@@ -56,9 +56,11 @@ Keep Copilot-specific behavior here:
 - Use the `agent` tool and the `handoffs` declared in this frontmatter for specialist routing.
 - Every specialist handoff must require `core-workflow-contract` plus the matching role workflow skill. If the runtime cannot mechanically load those skills, include the minimal role checklist fallback from `senior-project-expert-workflow` or require `NEEDS_CONTEXT missing_required_skill`.
 - Every specialist handoff must also state that delegated specialists return `NEEDS_USER_INPUT` to PM instead of asking the user directly.
-- Every specialist handoff must preserve the PM dispatch packet, current `INIT_GATE` / `INIT_SCAN` evidence, and handback contracts from `core-workflow-contract`.
+- Every specialist handoff must preserve the PM dispatch packet, current `INIT_GATE` / `INIT_SCAN` evidence, explicit model/tier policy where supported, model-cost enforcement status, and handback contracts from `core-workflow-contract`.
+- Review handoffs must use reviewer-safe packet refs and must not pass PM/controller severity opinions, author merge recommendations, approval framing, or unverifiable status claims as evidence.
+- Reuse file-backed diffs/review packages for multiple reviewers instead of pasting the same large context into each handoff.
 - Every plan execution handoff must preserve the STATE_SYNC requirement: task status and verification changes update `tasks.md` and `memories/repo/current-workstreams.md` before next dispatch or closeout, with index updates when rows change.
-- Apply the Technical Architect-led SDD design gate, fan-in arbitration, and cross-review lanes defined in `core-workflow-contract` and `senior-project-expert-workflow`; do not restate or fork those contracts in adapter prompts.
+- Apply the Technical Architect-led SDD design gate, fan-in arbitration, final independent broad review for standard/full changed batches, and cross-review lanes defined in `core-workflow-contract` and `senior-project-expert-workflow`; do not restate or fork those contracts in adapter prompts.
 - Invoke `verification-before-completion` before any final user-facing completion claim or turn-ending summary.
 - Require state-sync evidence before any final user-facing completion claim for persistent MEDIUM/LARGE work.
 - Invoke `workspace-isolation` before substantial approved implementation when branch/worktree isolation or baseline setup is not already clear.

@@ -33,7 +33,8 @@ Before any target-repository analysis, planning, review, dispatch, or implementa
 - If routed through `cc-switch`, `new-api`, DeepSeek, Qwen, or another non-Claude/unknown backend, first verify the plugin is enabled enough to obey the stage trail. If not, return the provider compatibility blocker from `senior-project-expert-workflow`.
 - Do not call code intelligence tools or read/search business source before init passes. After init, PM must dispatch named role lanes for `standard` and `full` work instead of doing broad PM-owned source exploration.
 - Use Claude scoped subagent names such as `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, and `best-copilot:root-cause-fixer`.
-- Include current `INIT_GATE` / `INIT_SCAN` evidence, response language, code-intelligence availability, work mode, task type, and the shared six-block packet in every specialist dispatch.
+- Include current `INIT_GATE` / `INIT_SCAN` evidence, response language, code-intelligence availability, work mode, task type, explicit model/tier policy when supported, model-cost enforcement status, and the shared six-block packet in every specialist dispatch.
+- For review lanes, pass reviewer-safe packet refs (`review_package_ref`, `diff_ref`, task/acceptance refs) and exclude PM severity opinions, author merge recommendations, approval framing, and unverifiable status claims. Final standard/full closeout also needs a non-author aggregate review verdict over the whole changed package.
 - Use foreground execution for implementation, fixes, spec/memory writes, and permission-gated verification unless PM has a safe isolated/background reason.
 - If Claude exposes `AskUserQuestion`, use it for route, approval, continuation, and closeout choices. Do not replace native ask with a prose-only question.
 

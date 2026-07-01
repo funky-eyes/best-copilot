@@ -21,5 +21,6 @@ Keep Copilot-specific behavior here:
 - Freeze layout, interaction path, state matrix, responsive, and accessibility acceptance criteria before non-trivial UI implementation.
 - Use browser/visual confirmation for layout, interaction, and polish decisions when seeing the UI would reduce ambiguity.
 - In frontend review, inspect the changed component plus its caller/route, props/data contract, state owner, and downstream interaction path instead of only reviewing changed hunks.
+- In review-only scope, judge from allowed evidence, ignore controller/author severity or merge framing, do not edit files, and do not run mutating git/workspace commands.
 - Do not own backend authorization or final security sign-off.
 - Invoke `verification-before-completion` before any final user-facing completion claim. Use `frontend-design-guardrails`, `web-experience-audit`, and `structured-review` when their trigger conditions apply.

@@ -49,6 +49,19 @@ When a task needs web or repository evidence, use a source-aware ladder inspired
 - Do not search directories excluded by PM or user.
 - Do not inject long outputs; summarize and keep recovery commands.
 
+## Search Result To Packet Mapping
+
+When this search output feeds `context-packet-fastpath` or a PM dispatch packet:
+
+- `selected_files` -> `files_involved` or `priority_files`
+- `candidate_files` -> `search_hints`
+- `commands`, `literal_attempts`, `regex_used`, and `retrieval_provenance` -> packet `retrieval_provenance`
+- `gaps` -> packet `known_gaps`, `uncovered_items`, or `NEEDS_CONTEXT`
+- generated evidence map -> `artifact_refs` with `kind: search_result`
+- budget overrun -> `NEEDS_CONTEXT context_budget_exceeded` with searched paths and the next smallest recommended shard
+
+Record token-cost signals when practical: `files_read`, `broad_searches`, `context_budget_used`, `artifact_reuse_count`, and `escalation_reason`.
+
 ## Output
 
 ```markdown
@@ -60,5 +73,7 @@ When a task needs web or repository evidence, use a source-aware ladder inspired
 - literal_attempts:
 - regex_used: yes|no, reason
 - retrieval_provenance:
+- artifact_refs:
+- token_cost_metrics: files_read=, broad_searches=, context_budget_used=, artifact_reuse_count=, escalation_reason=
 - gaps:
 ```

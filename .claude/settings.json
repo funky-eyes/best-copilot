@@ -1,5 +1,4 @@
 {
-  "agent": "senior-project-expert",
   "permissions": {
     "allow": [
       "mcp__codegraph__codegraph_search",
