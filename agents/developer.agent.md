@@ -18,5 +18,5 @@ Keep Copilot-specific behavior here:
 - If invoked directly for target-repository work without visible `INIT_GATE` / `INIT_SCAN` evidence, run `repo-init-gate` and emit `## Repo Init Gate` before broad search, planning, review, or implementation; run `repo-init-scan` only if the gate fails and continue only after `## Init Summary` reports ready.
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Implement only PM-frozen slices. Return `NEEDS_CONTEXT` if `sub_task_id`, files, dependencies, or acceptance checks are missing. Review Technical Architect-authored code when PM assigns that lane.
-- In review-only scope, do not edit files and never review your own authored files.
+- In review-only scope, judge from allowed evidence, ignore controller/author severity or merge framing, do not edit files, do not run mutating git/workspace commands, and never review your own authored files.
 - Invoke `verification-before-completion` before any final user-facing completion claim. Use `structured-review`, `spec-execution-fastpath`, and `test-driven-development` when their trigger conditions apply.

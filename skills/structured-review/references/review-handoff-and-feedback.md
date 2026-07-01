@@ -13,8 +13,12 @@ Before asking another reviewer to inspect completed work, prepare a bounded pack
 - verification already run, with command/check evidence
 - known gaps, risks, and skipped checks
 - review focus areas such as spec compliance, correctness, security, frontend UX, tests, customization contract, or regression risk
+- `artifact_refs`: final diff/review package, context-chain map, verification output, prior review findings, and state-sync refs when they exist
+- `base_head_or_revision` and freshness check for diff/context artifacts
+- `input_boundary`: trusted instructions, untrusted evidence, author claims, and forbidden controller/author severity or merge framing
+- `permission_boundary`: `read_only_review` by default, write set `none`, and fix owner if findings are accepted
 
-Do not request a broad review without scope. Highlight public contracts, auth, data, dependencies, CI, runtime config, browser UI, tools, permissions, memory, or workflow-routing changes.
+Do not request a broad review without scope. Highlight public contracts, auth, data, dependencies, CI, runtime config, browser UI, tools, permissions, memory, or workflow-routing changes. The final independent aggregate review is the only broad-review exception: scope it to the final changed branch/package plus artifact refs, require a non-author reviewer, and hide prior controller approval/severity framing until after the reviewer forms an evidence-based verdict.
 
 ## Feedback Intake
 
@@ -40,8 +44,11 @@ Do not blindly implement vague feedback. If feedback conflicts with requirements
 
 ```markdown
 ## review_handoff_or_intake
-- mode: handoff | intake | fix-scope
+- mode: handoff | intake | fix-scope | final-aggregate-review
 - scope:
+- artifact_refs:
+- input_boundary:
+- permission_boundary:
 - findings_or_focus:
 - context_chain_targets:
 - accepted_fixes:

@@ -32,6 +32,7 @@ You should NOT implement code unless explicitly asked, do final frontend polish,
 - Code intelligence is optional but ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`. For TypeScript/JavaScript work in Claude Code, if `typescript_lsp_status: available` or exposed LSP diagnostics/tools are present from `typescript-lsp@claude-plugins-official`, use them for go-to-definition, references, and diagnostics before grep fallback. Do not call absent tools, block, or claim degraded quality solely because code intelligence is missing.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
 - For SDD design brainstorming, include `approaches_considered`, `recommended_design`, `parallel_decomposition`, `acceptance_checks`, and `self_review_findings`. If self-review finds blockers, repair the design before returning.
+- In review-only scope, judge from allowed evidence, ignore controller/author severity or merge framing, do not edit files, and do not run mutating git/workspace commands.
 
 ## For SDD Design Brainstorming
 

@@ -20,7 +20,7 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 
 - **task_intent**: `goal`
 - **frozen_scope**: `requirement_refs`, `design_refs`, `non_goals`, `files_involved`, `write_set`, `dependencies`, `owner_lane`, `reviewer_lanes`, `parallel_group`, `parallel_ready`
-- **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check`, `verification_command`, `stop_conditions`, `context_budget`, `read_before_write_targets`
+- **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check`, `verification_command`, `stop_conditions`, `context_budget`, `review_package_strategy`, `reviewer_input_boundary`, `model_policy`, `model_cost_boundary`, `final_independent_review`, `read_before_write_targets`
 - **output_contract**: `ready_artifacts`, `implementation_steps`
 - **state_sync**: required `tasks.md` progress ledger/status update, `current-workstreams.md` update, and index updates when rows change
 
@@ -35,9 +35,14 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 - Prefer parallel groups that let Technical Architect and Developer work independently; add Frontend Designer as owner or reviewer for frontend surfaces.
 - Assign cross-review lanes per the Cross-Review Lanes from `core-workflow-contract`.
 - Give each task a small `ready_artifacts` list so fan-in can check outputs without rereading the whole conversation.
+- Keep each task independently understandable, but avoid embedding whole specs, diffs, logs, or broad chat summaries; use file-backed refs and recovery pointers for large evidence.
 - Include a `Progress Ledger` in persistent `tasks.md`; task status and verification changes must be durable before the next task starts.
 - Include material assumptions, meaningful tradeoffs, and the simplest viable option for each task or batch; if an unresolved question changes implementation or acceptance, mark it as a blocker instead of planning from a guess.
 - Include `read_before_write_targets` for code-editing tasks: target file public surface/exports, immediate caller/callee, and obvious shared utility or local pattern to inspect.
+- Include `review_package_strategy` for review-required work: how changed files, diff, task brief, acceptance checks, and context shards will be referenced without pasting the same large material into every reviewer prompt.
+- Include `reviewer_input_boundary`: allowed evidence and forbidden controller/author severity, merge, or approval framing.
+- Include explicit `model_policy` and `model_cost_boundary` for batch subagent work when the runtime supports model selection; otherwise record the runtime-default limitation.
+- For standard/full batches, include `final_independent_review` with scope, reviewer lane, required evidence, and closeout criteria.
 - Include `stop_conditions` for tasks that might otherwise expand into broad discovery.
 - Include `ready_artifacts` that fan-in can check directly: changed files, tests/checks run, review notes, migration notes, and memory/spec updates when relevant.
 - Public API, data model, auth, dependency, CI, or runtime config changes require blast radius notes.

@@ -18,9 +18,10 @@ Own functional verification, regression risk, code review, test sufficiency, and
 3. Check behavior against requirements first, then whether assumptions were explicit, the diff stayed surgical, the simplest viable approach was used, and read-before-write evidence exists for code edits.
 4. Check code quality, release risk, and test sufficiency.
 5. Confirm required cross-review lanes have reported before merge-readiness: Developer vs Technical Architect, Frontend Designer for frontend surfaces, and Security Reviewer for security-sensitive surfaces.
-6. Distinguish new regressions from pre-existing issues.
-7. Run the smallest useful verification commands available, or state exactly why they cannot run.
-8. If no blockers are found, state evidence and residual risk instead of broad praise.
+6. For `standard`/`full` closeout, perform or consume a final independent aggregate review over the whole changed branch/package after task-level reviews and verification. Do not rely on controller approval framing or author merge recommendations as evidence.
+7. Distinguish new regressions from pre-existing issues.
+8. Run the smallest useful verification commands available, or state exactly why they cannot run.
+9. If no blockers are found, state evidence and residual risk instead of broad praise.
 
 ## Specialist Ask Boundary
 

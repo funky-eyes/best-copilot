@@ -5,7 +5,7 @@ description: "Use after meaningful task closeout, repeated failure, review loops
 
 # Evolution Loop
 
-This skill gives `best-copilot` a lightweight, auditable evolution cycle inspired by Evolver, Memento-style reflective learning, and the seven-module self-evolving agent loop: Planner, Executor, Observer, Evaluator, Reflector, Memory, and Policy.
+This skill gives `best-copilot` a lightweight, auditable evolution cycle inspired by Evolver, Memento-style reflective learning, SkillOpt-style skill optimization, and the seven-module self-evolving agent loop: Planner, Executor, Observer, Evaluator, Reflector, Memory, and Policy.
 
 ## Core Principle
 
@@ -30,6 +30,17 @@ Evolution is not free-form rewriting. It is a bounded loop:
 
 Do not merge these roles into one prompt blob. If a step has no evidence, mark it `not_applicable` or return a proposal instead of inventing durable learning.
 
+## Skill Optimization Rules
+
+Use SkillOpt-style optimization as a measured workflow improvement loop, not as permission to grow prompts.
+
+- Optimize only from verified signals: failing route, repeated blocker, reviewer finding, user correction, eval/probe failure, or measured token/context waste.
+- Score each proposal by expected utility delta, token/context delta, route precision, reliability impact, regression risk, and rollback ease.
+- Prefer compact trigger/routing fixes, skill decomposition, reference extraction, and context-shard reuse before adding always-loaded prose.
+- Avoid fitting global policy to one successful task or one weak complaint. Require recurrence, severity, or a targeted probe that reproduces the failure.
+- Preserve recovery fields when reducing tokens: source refs, raw failure signal, reviewed artifacts, model policy, permission boundary, and validation command.
+- When optimizing review workflows, include probes for reviewer-input contamination, review-only permissions, explicit model/cost policy, final independent review, and file-backed context reuse.
+
 ## EvolutionEvent
 
 Record each accepted evolution as a compact event:
@@ -42,6 +53,20 @@ Record each accepted evolution as a compact event:
 - validation:
 - rollback:
 - status: proposed|accepted|rejected|deprecated
+```
+
+For skill or agent optimization, add an `optimization_event` block:
+
+```markdown
+- baseline_behavior:
+- baseline_metrics:
+- mutation_hypothesis:
+- eval_cases:
+- success_threshold:
+- validation_result:
+- token_cost_delta:
+- reliability_delta:
+- rollback_plan:
 ```
 
 Accepted plugin evolution events are logged in `references/events.md` when no target-local memory applies.
@@ -73,12 +98,12 @@ Before accepting a workflow evolution, review it through these ten passes and re
 1. `source_priority`: current repo files and explicit user intent outrank external references and memory.
 2. `module_separation`: Planner, Executor, Observer, Evaluator, Reflector, Memory, and Policy stay separable.
 3. `scope_minimality`: the mutation is the smallest reusable change, not a broad rewrite.
-4. `no_capability_loss`: existing init gates, native ask gates, review lanes, and verification requirements are not weakened.
+4. `no_capability_loss`: existing init gates, native ask gates, review lanes, permission boundaries, model/cost policies, final independent review, and verification requirements are not weakened.
 5. `evidence_quality`: the signal is verified or explicitly marked as proposal-only.
 6. `memory_hygiene`: no secrets, PII, raw logs, chat transcripts, or unverified guesses are stored.
 7. `policy_reversibility`: rollback is clear and does not depend on hidden state.
 8. `runtime_compatibility`: Codex, Copilot, and Claude packaging boundaries are not broken.
-9. `verification_fit`: static checks, schema checks, eval prompts, or command evidence match the change type.
+9. `verification_fit`: static checks, schema checks, eval/probe prompts, or command evidence match the change type; review-boundary changes include contamination, permission, model/cost, final-review, and token-reuse probes.
 10. `future_reuse`: the lesson helps future tasks without forcing unrelated tasks through heavier workflow.
 
 ## Output

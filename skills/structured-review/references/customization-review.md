@@ -36,6 +36,11 @@ Check:
 
 - New agent/skill or changes to `user-invocable`, tools/model, permission matrix, state enum, input schema, or handoff route should receive design review before static approval.
 - Coordinator/controller/PM agents should not expose edit tools or instruct themselves to implement code directly unless that is explicitly intended.
+- Independent reviewer packets define allowed evidence and forbid controller severity opinions, author merge recommendations, approval framing, and unverifiable status claims.
+- Review-only roles are structurally or textually read-only in each runtime; if edit/execute tools remain exposed by runtime metadata, instructions forbid file edits and mutating git/workspace commands in review-only scope.
+- Batch subagent dispatches use explicit model/tier policy where supported and document runtime-default fallback when not enforceable.
+- Shared diffs/specs/logs use `review_package_ref`, `diff_ref`, or context shards instead of repeated prompt injection when multiple reviewers need the same evidence.
+- Standard/full workflows require final independent whole-branch/package review evidence before closeout.
 - User-facing closeout gates should use the platform's native ask/selection mechanism when multiple natural next actions remain.
 - Follow the Native Ask Contract and Specialist Ask Boundary from `core-workflow-contract`. Use the runtime-specific native ask mechanism from the Runtime Adapters table; native ask tools must remain top-level/PM-only.
 - Closeout and route asks should preserve a custom free-form answer path. If the native UI only supports fixed choices, check that `Custom answer` is present and followed by a native/free-form prompt before a decision is made.

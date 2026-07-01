@@ -27,10 +27,20 @@ For every ready task:
 4. Run Stage 1 review: spec/task compliance. The reviewer checks whether requirements, non-goals, file boundaries, and acceptance checks were honored.
 5. Run Stage 2 review: context-chain, code quality, and release risk. The reviewer must use the `structured-review` code-review context-chain gate before assessing maintainability, coupling, security/performance risk, dead code, and test adequacy.
 6. Send confirmed findings to a fix loop using `structured-review` feedback-intake and targeted re-review modes.
-7. Run `STATE_SYNC`: update `tasks.md`, `memories/repo/current-workstreams.md`, and relevant index rows using `core-workflow-contract/references/state-persistence.md`.
-8. Only after the task passes the required reviews, verification, and state sync may PM mark it complete or dispatch the next task.
+7. After all task-level reviews pass for a `standard` or `full` batch, run a final independent broad review over the whole changed branch/package before closeout.
+8. Run `STATE_SYNC`: update `tasks.md`, `memories/repo/current-workstreams.md`, and relevant index rows using `core-workflow-contract/references/state-persistence.md`.
+9. Only after the task passes the required reviews, verification, state sync, and any required final independent review may PM mark it complete or dispatch the next task.
 
 Stage 1 and Stage 2 must not be performed by the same specialist who authored the implementation under review. Default reviewer lanes follow the Cross-Review Lanes from `core-workflow-contract`.
+
+## Review Isolation Rules
+
+- Build reviewer-safe packets separately from implementation packets.
+- Reviewers receive only task brief, changed-file list, diff or review package refs, acceptance checks, required spec/design refs, relevant context shards, and verification evidence.
+- Do not pass controller severity pre-assessments, author merge recommendations, "safe to ignore" language, or unverifiable status claims into Stage 1, Stage 2, or final broad review packets.
+- Review lanes are read-only by default. They may inspect and run non-mutating checks, but must not edit files or run mutating git/workspace commands unless PM explicitly reclassifies the lane as a fix/implementation lane.
+- Reuse the same file-backed review package across multiple reviewers when possible; do not paste the same large diff/spec/log into each subagent prompt.
+- Final independent broad review must use a fresh reviewer-safe packet scoped to the whole changed branch/package and must not inherit mid-run controller conclusions as evidence.
 
 ## Fresh Context Rules
 
@@ -55,6 +65,7 @@ After using this skill, PM should be able to report:
 - current task or batch status
 - implementation owner and reviewer lanes
 - Stage 1 and Stage 2 review outcomes
+- final independent broad review outcome when required
 - verification evidence and coverage
 - state-sync evidence: task ledger row/status, current workstream update, index updates or blocker
 - remaining blockers or next ready tasks
