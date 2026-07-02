@@ -43,7 +43,7 @@ This file is only for discovery and routing. Match the current task to the index
 - `search-fastpath`: target files are unclear or search is becoming expensive.
 - `context-packet-fastpath`: prepare or consume a minimal frozen context packet.
 - `spec-execution-fastpath`: clear requirement/spec, minimal reading, minimal diff.
-- `td-java-coding-guidelines`: Java implementation or review involving Tongdun/Alibaba Java rules, exceptions/logging, SQL/MyBatis, security, middleware, concurrency, or virtual threads.
+- `td-java-coding-guidelines`: Java implementation or review involving Tongdun/Alibaba Java rules, exceptions/logging, SQL/MyBatis, security, middleware, concurrency, virtual threads, or JVM JIT performance.
 - `td-python-coding-guidelines`: Python implementation or review involving Google Python style, imports, naming, docstrings, exceptions, logging, typing, lint, or style migration.
 - `test-driven-development`: new behavior or bug fix needs RED-GREEN-REFACTOR.
 - `systematic-debugging`: unknown root cause, failing tests, incidents, or complex unexpected behavior.
