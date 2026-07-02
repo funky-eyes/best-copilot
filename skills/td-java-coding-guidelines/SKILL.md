@@ -1,6 +1,6 @@
 ---
 name: td-java-coding-guidelines
-description: "Use when writing or reviewing Java code involving Tongdun/Alibaba Java rules, exceptions, logging, SQL/MyBatis, security, middleware, concurrency, virtual threads, or project layering."
+description: "Use when writing or reviewing Java code involving Tongdun/Alibaba Java rules, exceptions, logging, SQL/MyBatis, security, middleware, concurrency, virtual threads, JVM JIT performance, or project layering."
 ---
 
 # TONGDUN Java Development Guidelines
@@ -61,6 +61,12 @@ Covers pinning prevention, third-party library compatibility checks, thread-pool
 
 **Detailed rules:** read [references/virtual-thread-specification.md](references/virtual-thread-specification.md).
 
+### JVM JIT Performance Rules
+
+Covers HotSpot C2 / Graal JIT-friendly code for method inlining, escape analysis, scalar replacement, lock elimination/coarsening, devirtualization, loop optimization, bounds-check elimination, and branch prediction.
+
+**Detailed rules:** read [references/jvm-jit-performance-specification.md](references/jvm-jit-performance-specification.md).
+
 ## How To Use
 
 1. **When writing or reviewing code:** read `references/programming-specification.md`.
@@ -70,3 +76,4 @@ Covers pinning prevention, third-party library compatibility checks, thread-pool
 5. **When security-related functionality is involved:** read `references/security-specification.md`.
 6. **When Dubbo, Kafka, ZooKeeper, HBase, APEXDB, or similar middleware is involved:** read `references/middleware-framework-specification.md`.
 7. **When transactions or JDK 21 virtual threads are involved:** read `references/mysql-rules.md` and `references/virtual-thread-specification.md`.
+8. **When performance-sensitive Java code or hot paths are involved:** read `references/jvm-jit-performance-specification.md`.
