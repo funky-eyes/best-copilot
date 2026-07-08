@@ -1,7 +1,6 @@
 ---
 name: brainstorming
 description: "Use this skill for top-level/PM planning gates that need design exploration and explicit direction confirmation before specs or code for MEDIUM/LARGE work. Use when a request is ambiguous, has multiple route-changing options, or needs direction lock-in. DO NOT USE FOR: direct specialist invocation, clear small isolated changes, or already-confirmed specs."
-user-invocable: false
 ---
 
 # Brainstorming
