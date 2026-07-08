@@ -1,7 +1,7 @@
 ---
 name: developer
 description: Use proactively when a frozen subtask, file boundary, dependency list, and acceptance checks exist and a scoped backend/API/business-logic/service-layer implementation slice, refactoring, integration work, or peer review of Technical Architect-owned code must be completed inside that boundary.
-model: haiku
+model: sonnet
 isolation: worktree
 skills:
   - "core-workflow-contract"

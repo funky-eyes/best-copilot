@@ -46,6 +46,40 @@ return future.get();
 
 ## 15.2 Virtual Thread Pool Configuration
 
-- **[Mandatory]** A virtual-thread pool should not set core/max limits. Virtual threads are lightweight and do not need reuse. Use `Executors.newVirtualThreadPerTaskExecutor()`.
+- **[Mandatory]** Default virtual-thread usage should be task-per-virtual-thread. Virtual threads are lightweight and usually do not need reuse. Use `Executors.newVirtualThreadPerTaskExecutor()` only after checking the third-party library compatibility rules below.
 - **[Mandatory]** Do not use virtual threads for CPU-intensive work. They are suitable for I/O-intensive workloads.
 - **[Mandatory]** Do not store large objects in `ThreadLocal` from virtual threads. Virtual-thread cardinality can greatly amplify memory usage.
+
+## 15.3 ThreadLocal Buffer Compatibility
+
+- **[Mandatory]** Before using a per-task virtual-thread executor around an old client library, check whether the library stores large reusable buffers in `ThreadLocal` or per-thread caches. This includes known or suspected buffer-heavy clients such as Aerospike-client, fastjson, old serializers, codecs, drivers, and binary protocol clients.
+- **[Mandatory]** If the library owns large `ThreadLocal` buffers and cannot be changed, do not run every request on a fresh virtual thread. Use a small, bounded fixed virtual-thread executor so a limited number of long-lived virtual worker threads can reuse those per-thread buffers.
+- **[Mandatory]** Do not solve a `ThreadLocal` buffer problem by switching directly to an equally large platform-thread pool. A small fixed virtual-thread executor is usually lighter than the same-size platform-thread pool while still preserving ThreadLocal cache reuse.
+- **[Mandatory]** If the library also pins carriers through `synchronized`, native calls, or other pinning behavior, `ThreadLocal` reuse is not enough. Isolate the library on a dedicated platform-thread executor or replace/upgrade the dependency.
+- **[Recommended]** Bound concurrency and queue size explicitly for legacy-buffer paths. The pool size should be based on downstream capacity and buffer memory budget, not on request volume.
+
+```java
+// Good for legacy libraries that keep expensive ThreadLocal buffers.
+// This intentionally reuses a small number of virtual worker threads.
+ExecutorService legacyClientExecutor = new ThreadPoolExecutor(
+    16,
+    16,
+    0L,
+    TimeUnit.MILLISECONDS,
+    new ArrayBlockingQueue<>(1024),
+    Thread.ofVirtual().name("legacy-client-vt-", 0).factory(),
+    new ThreadPoolExecutor.CallerRunsPolicy());
+
+CompletableFuture<Result> future = CompletableFuture.supplyAsync(
+    () -> aerospikeOrFastjsonCall(input),
+    legacyClientExecutor);
+```
+
+```java
+// Bad for ThreadLocal-buffer-heavy legacy clients.
+// Each task gets a fresh virtual thread, so the library repeatedly allocates
+// large per-thread buffers and cannot reuse them.
+try (ExecutorService executor = Executors.newVirtualThreadPerTaskExecutor()) {
+    executor.submit(() -> aerospikeOrFastjsonCall(input));
+}
+```

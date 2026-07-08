@@ -57,7 +57,7 @@ Database transaction rules are included in the MySQL rules.
 
 ### JDK 21 Virtual Thread Rules
 
-Covers pinning prevention, third-party library compatibility checks, thread-pool configuration, and virtual-thread-specific constraints.
+Covers pinning prevention, third-party library compatibility checks, ThreadLocal buffer hazards, thread-pool configuration, and virtual-thread-specific constraints.
 
 **Detailed rules:** read [references/virtual-thread-specification.md](references/virtual-thread-specification.md).
 
@@ -76,4 +76,5 @@ Covers HotSpot C2 / Graal JIT-friendly code for method inlining, escape analysis
 5. **When security-related functionality is involved:** read `references/security-specification.md`.
 6. **When Dubbo, Kafka, ZooKeeper, HBase, APEXDB, or similar middleware is involved:** read `references/middleware-framework-specification.md`.
 7. **When transactions or JDK 21 virtual threads are involved:** read `references/mysql-rules.md` and `references/virtual-thread-specification.md`.
+   - If the code path mentions `ThreadLocal`, per-thread buffers/caches, Aerospike-client, fastjson, legacy JDBC drivers, serialization clients, or other old blocking clients, apply the virtual-thread third-party compatibility checklist before writing code. Do not default to `Executors.newVirtualThreadPerTaskExecutor()` until the reference rules say it is safe.
 8. **When performance-sensitive Java code or hot paths are involved:** read `references/jvm-jit-performance-specification.md`.
