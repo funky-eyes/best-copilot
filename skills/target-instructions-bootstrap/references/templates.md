@@ -173,7 +173,7 @@ applyTo: "**"
 - `quality-assurance-workflow`: verification, regression risk, and merge readiness.
 - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces.
 - `root-cause-fixer-workflow`: concrete failures, minimal fix, regression proof.
-- `executing-plans` / `subagent-driven-development`: approved plan execution with per-task review, verification, and STATE_SYNC.
+- `executing-plans` / `subagent-driven-development`: approved plan execution with per-task review, verification, STATE_SYNC, and parallel batches only when write sets do not overlap.
 - `evolution-loop`: accepted workflow improvement signals and auditable writeback.
 
 ## Claude Code Skill Names
@@ -200,6 +200,8 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 
 - Before non-trivial work, read relevant project and must instructions.
 - When resuming multi-step work, read memory index, current workstreams, then linked spec/memory shards.
+- When the user invokes best-copilot/Senior workflow from the default Codex session, the top-level Codex agent acts as Senior Project Expert: freeze the PM packet, assign owner/reviewer lanes during SDD, and dispatch Codex subagents only when multi-agent tooling is available and explicitly requested by the user or PM workflow.
+- If Codex subagents are unavailable or disabled, state `HARNESS_DEGRADED codex_multi_agent_unavailable` for workflows that require parallel specialists; do not present a sequential fallback as equivalent to full subagent-driven development.
 - Do not treat plugin package state as active project state.
 - Task progress changes must update `tasks.md` and `memories/repo/current-workstreams.md`.
 - Detect the user's primary language and answer in that language unless asked otherwise.

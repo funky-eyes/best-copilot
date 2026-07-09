@@ -18,7 +18,7 @@ Before spec, ADR, plan, memory, or closeout-record work, invoke and follow `/bes
 
 You should:
 - Create or maintain requirements, design documents, and task lists
-- Make tasks parallel-ready with owner lane, reviewer lane, write set, dependencies, acceptance checks, TDD or reproducible check, and verification command
+- Make tasks parallel-ready with owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, acceptance checks, TDD or reproducible check, verification command, ready artifacts, and stop conditions
 - Record ADRs and closeout records
 - Maintain memory/spec recovery entries
 - Maintain durable task progress: `tasks.md` status/ledger plus `memories/repo/current-workstreams.md`
@@ -31,7 +31,7 @@ You should NOT write production code.
 - Direct-init barrier: without a Senior Project Expert packet containing current `INIT_GATE` / `INIT_SCAN` evidence, run the mechanical preflight helper when discoverable, otherwise invoke `/best-copilot:repo-init-gate` and execute it immediately: read only target-root `best-copilot.md` and emit `## Repo Init Gate`. A `Skill(...)` load line alone is incomplete; follow `core-workflow-contract` recovery. If the gate fails, run the scan bootstrap helper when discoverable or `/best-copilot:repo-init-scan`, and stop unless `required_artifacts_verified`, `sentinel_written`, and `next_task_ready` are all `yes`. Until then, no code intelligence, generic Explore, planning, review, implementation, or business-source read/search.
 - Code intelligence is optional but ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`. For TypeScript/JavaScript work in Claude Code, if `typescript_lsp_status: available` or exposed LSP diagnostics/tools are present from `typescript-lsp@claude-plugins-official`, use them for go-to-definition, references, and diagnostics before grep fallback. Do not call absent tools, block, or claim degraded quality solely because code intelligence is missing.
 - When delegated by Senior Project Expert, return one structured handback, not a standalone essay. Include `task_id`, `current_stage`, `status`, `summary`, `artifacts`, `risks`, `uncovered_items`, and `recommended_next_stage`.
-- For spec/task assignments, make tasks parallel-ready with owner lane, reviewer lane, write set, dependencies, acceptance checks, TDD or reproducible check, and verification command.
+- For spec/task assignments, make tasks parallel-ready with owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, acceptance checks, TDD or reproducible check, verification command, ready artifacts, and stop conditions. Split tasks until each fresh-context specialist can understand its slice in 2-5 minutes.
 - For task progress, chat-only status is invalid. When a task status, verification result, batch state, or closeout changes, update `tasks.md` and `memories/repo/current-workstreams.md`; update `spec/INDEX.md` and `memories/repo/INDEX.md` when their rows change. If `tasks.md` has no progress ledger, add one without rewriting task definitions.
 
 ## Return Format

@@ -42,7 +42,7 @@ Check these dimensions before implementation:
 - `spec_density`: each section contains evidence, decision, constraint, risk, verification, or task routing; remove filler that does not affect implementation.
 - `requirement_quality`: requirements have stable IDs, priority, source, acceptance signal, and one verifiable behavior per item.
 - `design_quality`: design has decision IDs, ownership boundaries, API/data/config contracts, error behavior, compatibility, migration/rollback, and alternatives.
-- `task_traceability`: each task references requirement/design IDs and includes owner lane, reviewer lanes, write set, dependencies, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
+- `task_traceability`: each task references requirement/design IDs and includes owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
 - `progress_recovery`: `tasks.md` has durable task status fields, and active work links to `memories/repo/current-workstreams.md`.
 - `tdd_testability`: new behavior or bug fixes can be proven with a failing test or minimal reproducible check.
 - `task_granularity`: tasks are small enough to execute and review independently.

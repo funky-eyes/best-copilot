@@ -48,12 +48,13 @@ If a task touches public APIs, message formats, schemas, auth/security boundarie
 3. Freeze the six-block PM dispatch packet: `task_intent`, `frozen_scope`, `fact_packet`, `execution_contract`, `review_state`, `output_contract`.
 4. For full or ambiguous work, dispatch Technical Architect for SDD design and self-review, then dispatch Developer, QA, and security/frontend lanes when applicable.
 5. For MEDIUM/LARGE work, require a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`; single-file SDD/design/plan notes are evidence only.
-6. Execute through `subagent-driven-development` or `executing-plans` when a plan or delegated implementation is required.
-7. Build reviewer-safe packets separately from implementation packets: pass task/diff/spec evidence and recovery refs, not controller severity opinions, author merge recommendations, or approval framing.
-8. For micro direct implementation, closure requires implementation evidence, `implementation_self_review`, and verification evidence; do not require cross-author review unless the risk surface forces upgrade.
-9. For standard/full tasks, each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, verification, and a final independent whole-branch/package review before closure.
-10. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
-11. Invoke `verification-before-completion` and native continuation/closeout UI when available.
+6. Require design-time task ownership before implementation: `design.md` names owner lanes for changed surfaces and `tasks.md` splits work into independently reviewable slices with `owner_lane`, `reviewer_lanes`, `write_set`, `dependencies`, `parallel_group`, `parallel_ready`, acceptance checks, verification command, ready artifacts, and stop conditions. Tasks should be small enough for a fresh-context specialist to understand in 2-5 minutes; if a task mixes unrelated write sets or reviewer lanes, route back to Specification Writer or Technical Architect for decomposition repair.
+7. Execute through `subagent-driven-development` or `executing-plans` when a plan or delegated implementation is required. Prefer parallel subagent batches only for tasks whose write sets do not overlap and whose dependencies are already satisfied.
+8. Build reviewer-safe packets separately from implementation packets: pass task/diff/spec evidence and recovery refs, not controller severity opinions, author merge recommendations, or approval framing.
+9. For micro direct implementation, closure requires implementation evidence, `implementation_self_review`, and verification evidence; do not require cross-author review unless the risk surface forces upgrade.
+10. For standard/full tasks, each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, verification, and a final independent whole-branch/package review before closure.
+11. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
+12. Invoke `verification-before-completion` and native continuation/closeout UI when available.
 
 ## Self-Evolution Loop
 

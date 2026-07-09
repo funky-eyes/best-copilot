@@ -98,6 +98,8 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Before non-trivial work, read relevant project and must instructions.
 - When resuming multi-step work, read memory index, current workstreams, then linked spec/memory shards.
 - Use `.agents/skills` or installed plugin skills for workflow skills; use `.codex/agents/*.toml` for Codex custom agents.
+- When the user invokes best-copilot/Senior workflow from the default Codex session, the top-level Codex agent acts as Senior Project Expert: freeze the PM packet, assign owner/reviewer lanes during SDD, and dispatch Codex subagents only when multi-agent tooling is available and explicitly requested by the user or PM workflow.
+- If Codex subagents are unavailable or disabled, state `HARNESS_DEGRADED codex_multi_agent_unavailable` for workflows that require parallel specialists; do not present a sequential fallback as equivalent to full subagent-driven development.
 - Do not treat plugin package state as active project state.
 - Task progress changes must update `tasks.md` and `memories/repo/current-workstreams.md`.
 - Detect the user's primary language and answer in that language unless asked otherwise.
@@ -248,7 +250,7 @@ Maintenance: every MEDIUM/LARGE feature gets a spec directory with requirements.
 
 ```md
 # Tasks
-Each task: requirement refs, design refs, owner lane, reviewer lanes, files, write set, read-before-write targets, dependencies, parallel group, acceptance checks, TDD/minimal check, verification command, ready artifacts, stop conditions.
+Each task: requirement refs, design refs, owner lane, reviewer lanes, files, write set, read-before-write targets, dependencies, parallel group, parallel ready, acceptance checks, TDD/minimal check, verification command, ready artifacts, stop conditions. Keep tasks small enough for a fresh-context specialist to understand in 2-5 minutes; split mixed owner lanes or unrelated write sets before implementation.
 ```
 
 ## `must.instructions.md` and `skills-index.instructions.md`
