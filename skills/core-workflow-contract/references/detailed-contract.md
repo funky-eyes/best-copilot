@@ -8,6 +8,7 @@ Load this file only when the compact `SKILL.md` is not enough for routing, runti
 | --- | --- | --- |
 | Copilot CLI / VS Code Copilot | `agents/*.agent.md` + `skills/`; Copilot-only metadata stays in agent files. | VS Code: `vscode_askQuestions`, then `vscode/askQuestions`, then `askQuestions`. CLI: `Asking user`. |
 | Claude Code | `claude-plugin/` manifest; skills as `/best-copilot:<skill>` unless picker inserts another displayed form. PM session starts with `--agent senior-project-expert` or project/user `"agent": "senior-project-expert"`, scoped fallback `best-copilot:senior-project-expert`. PM dispatches scoped `/agents` names such as `best-copilot:developer`. | Built-in `AskUserQuestion`. |
+| Codex | `.codex-plugin/` and `.agents/` expose skills; `.codex/agents/*.toml` exposes custom-agent adapters when copied into the target or this checkout. Plugin install does not automatically make `agents/*.agent.md` available as Codex agents. The top-level Codex session must act as Senior Project Expert when the user invokes this workflow; use Codex subagents only when multi-agent tools are available and the user or PM workflow explicitly authorizes delegation or parallel work. Record `codex_multi_agent_status: available | unavailable | not_enabled` in PM packets. | Use the current Codex ask/input tool when present; otherwise follow the Native Ask fallback from the compact contract. |
 | Other runtimes | Map to local tools. | Check current tool inventory. |
 
 ## Claude Provider Caveat
@@ -33,7 +34,7 @@ Every delegated task uses six blocks:
 5. `review_state`: followup scope, verified items, review lanes, ready artifacts.
 6. `output_contract`: required skills, role checklist fallback, required artifacts, next stage, state sync requirements.
 
-Plan execution packets also include `plan_revision`, `execution_confirmed`, `task_id`, and full task text.
+Plan execution packets also include `plan_revision`, `execution_confirmed`, `task_id`, full task text, `owner_lane`, `reviewer_lanes`, `write_set`, `parallel_group`, `parallel_ready`, and dependency state. PM must not dispatch implementation from tasks that lack these fields.
 
 ### Review-Safe Packet Extensions
 

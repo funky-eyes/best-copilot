@@ -27,11 +27,12 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 ## Decomposition Rules
 
 - Tasks should be independently understandable in 2-5 minutes.
+- If one task would require multiple specialists to edit different write sets, split it at plan time and connect the slices with dependencies or a shared foundation task.
 - Every task should cite the requirement IDs and design decision IDs it satisfies; if it cannot, repair the spec before planning implementation.
 - Prefer success criteria, constraints, and verification over micro-prescribed implementation steps. Include concrete steps only when dependency order, safety, or verification makes them necessary.
 - Plan SDD first, then TDD: each task consumes reviewed design context and includes either a failing test target or a minimal reproducible check before implementation.
 - Split by file ownership, dependency order, and review lane, not by vague phases.
-- Mark parallel only when write sets do not overlap.
+- Mark parallel only when write sets do not overlap, dependencies are satisfied, and each task has a distinct owner lane plus reviewer lanes. Prefer a small number of high-confidence parallel groups over broad speculative fan-out.
 - Prefer parallel groups that let Technical Architect and Developer work independently; add Frontend Designer as owner or reviewer for frontend surfaces.
 - Assign cross-review lanes per the Cross-Review Lanes from `core-workflow-contract`.
 - Give each task a small `ready_artifacts` list so fan-in can check outputs without rereading the whole conversation.

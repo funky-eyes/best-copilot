@@ -43,7 +43,7 @@ The validator is shallow: it checks the required three files and basic source li
 - source links to `requirements.md` and `design.md`
 - `## Progress Ledger`
 - task status values from `core-workflow-contract/references/state-persistence.md`
-- per-task owner lane, reviewer lanes, write set, dependencies, acceptance checks, verification command, ready artifacts, and stop conditions
+- per-task owner lane, reviewer lanes, write set, dependencies, parallel group, parallel readiness, acceptance checks, verification command, ready artifacts, and stop conditions
 - closeout checklist requiring task/spec/memory agreement
 
 If an existing active `tasks.md` lacks progress tracking, do not rewrite its task definitions. Add a compatible `## Progress Ledger` near the top and initialize rows from visible task IDs.
@@ -62,5 +62,5 @@ If an existing active `tasks.md` lacks progress tracking, do not rewrite its tas
 - Confirm `spec/INDEX.md` and missing templates exist in the target repository.
 - Confirm existing active specs were preserved.
 - Confirm `tasks-template.md` includes `## Progress Ledger` and memory/spec closeout rules.
-- Confirm generated templates contain metadata, evidence, traceability, verification, task ownership, and task progress sections.
+- Confirm generated templates contain metadata, evidence, traceability, verification, task ownership, parallel readiness, and task progress sections.
 - If invoked because `spec/**` was missing and required files still do not exist, return `BLOCKED target_spec_bootstrap_incomplete` with missing paths. Do not let the caller continue the substantive task as if initialization succeeded.

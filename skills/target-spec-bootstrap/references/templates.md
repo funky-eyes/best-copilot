@@ -193,7 +193,8 @@ Use these neutral templates only for missing target-local spec files.
 
 - Every implementation task must map to at least one requirement ID and one design decision.
 - Split by ownership boundary, dependency order, and non-overlapping write set.
-- Each task must include read-before-write targets, acceptance checks, verification, reviewer lanes, ready artifacts, and stop conditions.
+- Each task must include owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
+- Keep tasks small enough for a fresh-context specialist to understand in 2-5 minutes; split mixed owner lanes or unrelated write sets before implementation.
 - If a task has unresolved product or security input that changes behavior, mark it blocked instead of guessing.
 - After each task status or verification change, update this `Progress Ledger` and `memories/repo/current-workstreams.md` before continuing.
 
@@ -218,7 +219,8 @@ Verification values: `passed | failed | blocked | not_run | not_applicable`.
 - Write set: `<files this task may edit>`
 - Read-before-write targets: `<public surface, immediate caller/callee, shared utility or local pattern>`
 - Dependencies: `<none | Task IDs>`
-- Parallel group: `<G0/G1/... or parallel_ready: false>`
+- Parallel group: `<G0/G1/...>`
+- Parallel ready: `<true | false with reason>`
 - Acceptance checks:
   - `<observable result mapped to requirement refs>`
 - TDD or minimal check:

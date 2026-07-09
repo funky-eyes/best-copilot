@@ -761,6 +761,8 @@ This file is the Codex adapter for the target repository. `.github/**` is the sh
 - Before non-trivial work, read relevant project and must instructions.
 - When resuming multi-step work, read memory index, current workstreams, then linked spec/memory shards.
 - Use `.agents/skills` or installed plugin skills for workflow skills; use `.codex/agents/*.toml` for Codex custom agents.
+- When the user invokes best-copilot/Senior workflow from the default Codex session, the top-level Codex agent acts as Senior Project Expert: freeze the PM packet, assign owner/reviewer lanes during SDD, and dispatch Codex subagents only when multi-agent tooling is available and explicitly requested by the user or PM workflow.
+- If Codex subagents are unavailable or disabled, state `HARNESS_DEGRADED codex_multi_agent_unavailable` for workflows that require parallel specialists; do not present a sequential fallback as equivalent to full subagent-driven development.
 - Do not treat plugin package state as active project state.
 - Task progress changes must update `tasks.md` and `memories/repo/current-workstreams.md`.
 - Detect the user's primary language and answer in that language unless asked otherwise.
@@ -771,7 +773,7 @@ name = "senior-project-expert"
 description = "PM/coordinator for large, ambiguous, cross-module, planning, dispatch, fan-in, closeout, and workflow-evolution work. Use when scope must be frozen before implementation."
 nickname_candidates = ["Senior Project Expert", "PM Coordinator"]
 developer_instructions = """
-Use best-copilot skills when available: core-workflow-contract, senior-project-expert-workflow, repo-init-gate, and repo-init-scan when the gate fails. Own intent, scope, planning, dispatch, fan-in, closeout, and workflow evolution. Do not write production code for medium or large work. Run repo-init-gate before substantive target-repository work. Use Codex subagents only after the user or PM workflow explicitly asks for delegation or parallel agent work. Invoke verification-before-completion before final completion claims.
+Use best-copilot skills when available: core-workflow-contract, senior-project-expert-workflow, repo-init-gate, and repo-init-scan when the gate fails. Own intent, scope, planning, dispatch, fan-in, closeout, and workflow evolution. In Codex, the top-level/default agent assumes this Senior Project Expert workflow when the user invokes best-copilot or asks for PM/subagent orchestration; do not depend on a separate always-on supervisor agent. Do not write production code for medium or large work. Run repo-init-gate before substantive target-repository work. At SDD/design time, require each implementation task to name owner_lane, reviewer_lanes, write_set, dependencies, parallel_group, parallel_ready, acceptance checks, verification command, ready artifacts, and stop conditions; split tasks until each fresh-context specialist can understand its slice in 2-5 minutes. Use Codex subagents only after the user or PM workflow explicitly asks for delegation or parallel agent work and the current tool inventory exposes multi-agent support. If subagents are unavailable, state HARNESS_DEGRADED codex_multi_agent_unavailable and do not present a sequential fallback as equivalent to full subagent-driven development. Invoke verification-before-completion before final completion claims.
 """
 EOF
 
@@ -1146,7 +1148,8 @@ write_missing "spec/templates/tasks-template.md" <<'EOF'
 
 - Every implementation task must map to at least one requirement ID and one design decision.
 - Split by ownership boundary, dependency order, and non-overlapping write set.
-- Each task must include read-before-write targets, acceptance checks, verification, reviewer lanes, and stop conditions.
+- Each task must include owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
+- Keep tasks small enough for a fresh-context specialist to understand in 2-5 minutes; split mixed owner lanes or unrelated write sets before implementation.
 
 ## Metadata
 
@@ -1154,9 +1157,18 @@ write_missing "spec/templates/tasks-template.md" <<'EOF'
 - Requirement source: `requirements.md`
 - Design source: `design.md`
 
+## Progress Ledger
+
+| Task ID | Status | Owner | Reviewer | Last updated | Verification | Evidence | Next action | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| T-001 | READY | `<lane>` | `<lane>` | unknown | not_run | none | Start task | none |
+
+Status values: `READY | IN_PROGRESS | DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_USER_INPUT | BLOCKED`.
+Verification values: `passed | failed | blocked | not_run | not_applicable`.
+
 ## Task List
 
-### Task 1: `<short imperative title>`
+### T-001: `<short imperative title>`
 
 - Requirement refs: `<FR-001, FR-002>`
 - Design refs: `<DD-001>`
@@ -1166,7 +1178,8 @@ write_missing "spec/templates/tasks-template.md" <<'EOF'
 - Write set: `<files this task may edit>`
 - Read-before-write targets: `<public surface, immediate caller/callee, shared utility or local pattern>`
 - Dependencies: `<none | Task IDs>`
-- Parallel group: `<G0/G1/... or parallel_ready: false>`
+- Parallel group: `<G0/G1/...>`
+- Parallel ready: `<true | false with reason>`
 - Acceptance checks:
   - `<observable result mapped to requirement refs>`
 - TDD or minimal check:
