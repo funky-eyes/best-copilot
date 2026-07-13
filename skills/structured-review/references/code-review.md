@@ -40,7 +40,7 @@ Check:
 - compatibility with existing call sites, feature flags, permissions, schemas, generated types, tests, and documented examples
 - for frontend changes: parent route/component, data contract, critical user path, loading/error/empty/disabled/focus/mobile states, and visible sensitive data exposure
 
-Use code intelligence when available: GitNexus impact/context/API impact/shape check, codegraph callers/callees/trace, or LSP references before grep fallback. If tooling is unavailable, inspect at least the immediate caller/callee or mark the missing chain evidence under `concerns / risks / unverified items`.
+Use the highest available code intelligence: `codebase-memory-mcp` graph search/trace/snippets/query first, then GitNexus impact/context/API impact/shape check, CodeGraph callers/callees/trace, LSP references, and native search last. Use the selected provider to establish impact and execution-path context before judging the diff. If only native search is available, inspect at least the immediate caller/callee or mark the missing chain evidence under `concerns / risks / unverified items`.
 
 Record `context_chain_reviewed` with the concrete files/symbols/routes checked. If a downstream contract cannot be verified, do not approve without a risk note or targeted verification.
 

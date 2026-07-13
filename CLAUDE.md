@@ -48,9 +48,9 @@ Senior Project Expert owns orchestration (intent, scope, dispatch, fan-in, close
 - In agent teams, teammate `skills:` frontmatter is ignored — spawn prompts must name skills explicitly or the teammate returns `NEEDS_CONTEXT missing_required_skill`.
 - A `Skill(...) Successfully loaded` line means Claude loaded instructions; it does not mean the workflow ran. Repo init is complete only after the target files are created or verified on disk and the preflight/scan path reports `required_artifacts_verified: yes`, `sentinel_written: yes`, and `next_task_ready: yes`.
 
-### Code Intelligence MCP (GitNexus / CodeGraph)
+### Code Intelligence MCP
 
-Structural code intelligence is optional. Choose by current tool inventory in this order: GitNexus (`mcp__gitnexus__*`), then CodeGraph (`mcp__codegraph__*`), then built-in Read/Grep/Glob plus shell `rg`. A local binary or plugin inventory entry is not enough, and absent tools must not be called.
+Structural code intelligence is capability-aware and optional. Choose by current tool inventory in this order: `codebase-memory-mcp` graph tools, GitNexus (`mcp__gitnexus__*`), CodeGraph (`mcp__codegraph__*`), language-server navigation/diagnostics, then built-in Read/Grep/Glob plus shell `rg`. Use the selected provider for symbol discovery, call-chain/context tracing, impact assessment, and review scope; record missing chain evidence when native search is the only option. A local binary or plugin inventory entry is not enough, and absent tools must not be called.
 
 ### Init Gate (mandatory preflight)
 
@@ -74,26 +74,30 @@ When installed in another repository, persistent state goes to that target repo 
 Bootstrap skills (`target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap`) create these scaffolds on first use.
 
 <!-- gitnexus:start -->
-# GitNexus — Code Intelligence
+# Code Intelligence — Provider Fallback
 
-This project is indexed by GitNexus as **best-copilot** (1294 symbols, 1301 relationships, 0 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+Use the highest exposed provider in this order: `codebase-memory-mcp` graph tools, GitNexus, CodeGraph, language-server tooling, then native Read/Grep/Glob and `rg`. Use it for symbol discovery, context and caller/callee tracing, impact analysis, change-scope review, and semantic refactoring when available. Record the selected provider and any missing chain evidence. Do not call absent tools or block solely because a provider is unavailable.
+
+# GitNexus — Fallback Provider
+
+This project is indexed by GitNexus as **best-copilot** (1294 symbols, 1301 relationships, 0 execution flows). Use its MCP tools when `codebase-memory-mcp` is not exposed.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
 ## Always Do
 
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
+- **When GitNexus is selected, run impact analysis before editing a symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **When GitNexus is selected, run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
 - **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When GitNexus is selected for unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
 - When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
 
 ## Never Do
 
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
+- NEVER edit a function, class, or method without first obtaining equivalent impact/context evidence from the selected provider.
 - NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
+- When GitNexus is selected, NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- When GitNexus is selected, NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
 
 ## Resources
 

@@ -105,8 +105,8 @@ Record `decision_provenance` for conflicts or overruled concerns.
 
 ## Code Intelligence
 
-- Prefer GitNexus MCP when present.
-- Else use CodeGraph MCP when present.
-- Else use built-in Read/Grep/Glob plus shell `rg` where allowed.
-- For TypeScript/JavaScript in Claude Code, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` before grep fallback.
-- Record availability in PM evidence and specialist packets. Do not call absent tools or block solely because code intelligence is unavailable.
+- Prefer exposed `codebase-memory-mcp` graph tools (`search_graph`, `trace_path`, `get_code_snippet`, `query_graph`, and `get_architecture`) when present.
+- Else use GitNexus MCP when present, then CodeGraph MCP, then exposed language-server navigation/diagnostics, and finally built-in Read/Grep/Glob plus shell `rg` where allowed.
+- Use the selected provider to establish symbol context, callers/callees, impact, and affected execution paths before implementation or approval. Use semantic rename/refactor only when that capability is exposed; otherwise require an explicit reference check.
+- For TypeScript/JavaScript in Claude Code, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` before native-search fallback.
+- Record the selected provider, availability, and missing chain evidence in PM evidence and specialist packets. Do not call absent tools or block solely because code intelligence is unavailable.

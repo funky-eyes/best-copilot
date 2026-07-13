@@ -35,26 +35,30 @@ This project provides plugins for Codex, Claude Code, and GitHub Copilot. As suc
 | `vscode_askQuestions` / `vscode/askQuestions` / `askQuestions` / `Asking user` | Use the available native ask mechanism when present | Top-level session and PM/coordinator only. In VS Code, if `vscode_askQuestions` appears in the latest tool inventory, call that exact tool before abstract `vscode/askQuestions` / `askQuestions`; in Copilot CLI, use `Asking user` when available. Specialists must not invoke native ask and should return `NEEDS_USER_INPUT` to PM when present or `BLOCKED missing_top_level_question` otherwise. Plain prose questions cannot replace native confirmation gates. If native ask is unavailable, continue only with a single safe interpretation or report a blocked/partial state. |
 
 <!-- gitnexus:start -->
-# GitNexus — Code Intelligence
+# Code Intelligence — Provider Fallback
 
-This project is indexed by GitNexus as **best-copilot** (1294 symbols, 1301 relationships, 0 execution flows). Use the GitNexus MCP tools to understand code, assess impact, and navigate safely.
+Use the highest exposed provider in this order: `codebase-memory-mcp` graph tools, GitNexus, CodeGraph, language-server tooling, then native Read/Grep/Glob and `rg`. Use it for symbol discovery, context and caller/callee tracing, impact analysis, change-scope review, and semantic refactoring when available. Record the selected provider and any missing chain evidence. Do not call absent tools or block solely because a provider is unavailable.
+
+# GitNexus — Fallback Provider
+
+This project is indexed by GitNexus as **best-copilot** (1294 symbols, 1301 relationships, 0 execution flows). Use its MCP tools when `codebase-memory-mcp` is not exposed.
 
 > If any GitNexus tool warns the index is stale, run `npx gitnexus analyze` in terminal first.
 
 ## Always Do
 
-- **MUST run impact analysis before editing any symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
-- **MUST run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
+- **When GitNexus is selected, run impact analysis before editing a symbol.** Before modifying a function, class, or method, run `gitnexus_impact({target: "symbolName", direction: "upstream"})` and report the blast radius (direct callers, affected processes, risk level) to the user.
+- **When GitNexus is selected, run `gitnexus_detect_changes()` before committing** to verify your changes only affect expected symbols and execution flows.
 - **MUST warn the user** if impact analysis returns HIGH or CRITICAL risk before proceeding with edits.
-- When exploring unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
+- When GitNexus is selected for unfamiliar code, use `gitnexus_query({query: "concept"})` to find execution flows instead of grepping. It returns process-grouped results ranked by relevance.
 - When you need full context on a specific symbol — callers, callees, which execution flows it participates in — use `gitnexus_context({name: "symbolName"})`.
 
 ## Never Do
 
-- NEVER edit a function, class, or method without first running `gitnexus_impact` on it.
+- NEVER edit a function, class, or method without first obtaining equivalent impact/context evidence from the selected provider.
 - NEVER ignore HIGH or CRITICAL risk warnings from impact analysis.
-- NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
-- NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
+- When GitNexus is selected, NEVER rename symbols with find-and-replace — use `gitnexus_rename` which understands the call graph.
+- When GitNexus is selected, NEVER commit changes without running `gitnexus_detect_changes()` to check affected scope.
 
 ## Resources
 

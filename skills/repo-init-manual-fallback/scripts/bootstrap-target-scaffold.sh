@@ -721,8 +721,8 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 - Use plugin skills with namespaced slash commands such as `/best-copilot:repo-init-gate` and `/best-copilot:repo-init-scan`.
 - In shell-capable Claude Code, prefer the bundled preflight helper when discoverable.
 - `Skill(...) Successfully loaded` is not proof that init ran. Continue only after the preflight/scan path verifies files on disk and reports ready.
-- Code intelligence is optional and ordered: use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`.
-- For TypeScript/JavaScript work, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` for go-to-definition, references, and diagnostics before grep fallback when available.
+- Code intelligence is optional and capability-aware: use exposed `codebase-memory-mcp` graph tools first, then `mcp__gitnexus__*`, `mcp__codegraph__*`, language-server tooling, and built-in Read/Grep/Glob plus shell `rg`. Use the selected provider for symbol context, call-chain tracing, impact, and review scope; record missing chain evidence when native search is the fallback.
+- For TypeScript/JavaScript work, use exposed LSP tools or diagnostics from `typescript-lsp@claude-plugins-official` for go-to-definition, references, and diagnostics before native-search fallback when available.
 - When Claude Code exposes `AskUserQuestion`, route choices, execution approvals, specialist `NEEDS_USER_INPUT` handbacks, continuation choices, and closeout choices must use that native popup with selectable options and a custom/Other answer path. Do not end with prose-only next-step questions.
 EOF
 
