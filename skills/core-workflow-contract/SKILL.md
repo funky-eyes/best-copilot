@@ -140,8 +140,9 @@ A delegated specialist's `artifacts.self_check` satisfies this gate only when it
 ## Search And Edits
 
 - Start from explicit paths, changed files, frozen packet files, `spec/INDEX.md`, and `memories/repo/INDEX.md`.
-- Prefer GitNexus when present, else CodeGraph, else built-in Read/Grep/Glob plus shell `rg`.
-- For TypeScript/JavaScript in Claude Code, use exposed `typescript-lsp@claude-plugins-official` tools/diagnostics when actually available.
+- Select the highest exposed structural provider in this order: `codebase-memory-mcp` (graph search, trace, snippets, and architecture), GitNexus, CodeGraph, language-server tooling, then built-in Read/Grep/Glob plus shell `rg`. A configured plugin or local binary is not proof that its tools are callable.
+- Use the selected provider for symbol discovery, context/call-chain tracing, impact assessment, and change-scope review. Preserve the provider and any missing chain evidence in implementation or review output; if only native search is available, inspect the direct caller/callee explicitly.
+- For TypeScript/JavaScript in Claude Code, use exposed `typescript-lsp@claude-plugins-official` tools/diagnostics when actually available before native search fallback.
 - Before code edits, read the changed file surface, immediate caller/callee, and obvious local utilities or patterns.
 - Keep diffs surgical; every changed line must trace to user intent, acceptance checks, or verification repair.
 

@@ -177,15 +177,12 @@ Follow the canonical definitions in `core-workflow-contract` for specialist ask 
 
 # Copilot Repository Instructions
 
-This repository is indexed by GitNexus.
+This repository is indexed by GitNexus, which is a fallback when a higher-priority code-intelligence provider is unavailable.
 
 When working in Agent mode:
 
-1. Before modifying any function, class, method, API handler, service, or shared type, use the GitNexus MCP tools to inspect impact and context.
-2. Prefer GitNexus context/query/impact tools over plain text search when understanding code relationships.
-3. Before committing or summarizing a change, use GitNexus change detection if available.
-4. If GitNexus reports the index is stale, ask the user to run:
-
-   npx -y gitnexus@latest analyze
-
+1. Before modifying a function, class, method, API handler, service, or shared type, select the highest available provider: `codebase-memory-mcp`, GitNexus, CodeGraph, language-server tooling, then local search. Use it to inspect the symbol context, callers/callees, and change impact; with local search, inspect the direct caller/callee explicitly.
+2. Use the selected provider's relationship evidence to scope edits, identify compatibility risks, and review the changed path. Record the provider and uncovered chain evidence in the task or review handback.
+3. When GitNexus is the selected provider, use its context/query/impact tools; use change detection before committing or summarizing a change, and if it reports a stale index, ask the user to run `npx -y gitnexus@latest analyze`.
+4. Use semantic rename/refactor support only when exposed by the selected provider; otherwise perform an explicit reference check before changing a symbol name.
 5. Do not perform large refactors based only on local file context.

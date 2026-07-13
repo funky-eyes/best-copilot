@@ -245,7 +245,7 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 - Use plugin skills as namespaced slash commands such as `/best-copilot:repo-init-gate`.
 - `Skill(...) Successfully loaded` only confirms instruction loading; init is complete only after gate/scan output verifies target files and reports ready.
 - PM must not inspect business source before init. For standard/full work after init, PM dispatches named specialists instead of broad source exploration.
-- Code intelligence is optional: GitNexus first when present, else CodeGraph, else Read/Grep/Glob plus shell `rg`; for TypeScript/JavaScript use exposed `typescript-lsp@claude-plugins-official` tools/diagnostics when available.
+- Code intelligence is optional and capability-aware: exposed `codebase-memory-mcp` graph tools first, then GitNexus, CodeGraph, language-server navigation/diagnostics, and Read/Grep/Glob plus shell `rg`; use the selected provider for symbol context, call-chain tracing, impact, and review scope, and record missing chain evidence when native search is the fallback.
 - Implementation, fixes, spec/memory writes, and permission-gated verification run foreground by default. Isolated worktree changes require PM fan-in and branch closeout before claiming landed changes.
 - When `AskUserQuestion` exists, PM route choices, approvals, specialist handbacks, continuation, and closeout must use it with selectable options and a custom/Other path.
 - STATE_SYNC is mandatory: task status or verification changes update `tasks.md` and `memories/repo/current-workstreams.md` before continuing.

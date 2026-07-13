@@ -69,7 +69,7 @@ The standalone `@path` lines below are Claude Code import directives. Keep them 
 - Imported `.github/instructions/**` are the shared source for repository facts, workflow gates, and skill routing. System/platform/user instructions outrank imported files.
 - Default agent: `"agent": "senior-project-expert"` in `.claude/settings.json`. PM dispatches to specialist subagents with scoped names (`best-copilot:technical-architect`, etc.).
 - Plugin skills: namespaced slash commands such as `/best-copilot:repo-init-gate`. In shell-capable Claude Code, prefer the bundled preflight helper when discoverable. `Skill(...) Successfully loaded` is not completion evidence. Continue only after the preflight/scan path reports ready.
-- Code intelligence is optional and ordered. Use `mcp__gitnexus__*` first when present, else `mcp__codegraph__*`, else built-in Read/Grep/Glob plus shell `rg`.
+- Code intelligence is optional and capability-aware. Use exposed `codebase-memory-mcp` graph tools first, then `mcp__gitnexus__*`, `mcp__codegraph__*`, language-server tooling, and built-in Read/Grep/Glob plus shell `rg`; use the selected provider for symbol context, call-chain tracing, impact, and review scope, and record missing chain evidence when native search is the fallback.
 - Keep this file short. Facts → `.github/instructions/`, memory → `memories/repo/**`, specs → `spec/**`.
 ```
 
