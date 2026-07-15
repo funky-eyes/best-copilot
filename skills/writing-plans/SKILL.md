@@ -19,7 +19,7 @@ Use this skill to turn a confirmed direction or spec into executable work.
 Each task maps to the six-block PM dispatch packet from `core-workflow-contract` plus plan-specific fields:
 
 - **task_intent**: `goal`
-- **frozen_scope**: `requirement_refs`, `design_refs`, `non_goals`, `files_involved`, `write_set`, `dependencies`, `owner_lane`, `reviewer_lanes`, `parallel_group`, `parallel_ready`
+- **frozen_scope**: `requirement_refs`, `design_refs`, `non_goals`, `difficulty`, `files_involved`, `write_set`, `dependencies`, `owner_lane`, `reviewer_lanes`, `parallel_group`, `parallel_ready`
 - **execution_contract**: `assumptions`, `tradeoffs`, `simpler_option_considered`, `acceptance_checks`, `tdd_or_check`, `verification_command`, `stop_conditions`, `context_budget`, `review_package_strategy`, `reviewer_input_boundary`, `model_policy`, `model_cost_boundary`, `final_independent_review`, `read_before_write_targets`
 - **output_contract**: `ready_artifacts`, `implementation_steps`
 - **state_sync**: required `tasks.md` progress ledger/status update, `current-workstreams.md` update, and index updates when rows change
@@ -32,7 +32,10 @@ Each task maps to the six-block PM dispatch packet from `core-workflow-contract`
 - Prefer success criteria, constraints, and verification over micro-prescribed implementation steps. Include concrete steps only when dependency order, safety, or verification makes them necessary.
 - Plan SDD first, then TDD: each task consumes reviewed design context and includes either a failing test target or a minimal reproducible check before implementation.
 - Split by file ownership, dependency order, and review lane, not by vague phases.
-- Mark parallel only when write sets do not overlap, dependencies are satisfied, and each task has a distinct owner lane plus reviewer lanes. Prefer a small number of high-confidence parallel groups over broad speculative fan-out.
+- Do not assign every task to `developer` by default. Classify each task as `high`, `medium`, or `low` difficulty before owner selection: high-difficulty work goes to `technical-architect`; medium-difficulty work should be split or balanced between `technical-architect` and `developer` only by non-overlapping write sets and dependency order, with no shared files, generated-template sources, or dispatch hot files; low-difficulty bounded implementation goes to `developer`. If one slice mixes difficulty bands, split it and make the higher-difficulty architect-owned slice a dependency.
+- Reviewer lanes are mandatory and must be independent from the owner. Default cross-review: high-difficulty architect-owned tasks include `developer` plus `qa` when behavior changes; medium-difficulty developer-owned tasks include `technical-architect` plus `qa` when behavior changes; frontend-owned tasks include `qa` and `technical-architect` when integration contracts change; security-sensitive tasks include `security`.
+- Add review readiness to the ledger: reviewer lane(s), review status/evidence, and next review action. A plan whose tasks have placeholder, empty, or owner-only reviewer lanes is not execution-ready.
+- Mark parallel only when write sets do not overlap at all, no task edits the same file/generated-template source/dispatch hot file, dependencies are satisfied, and each task has a distinct owner lane plus reviewer lanes. Prefer a small number of high-confidence parallel groups over broad speculative fan-out.
 - Prefer parallel groups that let Technical Architect and Developer work independently; add Frontend Designer as owner or reviewer for frontend surfaces.
 - Assign cross-review lanes per the Cross-Review Lanes from `core-workflow-contract`.
 - Give each task a small `ready_artifacts` list so fan-in can check outputs without rereading the whole conversation.
@@ -71,8 +74,8 @@ Use this output for a transient planning summary or for the content of `spec/<fe
 
 ## Progress Ledger
 
-| Task ID | Status | Owner | Reviewer | Last updated | Verification | Evidence | Next action | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| Task ID | Status | Difficulty | Owner | Reviewer(s) | Review status | Last updated | Verification | Evidence | Next action | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
 
 ## Tasks
 ### Task 1: ...
