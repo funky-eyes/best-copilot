@@ -13,7 +13,7 @@ Use this skill when a MEDIUM/LARGE plan is ready for implementation and fresh co
 - A current `tasks.md` exists and is approved for execution. For MEDIUM/LARGE target-repository work, it must live inside a Spec Bundle directory with sibling `requirements.md` and `design.md`; a single `spec/designs/*.md`, SDD note, or standalone implementation plan is evidence only and must be split before execution.
 - When shell access is available and the work is MEDIUM/LARGE, run `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` or consume equivalent validator evidence from PM.
 - `tasks.md` must contain `## Progress Ledger` or equivalent per-task status blocks before implementation dispatch. If absent, return `NEEDS_CONTEXT progress_ledger_missing` so Specification Writer repairs it first.
-- Each task has a complete task statement, `files_involved`, dependencies, assumptions or explicit unknowns, acceptance checks, and verification budget.
+- Each task has a complete task statement, `files_involved`, dependencies, assumptions or explicit unknowns, acceptance checks, verification budget, explicit `difficulty` (`high | medium | low`), a difficulty-appropriate `owner_lane`, and independent `reviewer_lanes`. Reject execution with `NEEDS_CONTEXT reviewer_lanes_missing` when reviewer lanes are empty, placeholders, or only the owner; reject with `NEEDS_CONTEXT owner_lane_mismatch` when high-difficulty work is assigned away from Technical Architect, or when medium-difficulty work is split/balanced despite overlapping write sets, same-file edits, generated-template source overlap, or dispatch hot-file overlap.
 - PM has frozen `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
 - If the work came through PM planning, `execution_confirmed` must match the current `plan_revision`.
 
@@ -22,7 +22,7 @@ Use this skill when a MEDIUM/LARGE plan is ready for implementation and fresh co
 For every ready task:
 
 1. Build a fresh context packet with `context-packet-fastpath`.
-2. Dispatch implementation to the right specialist: Technical Architect for full-stack architecture/mainline slices, Developer for scoped slices, Frontend Designer for UI-owned slices, or Root Cause Fixer for confirmed failures.
+2. Dispatch implementation to the right specialist by difficulty and lane: Technical Architect for high-difficulty slices, a balanced Technical Architect/Developer split for medium-difficulty slices only when write sets are disjoint, Developer for low-difficulty bounded slices, Frontend Designer for UI-owned slices, or Root Cause Fixer for confirmed failures.
 3. Require implementation evidence: changed files, read-before-write evidence for code edits, tests/checks run, key output, risk, and next-step notes.
 4. Run Stage 1 review: spec/task compliance. The reviewer checks whether requirements, non-goals, file boundaries, and acceptance checks were honored.
 5. Run Stage 2 review: context-chain, code quality, and release risk. The reviewer must use the `structured-review` code-review context-chain gate before assessing maintainability, coupling, security/performance risk, dead code, and test adequacy.

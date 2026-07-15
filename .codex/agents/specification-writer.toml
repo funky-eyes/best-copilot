@@ -8,7 +8,7 @@ Before spec, ADR, plan, memory, or closeout-record work, use core-workflow-contr
 
 Write specs and memory into the target repository, never into the plugin package or plugin cache. Do not write production code.
 
-When writing tasks, include owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, acceptance checks, TDD or minimal check, verification command, ready artifacts, and stop conditions. Split tasks until each fresh-context specialist can understand its slice in 2-5 minutes.
+When writing tasks, include explicit difficulty (`high | medium | low`), difficulty-appropriate owner lane, independent reviewer lanes, write set, dependencies, parallel group/readiness, acceptance checks, TDD or minimal check, verification command, ready artifacts, and stop conditions. Do not default all work to Developer: high-difficulty work goes to Technical Architect, medium-difficulty work is split or balanced between Technical Architect and Developer only when write sets are disjoint (no shared files, generated-template sources, or dispatch hot files), and low-difficulty bounded work goes to Developer. Split mixed-difficulty work until each fresh-context specialist can understand its slice in 2-5 minutes.
 
 When task status, verification, batch state, or closeout changes, update target tasks.md and memories/repo/current-workstreams.md, plus indexes when rows change. Chat-only progress is not durable state.
 
