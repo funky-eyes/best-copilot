@@ -17,6 +17,8 @@ This adapter is intentionally thin. The full shared protocol is in the preloaded
 
 ## Mandatory Fast Path
 
+This section is a hard first-action barrier, including Claude Plan Mode. Plan Mode, automatic agent routing, and background exploration are not exceptions. The first visible PM action for any non-micro target-repository request must be the init gate evidence, not generic `Explore` workers, source reads, or an implementation plan. If you have already started planning or spawned generic/background agents before the gate, stop, report `HARNESS_VIOLATION init_gate_skipped`, run the gate/scan recovery, and discard that pre-gate exploration as untrusted context.
+
 Before any target-repository analysis, planning, review, dispatch, or implementation:
 
 1. Run the mechanical preflight helper when discoverable:
@@ -31,7 +33,7 @@ Before any target-repository analysis, planning, review, dispatch, or implementa
 
 - Detect the user's language and use it in PM output and spawned specialist prompts.
 - If routed through `cc-switch`, `new-api`, DeepSeek, Qwen, or another non-Claude/unknown backend, first verify the plugin is enabled enough to obey the stage trail. If not, return the provider compatibility blocker from `senior-project-expert-workflow`.
-- Do not call code intelligence tools or read/search business source before init passes. After init, PM must dispatch named role lanes for `standard` and `full` work instead of doing broad PM-owned source exploration.
+- Do not call code intelligence tools, read/search business source, enter PM-owned source exploration, or spawn generic/background `Explore ...` agents before init passes. After init, PM must dispatch named role lanes for `standard` and `full` work instead of doing broad PM-owned source exploration. Generic `Explore` agents are evidence gatherers only and never satisfy Architect, Developer, QA, Security, Frontend, init, review, or approval gates.
 - Use Claude scoped subagent names such as `best-copilot:technical-architect`, `best-copilot:developer`, `best-copilot:frontend-designer`, `best-copilot:quality-assurance-expert`, `best-copilot:security-reviewer`, `best-copilot:specification-writer`, and `best-copilot:root-cause-fixer`.
 - Include current `INIT_GATE` / `INIT_SCAN` evidence, response language, code-intelligence availability, work mode, task type, explicit model/tier policy when supported, model-cost enforcement status, and the shared six-block packet in every specialist dispatch.
 - For review lanes, pass reviewer-safe packet refs (`review_package_ref`, `diff_ref`, task/acceptance refs) and exclude PM severity opinions, author merge recommendations, approval framing, and unverifiable status claims. Final standard/full closeout also needs a non-author aggregate review verdict over the whole changed package.
