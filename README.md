@@ -2,7 +2,7 @@
 
 English | [Simplified Chinese](README.zh-CN.md) | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.7.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.8.0-1d9bf0)](plugin.json)
 [![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
@@ -210,7 +210,7 @@ This keeps shared behavior, role-specific behavior, and incompatible runtime met
 | Claude base session | Agent's `skills:` not activated, must call manually |
 | Copilot CLI | Body reference is not mechanical preload, packet must include minimal checklist |
 
-Claude agent frontmatter normally preloads only `core-workflow-contract` and the matching role workflow skill. Senior Project Expert additionally preloads only `repo-init-gate`; `repo-init-scan` stays on-demand and is loaded only when the sentinel gate fails. Other focused skills such as `structured-review`, `test-driven-development`, or `web-experience-audit` stay on-demand in the agent body to reduce startup context.
+Claude agent frontmatter normally preloads only `core-workflow-contract` and the matching role workflow skill. Senior Project Expert additionally preloads only `repo-init-gate`; `repo-init-scan` stays on-demand and is loaded only when the sentinel gate fails. Focused verification and experience skills stay on-demand, while SDD/TDD are enforced directly by role workflows to reduce startup context.
 
 ### Multi-Runtime Comparison
 
@@ -302,7 +302,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → PLANNER_FREEZE_PACKET
 
 ### Stage 1: Init Gate (Mandatory Preflight)
 
-Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.7.1"`.
+Before any substantive work on the target repository, the system runs `repo-init-gate` — it only reads `best-copilot.md` from the target repository root, checking whether the frontmatter `version` matches the current contract version `"0.8.0"`.
 
 ```
 repo-init-gate
@@ -371,13 +371,14 @@ For `standard` tasks, ARCHITECT_SDD is skipped with the reason recorded for effi
 
 ### Stage 5: Parallel Dispatch and Execution
 
-After passing design review, PM breaks work into parallelizable tasks via `writing-plans`, each with:
+After passing design review, the Specification Writer workflow breaks work into parallelizable tasks, each with:
 
 - Independent file ownership and write sets (non-overlapping)
 - Clear dependency relationships and acceptance checks
 - Designated owner lanes and review lanes
+- A durable `Progress Ledger` recording task status, owner/reviewer agents, verification evidence, and next action in `spec/<feature>/tasks.md`, synchronized with `memories/repo/current-workstreams.md`
 
-Dispatch execution proceeds through `subagent-driven-development` or `executing-plans`:
+PM dispatches the approved tasks directly to the assigned role workflows:
 
 ```
 For each ready task:
@@ -521,7 +522,7 @@ Target Repository
 │   ├── must.instructions.md       ← Core rules
 │   └── skills-index.instructions.md ← Skill routing
 │
-└── best-copilot.md               ← Init sentinel (version: "0.7.1")
+└── best-copilot.md               ← Init sentinel (version: "0.8.0")
 ```
 
 ### Spec vs Memory Division
@@ -562,10 +563,10 @@ Medium-to-large work establishes bidirectional links between spec and memory:
 | Compatibility | `senior-project-expert` |
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-gate`, `repo-init-scan`, `repo-init-official`, `repo-init-manual-fallback`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
-| Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
-| Execution | `workspace-isolation`, `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Planning | role workflows, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` (legacy planning skills remain compatibility shims) |
+| Execution | role workflows, `workspace-isolation`, `dispatching-parallel-agents` (TDD is built into implementation workflows) |
 | Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
-| Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
+| Review | role workflows, `structured-review`, `root-cause-investigation`, `systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `development-branch-closeout`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
 
@@ -590,7 +591,7 @@ memories/repo/INDEX.md                           ← Resume index routing table
 memories/repo/current-workstreams.md             ← Currently active work
 spec/INDEX.md                                    ← Spec routing table
 spec/templates/                                  ← Reusable templates
-best-copilot.md                                  ← Init sentinel (version: "0.7.1")
+best-copilot.md                                  ← Init sentinel (version: "0.8.0")
 ```
 
 If required facts or scaffolds cannot be created, the workflow stops as `BLOCKED first_use_gate_incomplete` — see [Core Workflow Stage 1](#stage-1-init-gate-mandatory-preflight) for the full explanation.
@@ -760,7 +761,6 @@ External references serve only as data input — ideas must be translated to loc
 `best-copilot` learns from public workflow and skill-system ideas, including:
 
 - [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
-- [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [spec-kit](https://github.com/github/spec-kit)
 - [Open Design](https://github.com/nexu-io/open-design)

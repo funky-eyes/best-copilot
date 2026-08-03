@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | 한국어 | [日本語](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.7.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.8.0-1d9bf0)](plugin.json)
 [![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
@@ -208,7 +208,7 @@ Claude 어댑터는 `claude-agents/*.md`에서 Claude 모델 alias를 사용합�
 | Claude 기본 세션 | agent의 `skills:` 미활성화, 수동 호출 필요 |
 | Copilot CLI | 본문 참조는 기계적 프리로딩이 아님, 패킷에 최소 체크리스트 포함 필요 |
 
-Claude agent frontmatter는 일반적으로 `core-workflow-contract`와 해당 역할 workflow만 미리 로드합니다. Senior Project Expert는 추가로 `repo-init-gate`만 미리 로드하며, `repo-init-scan`은 sentinel gate가 실패할 때만 필요에 따라 로드됩니다. `structured-review`, `test-driven-development`, `web-experience-audit` 같은 다른 focused skills는 agent 본문에서 필요할 때만 호출하도록 두어 시작 컨텍스트를 줄입니다.
+Claude agent frontmatter는 일반적으로 `core-workflow-contract`와 해당 역할 workflow만 미리 로드합니다. Senior Project Expert는 추가로 `repo-init-gate`만 미리 로드하며, `repo-init-scan`은 sentinel gate가 실패할 때만 필요에 따라 로드됩니다. 검증·경험 skill은 필요할 때만 로드하고 SDD/TDD는 역할 workflow가 직접 강제하여 시작 컨텍스트를 줄입니다.
 
 ### 듀얼 런타임 비교
 
@@ -294,7 +294,7 @@ INIT_GATE → [필요시 INIT_SCAN] → CLASSIFY → PLANNER_FREEZE_PACKET
 
 ### 단계 1: Init 게이트 (필수 프리체크)
 
-대상 저장소에서 실질적인 작업을 하기 전, 시스템은 먼저 `repo-init-gate`를 실행합니다 — 대상 저장소 루트의 `best-copilot.md`만 읽어서 frontmatter의 `version`이 현재 계약 버전 `"0.7.1"`과 일치하는지 확인합니다.
+대상 저장소에서 실질적인 작업을 하기 전, 시스템은 먼저 `repo-init-gate`를 실행합니다 — 대상 저장소 루트의 `best-copilot.md`만 읽어서 frontmatter의 `version`이 현재 계약 버전 `"0.8.0"`과 일치하는지 확인합니다.
 
 ```
 repo-init-gate
@@ -363,13 +363,14 @@ PM은 의도를 표준 **6블록 디스패치 패키지**(PM Dispatch Packet)로
 
 ### 단계 5: 병렬 디스패치 및 실행
 
-설계 리뷰 통과 후, PM은 `writing-plans`를 통해 작업을 병렬화 가능한 작업으로 분해합니다:
+설계 리뷰 통과 후, Specification Writer workflow가 작업을 병렬화 가능한 작업으로 분해합니다:
 
 - 독립적인 파일 소유권과 쓰기 세트 (겹치지 않음)
 - 명확한 의존성 관계와 수용 검증
 - 지정된 소유자 레인과 리뷰 레인
+- `spec/<feature>/tasks.md`에 지속적인 `Progress Ledger`를 유지하여 작업 상태, 담당/리뷰 agent, 검증 증거, 다음 작업을 기록하고 `memories/repo/current-workstreams.md`와 동기화
 
-디�스패치 실행은 `subagent-driven-development` 또는 `executing-plans`를 통해 진행됩니다:
+PM은 승인된 작업을 담당 역할 workflow에 직접 디스패치합니다:
 
 ```
 각 준비된 작업에 대해:
@@ -512,7 +513,7 @@ PM/코디네이터만 Native Ask 메커니즘(Copilot: `vscode_askQuestions` / `
 │   ├── must.instructions.md       ← 핵심 규칙
 │   └── skills-index.instructions.md ← 스킬 라우팅
 │
-└── best-copilot.md               ← Init sentinel (version: "0.7.1")
+└── best-copilot.md               ← Init sentinel (version: "0.8.0")
 ```
 
 ### Spec vs Memory 분업
@@ -553,10 +554,10 @@ PM/코디네이터만 Native Ask 메커니즘(Copilot: `vscode_askQuestions` / `
 | Compatibility | `senior-project-expert` |
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-gate`, `repo-init-scan`, `repo-init-official`, `repo-init-manual-fallback`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
-| Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
-| Execution | `workspace-isolation`, `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Planning | 역할 workflow, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` (기존 planning skill은 호환 진입점만 유지) |
+| Execution | 역할 workflow, `workspace-isolation`, `dispatching-parallel-agents` (TDD는 구현 workflow에 내장) |
 | Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
-| Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
+| Review | 역할 workflow, `structured-review`, `root-cause-investigation`, `systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `development-branch-closeout`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
 
@@ -581,7 +582,7 @@ memories/repo/INDEX.md                           ← 복구 인덱스 라우팅 
 memories/repo/current-workstreams.md             ← 현재 활성 작업
 spec/INDEX.md                                    ← 스펙 라우팅 테이블
 spec/templates/                                  ← 재사용 가능한 템플릿
-best-copilot.md                                  ← Init sentinel (version: "0.7.1")
+best-copilot.md                                  ← Init sentinel (version: "0.8.0")
 ```
 
 필요한 사실이나 스캐폴드를 생성할 수 없는 경우, 추측에 기반한 계속 대신 `BLOCKED first_use_gate_incomplete`로 중지합니다 — 전체 설명은 [핵심 워크플로 Stage 1](#단계-1-init-게이트-필수-프리체크)을 참조하세요.
@@ -751,7 +752,6 @@ Policy → 검증 후에만 경계 있는 workflow 규칙 업데이트
 `best-copilot`은 다음과 같은 공개 워크플로 및 스킬 시스템 아이디어에서 학습합니다:
 
 - [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
-- [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [spec-kit](https://github.com/github/spec-kit)
 - [Open Design](https://github.com/nexu-io/open-design)

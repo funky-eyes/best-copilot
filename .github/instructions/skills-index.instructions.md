@@ -30,11 +30,7 @@ This file is only for discovery and routing. Match the current task to the index
   - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces, and sensitive data review.
   - `root-cause-fixer-workflow`: concrete failure evidence, minimal root-cause patching, and regression proof.
 - `evolution-loop`: closeout, repeated failure, review loop, stale trigger, or user-requested agent/skill improvement; produces auditable and reversible evolution proposals.
-- `brainstorming`: top-level or PM planning gate where route-changing ambiguity must be locked through explicit direction confirmation before spec or code; PM-led large technical design routes deep brainstorming through Technical Architect.
-- `writing-plans`: MEDIUM/LARGE tasks that need executable slices with files and verification; persistent MEDIUM/LARGE output belongs in `spec/<feature>/tasks.md`, not a standalone plan file.
-- `spec-review-gauntlet`: pre-implementation readiness and multi-lane design review for Spec Bundles, execution plans, cross-module changes, and high-risk customization workflow changes; MEDIUM/LARGE target work must have `requirements.md`, `design.md`, and `tasks.md` in one spec directory before implementation.
-- `executing-plans`: approved tasks.md or multi-step plan execution with checkpoints, verification evidence, per-task review, and durable state sync.
-- `subagent-driven-development`: fresh-context specialist execution for approved plans, requiring implementation, spec-compliance review, code-quality review, verification, and state sync per task.
+- `brainstorming`, `writing-plans`, `spec-review-gauntlet`, `executing-plans`, and `subagent-driven-development`: compact compatibility contracts. They preserve required output locations, task owner/reviewer assignment, Progress Ledger, dispatch, review, and state-sync shapes without repeating general SDD reasoning. Canonical behavior remains in `core-workflow-contract` plus PM/role workflows; do not preload these skills when the owning workflow already supplies the contract.
 - `dispatching-parallel-agents`: independent frozen subtasks with non-overlapping write sets.
 - `workspace-isolation`: before approved implementation or substantial feature/fix work when branch/worktree isolation, provenance, or baseline setup must be decided.
 
@@ -45,7 +41,7 @@ This file is only for discovery and routing. Match the current task to the index
 - `spec-execution-fastpath`: clear requirement/spec, minimal reading, minimal diff.
 - `td-java-coding-guidelines`: Java implementation or review involving Tongdun/Alibaba Java rules, exceptions/logging, SQL/MyBatis, security, middleware, concurrency, virtual threads, or JVM JIT performance.
 - `td-python-coding-guidelines`: Python implementation or review involving Google Python style, imports, naming, docstrings, exceptions, logging, typing, lint, or style migration.
-- `test-driven-development`: new behavior or bug fix needs RED-GREEN-REFACTOR.
+- `test-driven-development`: compatibility reminder only; Developer and Technical Architect workflows directly require RED-GREEN-REFACTOR for behavior changes and bug fixes.
 - `systematic-debugging`: unknown root cause, failing tests, incidents, or complex unexpected behavior.
 - `root-cause-investigation`: failure evidence exists and likely file set is narrow.
 

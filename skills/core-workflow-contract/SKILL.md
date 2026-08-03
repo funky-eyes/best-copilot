@@ -49,12 +49,19 @@ If a task touches public APIs, message formats, schemas, auth/security boundarie
 4. For full or ambiguous work, dispatch Technical Architect for SDD design and self-review, then dispatch Developer, QA, and security/frontend lanes when applicable.
 5. For MEDIUM/LARGE work, require a Spec Bundle directory with `requirements.md`, `design.md`, and `tasks.md`; single-file SDD/design/plan notes are evidence only.
 6. Require design-time task ownership before implementation: `design.md` names owner lanes for changed surfaces and `tasks.md` splits work into independently reviewable slices with `owner_lane`, `reviewer_lanes`, `write_set`, `dependencies`, `parallel_group`, `parallel_ready`, acceptance checks, verification command, ready artifacts, and stop conditions. Tasks should be small enough for a fresh-context specialist to understand in 2-5 minutes; if a task mixes unrelated write sets or reviewer lanes, route back to Specification Writer or Technical Architect for decomposition repair.
-7. Execute through `subagent-driven-development` or `executing-plans` when a plan or delegated implementation is required. Prefer parallel subagent batches only for tasks whose write sets do not overlap and whose dependencies are already satisfied.
+7. Execute approved tasks through the assigned role workflows. The legacy `executing-plans` and `subagent-driven-development` skills are compatibility entrypoints only. Prefer parallel batches only for tasks whose write sets do not overlap and whose dependencies are already satisfied.
 8. Build reviewer-safe packets separately from implementation packets: pass task/diff/spec evidence and recovery refs, not controller severity opinions, author merge recommendations, or approval framing.
 9. For micro direct implementation, closure requires implementation evidence, `implementation_self_review`, and verification evidence; do not require cross-author review unless the risk surface forces upgrade.
 10. For standard/full tasks, each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, verification, and a final independent whole-branch/package review before closure.
 11. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
 12. Invoke `verification-before-completion` and native continuation/closeout UI when available.
+
+## SDD And TDD Invariant
+
+- MEDIUM/LARGE work follows SDD: resolve material choices, maintain a target-local `requirements.md` / `design.md` / `tasks.md` Spec Bundle, review it before implementation, and keep task/memory state synchronized. The directory contract does not change.
+- Implementation follows TDD for every behavior change and bug fix: record RED failing-test or reproducible-check evidence, make the smallest GREEN change, then REFACTOR only under passing evidence.
+- A TDD exception is allowed only when RED is technically impractical. The implementer must record the reason and an alternative reproducible check; the reviewer decides whether the evidence is sufficient.
+- These rules are enforced by PM and role workflows. Compatibility skills may route old callers but must not fork or restate the methodology.
 
 ## Self-Evolution Loop
 

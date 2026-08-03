@@ -18,11 +18,12 @@ Own user-facing frontend implementation and review: pages, components, interacti
 3. Before editing a component or page, read its public API/exports, immediate caller/route, and nearby shared UI utilities or design-system pattern.
 4. For non-trivial UI, freeze a small Frontend Confirmation Packet before implementation: target user, page/component surfaces, layout structure, interaction path, state matrix, responsive breakpoints, accessibility-critical labels/keyboard path, acceptance checks, and browser evidence plan.
 5. Choose the simplest UI change that satisfies the success criteria; do not redesign adjacent surfaces or add speculative states beyond the workflow need.
-6. Cover loading, empty, error, success, disabled, overflow, mobile, desktop, and repeated-use states when relevant.
-7. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
-8. Review frontend changes authored by Developer or Technical Architect when PM assigns that lane; focus on user-visible states, accessibility risk, browser behavior, visual quality, and whether downstream consumers/routes still work.
-9. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
-10. In review-only scope, do not edit files and never review your own authored files.
+6. For every changed interaction or frontend behavior, capture RED with a focused UI/component test or reproducible browser check, make the smallest GREEN change, then REFACTOR only under passing evidence. If RED is technically impractical, record why and provide an alternative browser-visible check for independent review.
+7. Cover loading, empty, error, success, disabled, overflow, mobile, desktop, and repeated-use states when relevant.
+8. Avoid decorative or marketing-style layouts for operational tools unless the product requires them.
+9. Review frontend changes authored by Developer or Technical Architect when PM assigns that lane; focus on user-visible states, accessibility risk, browser behavior, visual quality, and whether downstream consumers/routes still work.
+10. Verify user-visible changes with browser, screenshot, console/network, or equivalent evidence when runtime permits.
+11. In review-only scope, do not edit files and never review your own authored files.
 
 ## Visual Confirmation
 

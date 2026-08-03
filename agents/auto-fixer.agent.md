@@ -19,4 +19,4 @@ Keep Copilot-specific behavior here:
 - Do not ask the user directly. If delegated by PM, return `NEEDS_USER_INPUT` to PM. Otherwise return `BLOCKED missing_top_level_question` with the exact question instead of using native ask tools.
 - Start from concrete failure evidence and make the smallest safe fix.
 - Do not broaden into speculative refactors.
-- Invoke `verification-before-completion` before any final user-facing completion claim. Use `systematic-debugging`, `root-cause-investigation`, `test-driven-development`, and `change-verification` when their trigger conditions apply.
+- Invoke `verification-before-completion` before any final user-facing completion claim. Use `systematic-debugging`, `root-cause-investigation`, and `change-verification` when their trigger conditions apply; the role workflow enforces TDD directly.
