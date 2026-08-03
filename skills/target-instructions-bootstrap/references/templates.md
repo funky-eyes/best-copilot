@@ -56,7 +56,7 @@ applyTo: "**"
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.7.1
+- Bootstrap contract version: 0.8.0
 - Last full verification: unknown
 - Reentry rule: best-copilot-version-sentinel-first
 ```
@@ -173,7 +173,7 @@ applyTo: "**"
 - `quality-assurance-workflow`: verification, regression risk, and merge readiness.
 - `security-reviewer-workflow`: auth, permissions, dependencies, secrets, release surfaces.
 - `root-cause-fixer-workflow`: concrete failures, minimal fix, regression proof.
-- `executing-plans` / `subagent-driven-development`: approved plan execution with per-task review, verification, STATE_SYNC, and parallel batches only when write sets do not overlap.
+- Assigned role workflows execute approved plans with per-task review, verification, STATE_SYNC, and parallel batches only when write sets do not overlap; legacy execution skills are compatibility routes only.
 - `evolution-loop`: accepted workflow improvement signals and auditable writeback.
 
 ## Claude Code Skill Names

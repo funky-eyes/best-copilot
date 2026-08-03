@@ -58,17 +58,6 @@ Specs must be rich enough for another fresh-context agent to implement or review
 - Use tables when they improve scanability; use short prose for rationale. Do not add generic filler such as "improve robustness", "add proper validation", or "handle edge cases" without exact behavior.
 - If evidence is missing, mark it as an assumption or open question. Do not silently convert uncertainty into a requirement.
 
-## External Capability Translation For Specs
-
-Use external systems only as patterns translated into best-copilot primitives:
-
-- Spec Kit -> gate-oriented requirements/design/tasks with explicit dependencies and status.
-- Superpowers and oh-my-openagent -> fresh-context review loops, explicit reviewer lanes, and fan-in evidence.
-- gstack -> plan/review separation and security/release-risk labels.
-- claude-mem and Memento-Skills -> compact linked memory and recovery hints, not raw transcript storage.
-- Open Design and UI UX Pro Max Skill -> evidence-first design artifacts for UI work only, with reusable base plus task-specific override where helpful.
-- fetch-skill -> bounded skill discovery and ranking signals, not broad skill preloading.
-
 ## Specialist Ask Boundary
 
 Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users directly.

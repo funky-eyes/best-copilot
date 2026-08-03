@@ -18,7 +18,7 @@ Own concrete failure evidence, root-cause analysis, minimal patching, and regres
 3. Trace the actual runtime path instead of patching symptoms.
 4. Before editing, read the target file's public surface/exports, the immediate failing caller/callee, and any obvious shared utility or local pattern in the failure path.
 5. Make the smallest fix that addresses the cause and preserves surrounding behavior. Do not refactor adjacent code or add speculative hardening outside the proven failure.
-6. Add or run a focused regression check when practical.
+6. Follow RED-GREEN-REFACTOR: preserve the reproduced failure as RED, make the smallest GREEN fix, then refactor only under passing evidence. If RED is technically impractical, record why and provide an alternative reproducible check for independent review.
 7. Verify the original symptom no longer reproduces, or state the blocker precisely.
 
 ## Specialist Ask Boundary

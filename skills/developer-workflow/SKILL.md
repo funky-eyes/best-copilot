@@ -18,7 +18,7 @@ Own frozen implementation slices and peer review of Technical Architect-owned co
 3. Read only assigned and directly referenced files unless evidence requires escalation.
 4. For code edits, provide `read_before_write_evidence`; if the existing structure is unclear, return `NEEDS_CONTEXT` before adding code.
 5. Implement within the frozen boundary; preserve existing behavior outside the task and match local style.
-6. Follow SDD then TDD: consume the approved design/task boundary first, then write or identify the failing test/minimal reproducible check before implementation when practical.
+6. Follow SDD then TDD: consume the approved design/task boundary first; for every behavior change or bug fix, capture RED failing-test or reproducible-check evidence, make the smallest GREEN change, then REFACTOR only under passing evidence. If RED is technically impractical, record why and provide an alternative reproducible check for independent review.
 7. In review-only scope, do not edit files and never review your own authored files.
 8. Report exact verification commands and results.
 

@@ -1,6 +1,6 @@
 # Code Intelligence Fallback Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **Historical plan:** Execute task-by-task through the current PM and role workflows. The original external workflow dependency has been retired; checkbox (`- [ ]`) syntax remains only for tracking.
 
 **Goal:** Make `codebase-memory-mcp` the preferred structural code-intelligence provider in every supported runtime, with GitNexus, CodeGraph, LSP, and native search as capability-aware fallbacks.
 

@@ -2,7 +2,7 @@
 
 [English](README.md) | 简体中文 | [Korean](README.ko.md) | [Japanese](README.ja.md)
 
-[![version](https://img.shields.io/badge/version-0.7.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.8.0-1d9bf0)](plugin.json)
 [![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
@@ -210,7 +210,7 @@ core-workflow-contract + 各角色 role-*-workflow
 | Claude base session | agent 的 `skills:` 未激活，需手动调用 |
 | Copilot CLI | body 引用非机械预加载，packet 中需含最小 checklist |
 
-Claude agent 的 frontmatter 通常只预加载 `core-workflow-contract` 和对应角色 workflow。Senior Project Expert 额外只预加载 `repo-init-gate`；`repo-init-scan` 保持按需加载，只有 sentinel 门禁失败时才进入。`structured-review`、`test-driven-development`、`web-experience-audit` 这类其他 focused skills 保留在 agent 正文里按需触发，避免启动时默认吃掉过多上下文。
+Claude agent 的 frontmatter 通常只预加载 `core-workflow-contract` 和对应角色 workflow。Senior Project Expert 额外只预加载 `repo-init-gate`；`repo-init-scan` 仅在 sentinel 门禁失败时按需加载。验证与体验类 skill 保持按需触发，SDD/TDD 则由角色 workflow 直接强制执行，以减少启动上下文。
 
 ### 运行时差异一览
 
@@ -302,7 +302,7 @@ INIT_GATE → [INIT_SCAN if needed] → CLASSIFY → PLANNER_FREEZE_PACKET
 
 ### 阶段一：Init 门禁（强制预检）
 
-在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.7.1"`。
+在目标仓库上做任何实质性工作之前，系统先执行 `repo-init-gate`——只读取目标仓库根目录的 `best-copilot.md`，检查 frontmatter 中的 `version` 是否为当前契约版本 `"0.8.0"`。
 
 ```
 repo-init-gate
@@ -371,13 +371,14 @@ PM 将意图冻结为标准的**六区块分发包**（PM Dispatch Packet），�
 
 ### 阶段五：并行派发与执行
 
-通过设计评审后，PM 通过 `writing-plans` 将工作拆解为可并行的任务，每个任务都有：
+通过设计评审后，Specification Writer workflow 将工作拆解为可并行任务，每个任务都有：
 
 - 独立的文件所有者和写入集（write set 不重叠）
 - 明确的依赖关系和验收检查
 - 指定的所有者通道和评审通道
+- 在 `spec/<feature>/tasks.md` 中保留持久化 `Progress Ledger`，记录任务状态、负责/评审 agent、验证证据和下一步，并与 `memories/repo/current-workstreams.md` 同步
 
-派发执行通过 `subagent-driven-development` 或 `executing-plans` 进行：
+PM 将已批准任务直接派发给对应角色 workflow：
 
 ```
 每个就绪任务:
@@ -520,7 +521,7 @@ PM 先把所有专员 handback 记录为可观察证据，再按优先级裁决�
 │   ├── must.instructions.md       ← 核心规则
 │   └── skills-index.instructions.md ← 技能路由
 │
-└── best-copilot.md               ← Init sentinel（version: "0.7.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.8.0"）
 ```
 
 ### Spec vs Memory 的分工
@@ -561,10 +562,10 @@ Memory 使用 **INDEX.md 路由 + 按需加载**，控制 token 预算：
 | Compatibility | `senior-project-expert` |
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-gate`, `repo-init-scan`, `repo-init-official`, `repo-init-manual-fallback`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
-| Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
-| Execution | `workspace-isolation`, `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Planning | 角色 workflow、`context-packet-fastpath`、`search-fastpath`、`spec-execution-fastpath`（旧 planning skill 仅保留兼容入口） |
+| Execution | 角色 workflow、`workspace-isolation`、`dispatching-parallel-agents`（TDD 已内置于实现 workflow） |
 | Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
-| Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
+| Review | 角色 workflow、`structured-review`、`root-cause-investigation`、`systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `development-branch-closeout`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
 
@@ -589,7 +590,7 @@ memories/repo/INDEX.md                           ← 恢复索引路由表
 memories/repo/current-workstreams.md             ← 当前活跃工作
 spec/INDEX.md                                    ← Spec 路由表
 spec/templates/                                  ← 可复用模板
-best-copilot.md                                  ← Init sentinel（version: "0.7.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.8.0"）
 ```
 
 如果必需的事实或脚手架无法创建，工作会以 `BLOCKED first_use_gate_incomplete` 停止——参见 [核心工作流 Stage 1](#阶段一init-门禁强制预检) 的完整说明。
@@ -759,7 +760,6 @@ Policy → 只在验证后更新有界 workflow 规则
 `best-copilot` 借鉴并学习了若干公开的工作流与技能系统思想，例如：
 
 - [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
-- [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [spec-kit](https://github.com/github/spec-kit)
 - [Open Design](https://github.com/nexu-io/open-design)

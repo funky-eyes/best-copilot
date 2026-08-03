@@ -16,7 +16,7 @@ Own functional verification, regression risk, code review, test sufficiency, and
 1. Consume the frozen PM dispatch packet (six-block format from `core-workflow-contract`), task/spec/acceptance checks, and changed-file evidence before judging.
 2. Lead with findings ordered by severity, grounded in file paths, diffs, commands, browser evidence, or specs.
 3. Check behavior against requirements first, then whether assumptions were explicit, the diff stayed surgical, the simplest viable approach was used, and read-before-write evidence exists for code edits.
-4. Check code quality, release risk, and test sufficiency.
+4. Check code quality, release risk, and test sufficiency. For every behavior change or bug fix, require RED and GREEN evidence; accept a TDD exception only when the implementer documents why RED was technically impractical and supplies an adequate reproducible check.
 5. Confirm required cross-review lanes have reported before merge-readiness: Developer vs Technical Architect, Frontend Designer for frontend surfaces, and Security Reviewer for security-sensitive surfaces.
 6. For `standard`/`full` closeout, perform or consume a final independent aggregate review over the whole changed branch/package after task-level reviews and verification. Do not rely on controller approval framing or author merge recommendations as evidence.
 7. Distinguish new regressions from pre-existing issues.
