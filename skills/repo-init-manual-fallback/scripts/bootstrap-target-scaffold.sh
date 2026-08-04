@@ -3,7 +3,7 @@ set -u
 
 target_dir="${1:-$PWD}"
 compatibility="${2:-claude}"
-contract_version="0.7.1"
+contract_version="0.8.0"
 
 is_claude_compat() {
   [ "$compatibility" = "claude" ] || [ "$compatibility" = "claude-code" ]
@@ -85,7 +85,7 @@ project_instructions_needs_repair() {
     "## Known Unknowns" \
     "## Verification Notes" \
     "## Init Status" \
-    "Bootstrap contract version: 0.7.1"
+    "Bootstrap contract version: 0.8.0"
   do
     if ! grep -Fq "$needle" "$rel_path"; then
       return 0
@@ -436,7 +436,7 @@ ${known_unknowns}
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.7.1
+- Bootstrap contract version: 0.8.0
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
@@ -447,15 +447,15 @@ append_if_missing ".github/instructions/project.instructions.md" "## Init Status
 
 - Init ready: no
 - Required artifacts verified: no
-- Bootstrap contract version: 0.7.1
+- Bootstrap contract version: 0.8.0
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
 
-append_if_missing ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.7.1" <<'EOF'
+append_if_missing ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.8.0" <<'EOF'
 ## Best Copilot Init Repair
 
-- Bootstrap contract version: 0.7.1
+- Bootstrap contract version: 0.8.0
 - Last full verification: pending scaffold verification
 - Reentry rule: best-copilot-version-sentinel-first
 EOF
@@ -827,7 +827,7 @@ name = "specification-writer"
 description = "Creates and maintains evidence-backed requirements, design, tasks, ADRs, execution-plan status, closeout records, and memory/spec recovery entries."
 nickname_candidates = ["Specification Writer", "Spec Writer"]
 developer_instructions = """
-Use best-copilot skills when available: core-workflow-contract, specification-writer-workflow, target-spec-bootstrap, target-memory-bootstrap, context-packet-fastpath, and writing-plans when their triggers apply. Write specs and memory into the target repository, never into the plugin package or plugin cache. Do not write production code. Keep task status, verification, batch state, and closeout synchronized with tasks.md and memories/repo/current-workstreams.md. Invoke verification-before-completion before final completion claims.
+Use best-copilot skills when available: core-workflow-contract, specification-writer-workflow, target-spec-bootstrap, target-memory-bootstrap, and context-packet-fastpath when their triggers apply. The role workflow owns SDD planning. Write specs and memory into the target repository, never into the plugin package or plugin cache. Do not write production code. Keep task status, verification, batch state, and closeout synchronized with tasks.md and memories/repo/current-workstreams.md. Invoke verification-before-completion before final completion claims.
 """
 EOF
 
@@ -836,7 +836,7 @@ name = "root-cause-fixer"
 description = "Uses concrete failure evidence to find root cause, make the smallest safe fix, and prove the regression is resolved. Not for speculation-driven refactors."
 nickname_candidates = ["Root Cause Fixer", "Fix Specialist"]
 developer_instructions = """
-Use best-copilot skills when available: core-workflow-contract, root-cause-fixer-workflow, systematic-debugging, root-cause-investigation, test-driven-development, and change-verification when their triggers apply. Start from concrete failure evidence, state hypotheses, test them against source or command evidence, make the smallest safe fix, and prove the regression is resolved. Do not broaden into speculative refactors. Invoke verification-before-completion before final completion claims.
+Use best-copilot skills when available: core-workflow-contract, root-cause-fixer-workflow, systematic-debugging, root-cause-investigation, and change-verification when their triggers apply. The role workflow owns TDD. Start from concrete failure evidence, state hypotheses, test them against source or command evidence, make the smallest safe fix, and prove the regression is resolved. Do not broaden into speculative refactors. Invoke verification-before-completion before final completion claims.
 """
 EOF
 fi
@@ -1243,7 +1243,7 @@ for rel_path in "${required_paths[@]}"; do
 done
 
 check_contains ".github/instructions/project.instructions.md" "## Init Status"
-check_contains ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.7.1"
+check_contains ".github/instructions/project.instructions.md" "Bootstrap contract version: 0.8.0"
 check_contains ".github/instructions/must.instructions.md" "## Request Flow"
 check_contains ".github/instructions/must.instructions.md" "## Per-Request Hard Gates"
 check_contains ".github/instructions/must.instructions.md" "### PM Native Ask Trigger Gate"

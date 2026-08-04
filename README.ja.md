@@ -2,7 +2,7 @@
 
 [English](README.md) | [简体中文](README.zh-CN.md) | [한국어](README.ko.md) | 日本語
 
-[![version](https://img.shields.io/badge/version-0.7.1-1d9bf0)](plugin.json)
+[![version](https://img.shields.io/badge/version-0.8.0-1d9bf0)](plugin.json)
 [![Codex](https://img.shields.io/badge/Codex-plugin-111827)](.codex-plugin/plugin.json)
 [![Copilot CLI](https://img.shields.io/badge/Copilot%20CLI-plugin-22c55e)](https://docs.github.com/copilot/how-tos/copilot-cli/customize-copilot)
 [![Claude Code](https://img.shields.io/badge/Claude%20Code-plugin-f97316)](claude-plugin/.claude-plugin/plugin.json)
@@ -208,7 +208,7 @@ Claude アダプターは `claude-agents/*.md` で Claude モデル alias を使
 | Claude ベースセッション | agent の `skills:` 未活性化、手動呼び出し必要 |
 | Copilot CLI | 本文参照は機械的プリロードではない、パケットに最小チェックリスト含む必要 |
 
-Claude agent の frontmatter は通常 `core-workflow-contract` と対応ロール workflow のみプリロードします。Senior Project Expert は追加で `repo-init-gate` だけをプリロードし、`repo-init-scan` は sentinel gate が失敗した場合だけオンデマンドでロードします。`structured-review`、`test-driven-development`、`web-experience-audit` などの他の focused skills は agent 本文で必要時に呼び出す形にして、起動時コンテキストを削減します。
+Claude agent の frontmatter は通常 `core-workflow-contract` と対応ロール workflow のみプリロードします。Senior Project Expert は追加で `repo-init-gate` だけをプリロードし、`repo-init-scan` は sentinel gate が失敗した場合だけオンデマンドでロードします。検証・体験系 skill はオンデマンドのまま、SDD/TDD はロール workflow が直接強制して起動コンテキストを削減します。
 
 ### デュアルランタイム比較
 
@@ -294,7 +294,7 @@ INIT_GATE → [必要に応じて INIT_SCAN] → CLASSIFY → PLANNER_FREEZE_PAC
 
 ### ステージ 1: Init ゲート（必須プリフライト）
 
-ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.7.1"` と一致するか確認します。
+ターゲットリポジトリで実質的な作業を行う前に、システムはまず `repo-init-gate` を実行します——ターゲットリポジトリルートの `best-copilot.md` のみを読み、frontmatter の `version` が現在の契約バージョン `"0.8.0"` と一致するか確認します。
 
 ```
 repo-init-gate
@@ -363,13 +363,14 @@ PM は意図を標準の **6ブロックディスパッチパケット**（PM Di
 
 ### ステージ 5: 並列ディスパッチと実行
 
-設計レビュー通過後、PM は `writing-plans` を通じて作業を並列化可能なタスクに分割します：
+設計レビュー通過後、Specification Writer workflow が作業を並列化可能なタスクに分割します：
 
 - 独立したファイル所有権と書き込みセット（重複なし）
 - 明確な依存関係と受容チェック
 - 指定されたオーナーレーンとレビューレーン
+- `spec/<feature>/tasks.md` に永続的な `Progress Ledger` を保持し、タスク状態、担当/レビュアー agent、検証証拠、次のアクションを記録して `memories/repo/current-workstreams.md` と同期
 
-ディスパッチ実行は `subagent-driven-development` または `executing-plans` を通じて進行します：
+PM は承認済みタスクを担当ロール workflow へ直接ディスパッチします：
 
 ```
 各準備完了タスクについて：
@@ -512,7 +513,7 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 │   ├── must.instructions.md       ← コアルール
 │   └── skills-index.instructions.md ← スキルルーティング
 │
-└── best-copilot.md               ← Init sentinel（version: "0.7.1"）
+└── best-copilot.md               ← Init sentinel（version: "0.8.0"）
 ```
 
 ### Spec vs Memory の分担
@@ -553,10 +554,10 @@ PM/コーディネーターのみが Native Ask メカニズム（Copilot: `vsco
 | Compatibility | `senior-project-expert` |
 | Role Workflows | `senior-project-expert-workflow`, `specification-writer-workflow`, `technical-architect-workflow`, `developer-workflow`, `frontend-designer-workflow`, `quality-assurance-workflow`, `security-reviewer-workflow`, `root-cause-fixer-workflow` |
 | Bootstrap | `repo-init-gate`, `repo-init-scan`, `repo-init-official`, `repo-init-manual-fallback`, `target-instructions-bootstrap`, `target-memory-bootstrap`, `target-spec-bootstrap` |
-| Planning | `brainstorming`, `writing-plans`, `context-packet-fastpath`, `search-fastpath`, `spec-execution-fastpath` |
-| Execution | `workspace-isolation`, `test-driven-development`, `executing-plans`, `subagent-driven-development`, `dispatching-parallel-agents` |
+| Planning | ロール workflow、`context-packet-fastpath`、`search-fastpath`、`spec-execution-fastpath`（旧 planning skill は互換入口のみ） |
+| Execution | ロール workflow、`workspace-isolation`、`dispatching-parallel-agents`（TDD は実装 workflow に内蔵） |
 | Coding Standards | `td-java-coding-guidelines`, `td-python-coding-guidelines` |
-| Review | `structured-review`, `spec-review-gauntlet`, `root-cause-investigation`, `systematic-debugging` |
+| Review | ロール workflow、`structured-review`、`root-cause-investigation`、`systematic-debugging` |
 | Verification | `change-verification`, `verification-before-completion`, `development-branch-closeout`, `web-experience-audit`, `frontend-design-guardrails` |
 | Evolution | `evolution-loop` |
 
@@ -581,7 +582,7 @@ memories/repo/INDEX.md                           ← 復帰インデックスル
 memories/repo/current-workstreams.md             ← 現在のアクティブな作業
 spec/INDEX.md                                    ← スペックルーティングテーブル
 spec/templates/                                  ← 再利用可能なテンプレート
-best-copilot.md                                  ← Init sentinel（version: "0.7.1"）
+best-copilot.md                                  ← Init sentinel（version: "0.8.0"）
 ```
 
 必要な事実やスキャフォールドを作成できない場合、推測に基づく継続ではなく `BLOCKED first_use_gate_incomplete` として停止します——完全な説明は[コアワークフロー Stage 1](#ステージ-1-init-ゲート必須プリフライト)を参照してください。
@@ -751,7 +752,6 @@ Policy → 検証後にのみ境界のある workflow ルールを更新
 この実装は以下の公開プロジェクトからアイデアを得ています：
 
 - [oh-my-openagent](https://github.com/code-yeongyu/oh-my-openagent)
-- [Superpowers](https://github.com/obra/superpowers)
 - [gstack](https://github.com/garrytan/gstack)
 - [spec-kit](https://github.com/github/spec-kit)
 - [Open Design](https://github.com/nexu-io/open-design)

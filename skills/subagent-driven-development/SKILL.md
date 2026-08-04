@@ -1,71 +1,30 @@
 ---
 name: subagent-driven-development
-description: "Use when an approved tasks.md from a Spec Bundle, or a compact approved small-work plan, should be executed by fresh-context specialist subagents, with each task receiving implementation, spec-compliance review, code-quality review, and verification before closure. DO NOT USE FOR: missing plans, brainstorming, or simple single-file edits."
+description: "Compatibility entrypoint for delegated execution of approved tasks. Canonical dispatch and review rules live in the PM and role workflows."
 user-invocable: false
 ---
 
-# Subagent Driven Development
+# Delegated Development Compatibility Entry
 
-Use this skill when a MEDIUM/LARGE plan is ready for implementation and fresh context would reduce cross-task contamination. The PM remains the controller: specialists implement or review bounded slices, and the PM adjudicates fan-in results.
+Keep this route for installed configurations; do not treat it as a separate development methodology.
 
-## Preconditions
+PM uses `senior-project-expert-workflow` to dispatch independently scoped tasks to role workflows. Each implementation packet must carry the approved Spec Bundle references, frozen write set, acceptance checks, RED test or reproducible check, verification command, reviewer lanes, and state-sync target. Reviewers receive evidence-only packets and never approve their own work. Parallel execution is allowed only for satisfied dependencies and non-overlapping write sets.
 
-- A current `tasks.md` exists and is approved for execution. For MEDIUM/LARGE target-repository work, it must live inside a Spec Bundle directory with sibling `requirements.md` and `design.md`; a single `spec/designs/*.md`, SDD note, or standalone implementation plan is evidence only and must be split before execution.
-- When shell access is available and the work is MEDIUM/LARGE, run `target-spec-bootstrap/scripts/validate-spec-bundle.sh <target-root>/spec/<feature-slug>` or consume equivalent validator evidence from PM.
-- `tasks.md` must contain `## Progress Ledger` or equivalent per-task status blocks before implementation dispatch. If absent, return `NEEDS_CONTEXT progress_ledger_missing` so Specification Writer repairs it first.
-- Each task has a complete task statement, `files_involved`, dependencies, assumptions or explicit unknowns, acceptance checks, verification budget, explicit `difficulty` (`high | medium | low`), a difficulty-appropriate `owner_lane`, and independent `reviewer_lanes`. Reject execution with `NEEDS_CONTEXT reviewer_lanes_missing` when reviewer lanes are empty, placeholders, or only the owner; reject with `NEEDS_CONTEXT owner_lane_mismatch` when high-difficulty work is assigned away from Technical Architect, or when medium-difficulty work is split/balanced despite overlapping write sets, same-file edits, generated-template source overlap, or dispatch hot-file overlap.
-- PM has frozen `user_provided_paths`, `priority_files`, `already_read_files`, `authoritative_repo_facts`, `assumptions`, `tradeoffs`, `simpler_option_considered`, `forbidden_approaches`, and `source_provenance_refs` when relevant.
-- If the work came through PM planning, `execution_confirmed` must match the current `plan_revision`.
+## Minimal Dispatch Record
 
-## Task Cycle
+```markdown
+- Task ID: <T-...>
+- Owner agent: <technical-architect | developer | frontend-designer | root-cause-fixer | specification-writer>
+- Reviewer agents: <independent lanes>
+- Spec refs: <requirements.md, design.md, tasks.md anchors>
+- Write set / dependencies: <paths and task IDs>
+- Acceptance / RED / verification: <checks and command>
+- Progress row: <current status and evidence location>
+- State sync: <tasks.md and current-workstreams.md paths>
+```
 
-For every ready task:
+PM must reconcile each handback into the matching Progress Ledger row. A task is not complete merely because an agent returned; its required review, verification, and state synchronization must be recorded.
 
-1. Build a fresh context packet with `context-packet-fastpath`.
-2. Dispatch implementation to the right specialist by difficulty and lane: Technical Architect for high-difficulty slices, a balanced Technical Architect/Developer split for medium-difficulty slices only when write sets are disjoint, Developer for low-difficulty bounded slices, Frontend Designer for UI-owned slices, or Root Cause Fixer for confirmed failures.
-3. Require implementation evidence: changed files, read-before-write evidence for code edits, tests/checks run, key output, risk, and next-step notes.
-4. Run Stage 1 review: spec/task compliance. The reviewer checks whether requirements, non-goals, file boundaries, and acceptance checks were honored.
-5. Run Stage 2 review: context-chain, code quality, and release risk. The reviewer must use the `structured-review` code-review context-chain gate before assessing maintainability, coupling, security/performance risk, dead code, and test adequacy.
-6. Send confirmed findings to a fix loop using `structured-review` feedback-intake and targeted re-review modes.
-7. After all task-level reviews pass for a `standard` or `full` batch, run a final independent broad review over the whole changed branch/package before closeout.
-8. Run `STATE_SYNC`: update `tasks.md`, `memories/repo/current-workstreams.md`, and relevant index rows using `core-workflow-contract/references/state-persistence.md`.
-9. Only after the task passes the required reviews, verification, state sync, and any required final independent review may PM mark it complete or dispatch the next task.
+Use fresh, file-backed packets rather than long chat history. Refresh changed-file and evidence refs before review/fix dispatch. Repeated missing-context or blocker results require PM re-analysis, not another blind dispatch.
 
-Stage 1 and Stage 2 must not be performed by the same specialist who authored the implementation under review. Default reviewer lanes follow the Cross-Review Lanes from `core-workflow-contract`.
-
-## Review Isolation Rules
-
-- Build reviewer-safe packets separately from implementation packets.
-- Reviewers receive only task brief, changed-file list, diff or review package refs, acceptance checks, required spec/design refs, relevant context shards, and verification evidence.
-- Do not pass controller severity pre-assessments, author merge recommendations, "safe to ignore" language, or unverifiable status claims into Stage 1, Stage 2, or final broad review packets.
-- Review lanes are read-only by default. They may inspect and run non-mutating checks, but must not edit files or run mutating git/workspace commands unless PM explicitly reclassifies the lane as a fix/implementation lane.
-- Reuse the same file-backed review package across multiple reviewers when possible; do not paste the same large diff/spec/log into each subagent prompt.
-- Final independent broad review must use a fresh reviewer-safe packet scoped to the whole changed branch/package and must not inherit mid-run controller conclusions as evidence.
-
-## Fresh Context Rules
-
-- Do not pass long chat history to specialists.
-- Pass verified facts, frozen paths, compact summaries, and recovery hints.
-- If a previous task changed files, refresh `changed_files`, `inline_code_context`, and `already_read_files` before follow-up review or fix.
-- Do not let one subagent's guesses become another subagent's facts.
-
-## Fan-In Rules
-
-- Accept only `DONE`, `DONE_WITH_CONCERNS`, `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCKED`.
-- Follow the Specialist Handback Schema from `core-workflow-contract`.
-- Completion-like results without verification evidence are incomplete.
-- Completion-like results without state-sync evidence are incomplete for persistent MEDIUM/LARGE work.
-- `DONE_WITH_CONCERNS` must list the concern impact and whether it blocks later tasks.
-- Repeated `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or the same blocker twice triggers PM re-analysis instead of another blind dispatch.
-
-## Output Expected From PM
-
-After using this skill, PM should be able to report:
-
-- current task or batch status
-- implementation owner and reviewer lanes
-- Stage 1 and Stage 2 review outcomes
-- final independent broad review outcome when required
-- verification evidence and coverage
-- state-sync evidence: task ledger row/status, current workstream update, index updates or blocker
-- remaining blockers or next ready tasks
+The shared handback and closeout rules come exclusively from `core-workflow-contract`.
