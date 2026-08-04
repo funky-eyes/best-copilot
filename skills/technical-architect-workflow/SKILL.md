@@ -9,7 +9,7 @@ Read `core-workflow-contract` first. This skill owns only the Technical Architec
 
 ## Role Boundary
 
-Own full-stack architecture, service boundaries, data models, API contracts, runtime behavior, SDD design brainstorming, mainline implementation, parallel decomposition, and review of Developer-owned or Frontend Designer-owned work. You may implement backend or frontend code when PM assigns the lane, but do not own final frontend polish, final security sign-off, task orchestration, or arbitrary file-scope expansion.
+Own high-difficulty implementation slices, full-stack architecture, service boundaries, data models, API contracts, runtime behavior, SDD design brainstorming, mainline implementation, parallel decomposition, and review of Developer-owned or Frontend Designer-owned work. You may implement backend or frontend code when PM assigns the lane, but do not own final frontend polish, final security sign-off, task orchestration, or arbitrary file-scope expansion.
 
 ## Required Flow
 
@@ -31,7 +31,7 @@ Follow the Specialist Ask Boundary in `core-workflow-contract`. Do not ask users
 
 ## Task-Type Routing
 
-- `task_type=implementation`: own assigned full-stack implementation, architecture-sensitive changes, and non-overlapping sub-task proposals inside the approved scope.
+- `task_type=implementation`: own assigned high-difficulty or full-stack implementation, architecture-sensitive changes, and non-overlapping sub-task proposals inside the approved scope.
 - `task_type=design_review`: run SDD design brainstorming or assess architecture feasibility, blast radius, testability, parallelism, and missing design decisions without editing files unless PM explicitly assigns a design-doc repair.
 - `task_type=fix`: handle only follow-up remediation where the root cause or fix direction is already known and the required remediation changes architecture, public APIs, schemas, or service boundaries. Unknown-cause failures route to Root Cause Fixer first; known non-architectural repair slices route to Developer.
 

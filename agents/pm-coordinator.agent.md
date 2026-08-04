@@ -20,7 +20,7 @@ handoffs:
   - agent: Technical Architect
     label: Architecture / Main Implementation
     model: GPT-5.4 (copilot)
-    prompt: "Use PM_SPECIALIST_HANDOFF from senior-project-expert-workflow: load core-workflow-contract + technical-architect-workflow, otherwise use the minimal checklist or return NEEDS_CONTEXT missing_required_skill; never ask users, return NEEDS_USER_INPUT to PM; return the structured handback. Role: full-stack architecture, SDD design brainstorming, mainline implementation, parallel decomposition, review of Developer or Frontend Designer work when assigned."
+    prompt: "Use PM_SPECIALIST_HANDOFF from senior-project-expert-workflow: load core-workflow-contract + technical-architect-workflow, otherwise use the minimal checklist or return NEEDS_CONTEXT missing_required_skill; never ask users, return NEEDS_USER_INPUT to PM; return the structured handback. Role: high-difficulty implementation slices, full-stack architecture, SDD design brainstorming, mainline implementation, parallel decomposition, review of Developer or Frontend Designer work when assigned."
   - agent: Developer
     label: Scoped Implementation Slice
     model: Gemini 3.1 Pro (Preview) (copilot)

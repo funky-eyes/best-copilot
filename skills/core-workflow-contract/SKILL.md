@@ -52,7 +52,7 @@ If a task touches public APIs, message formats, schemas, auth/security boundarie
 7. Execute approved tasks through the assigned role workflows. The legacy `executing-plans` and `subagent-driven-development` skills are compatibility entrypoints only. Prefer parallel batches only for tasks whose write sets do not overlap and whose dependencies are already satisfied.
 8. Build reviewer-safe packets separately from implementation packets: pass task/diff/spec evidence and recovery refs, not controller severity opinions, author merge recommendations, or approval framing.
 9. For micro direct implementation, closure requires implementation evidence, `implementation_self_review`, and verification evidence; do not require cross-author review unless the risk surface forces upgrade.
-10. For standard/full tasks, each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, verification, and a final independent whole-branch/package review before closure.
+10. For standard/full tasks, each task needs implementation evidence, Stage 1 spec compliance review, Stage 2 code/release-risk review, verification, and a final independent whole-branch/package review before closure. Tasks with missing, placeholder, or owner-only reviewer lanes are not dispatchable.
 11. Run `STATE_SYNC` before continuing to the next task, closing a batch, or sending final user-facing completion.
 12. Invoke `verification-before-completion` and native continuation/closeout UI when available.
 

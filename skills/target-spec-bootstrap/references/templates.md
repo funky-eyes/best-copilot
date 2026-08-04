@@ -192,17 +192,20 @@ Use these neutral templates only for missing target-local spec files.
 ## Execution Rules
 
 - Every implementation task must map to at least one requirement ID and one design decision.
-- Split by ownership boundary, dependency order, and non-overlapping write set.
-- Each task must include owner lane, reviewer lanes, write set, dependencies, parallel group/readiness, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
-- Keep tasks small enough for a fresh-context specialist to understand in 2-5 minutes; split mixed owner lanes or unrelated write sets before implementation.
+- Split by ownership boundary, dependency order, and non-overlapping write set; parallel or balanced medium-difficulty slices must not edit the same file, generated-template source, or dispatch hot file.
+- Each task must include difficulty (`high | medium | low`), owner lane, independent reviewer lanes, write set, dependencies, parallel group/readiness, read-before-write targets, acceptance checks, verification, ready artifacts, and stop conditions.
+- Owner lane selection must follow difficulty, not a developer default: high-difficulty work goes to `technical-architect`; medium-difficulty work is split or balanced between `technical-architect` and `developer` only when write sets are disjoint and dependencies allow; do not split tasks that modify the same file, generated-template source, or dispatch hot file; low-difficulty bounded implementation goes to `developer`. Split mixed-difficulty work instead of assigning one large task to Developer.
+- Reviewer lanes are required before execution. They must be independent from the owner and sufficient for difficulty/risk: high-difficulty architect-owned tasks include `developer` and `qa` when behavior changes; medium-difficulty developer-owned tasks include `technical-architect`; behavior/test-sensitive tasks include `qa`; security-sensitive tasks include `security`; frontend-visible tasks include `frontend`/`qa` as applicable.
+- `DONE` requires linked review evidence for all required reviewers. Without review evidence, use `DONE_WITH_CONCERNS review_evidence_missing` or keep the task open.
+- Keep tasks small enough for a fresh-context specialist to understand in 2-5 minutes; split mixed difficulty bands, mixed owner lanes, or unrelated write sets before implementation.
 - If a task has unresolved product or security input that changes behavior, mark it blocked instead of guessing.
 - After each task status or verification change, update this `Progress Ledger` and `memories/repo/current-workstreams.md` before continuing.
 
 ## Progress Ledger
 
-| Task ID | Status | Owner | Reviewer | Last updated | Verification | Evidence | Next action | Notes |
-| --- | --- | --- | --- | --- | --- | --- | --- | --- |
-| T-001 | READY | `<lane>` | `<lane>` | unknown | not_run | none | Start task | none |
+| Task ID | Status | Difficulty | Owner | Reviewer(s) | Review status | Last updated | Verification | Evidence | Next action | Notes |
+| --- | --- | --- | --- | --- | --- | --- | --- | --- | --- | --- |
+| T-001 | READY | `<high | medium | low>` | `<lane>` | `<independent lane(s)>` | not_started | unknown | not_run | none | Start task | none |
 
 Status values: `READY | IN_PROGRESS | DONE | DONE_WITH_CONCERNS | NEEDS_CONTEXT | NEEDS_USER_INPUT | BLOCKED`.
 Verification values: `passed | failed | blocked | not_run | not_applicable`.
@@ -213,8 +216,9 @@ Verification values: `passed | failed | blocked | not_run | not_applicable`.
 
 - Requirement refs: `<FR-001, FR-002>`
 - Design refs: `<DD-001>`
+- Difficulty: `high | medium | low`
 - Owner lane: `technical-architect | developer | frontend-designer | root-cause-fixer | specification-writer`
-- Reviewer lanes: `<developer, technical-architect, qa, security, frontend>`
+- Reviewer lanes: `<independent developer, technical-architect, qa, security, frontend lanes required for this risk>`
 - Files involved: `<explicit files or surfaces>`
 - Write set: `<files this task may edit>`
 - Read-before-write targets: `<public surface, immediate caller/callee, shared utility or local pattern>`
@@ -242,7 +246,7 @@ Verification values: `passed | failed | blocked | not_run | not_applicable`.
 
 - Requirements, design, tasks, and memory links agree.
 - `Progress Ledger` has no `IN_PROGRESS`, `NEEDS_CONTEXT`, `NEEDS_USER_INPUT`, or `BLOCKED` rows unless explicitly closing with concerns.
-- All required reviewer lanes are named and review evidence is linked.
+- All required independent reviewer lanes are named, review status is recorded, and review evidence is linked.
 - Verification commands are concrete and scoped.
 - `memories/repo/current-workstreams.md` has final current focus, last verified evidence, and next resume action.
 - Residual risks and skipped checks are explicit.
